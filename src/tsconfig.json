@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+      "target": "ES2020",                     // Compatibile con gli ambienti ESM moderni
+      "module": "ESNext",                     // Abilita il supporto a ESM
+      "moduleResolution": "node",             // Risolve i moduli come Node.js
+      "allowSyntheticDefaultImports": true,   // Importa default anche da moduli CommonJS
+      "declaration": true,                    // Crea anche i file .d.ts
+      "sourceMap": true                       // Crea file .map per il debug
+    },
+    "exclude": ["node_modules", "dist"]
+  }
