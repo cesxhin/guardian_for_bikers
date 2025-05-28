@@ -1,23 +1,65 @@
+import _ from "lodash";
+
+import Logger from "../lib/logger";
 import { IGroup } from "../domains/interfaces/IGroup";
 import { modelGroup } from "../domains/models/group";
+import { GroupErrorGeneric, GroupNotFound } from "../utils/exceptionsUtils";
+
+const logger = Logger("group-repository");
 
 export class GroupRepository {
-    async find(id: number): Promise<IGroup | null>{
-        return await modelGroup.findOne({
-            id
-        });
+    async find(id: number): Promise<IGroup>{
+        let group: IGroup | null;
+        try{
+            group = await modelGroup.findOne({ id }).lean();
+        }catch(err){
+            logger.error("Error find, details:", err);
+            throw new GroupErrorGeneric(err);
+        }
+
+        if(_.isNil(group)){
+            throw new GroupNotFound(`Not found group id "${id}"`);
+        }
+
+        return group;
     }
-    async edit(id: number, data: Omit<Partial<IGroup>, "id">): Promise<IGroup | null>{
-        return await modelGroup.findOneAndUpdate({
-            id
-        }, data);
+
+    async edit(id: number, data: Omit<Partial<IGroup>, "id">): Promise<IGroup>{
+        let group: IGroup | null;
+        try{
+            group = await modelGroup.findOneAndUpdate({ id }, data, { new: true }).lean();
+        }catch(err){
+            logger.error("Error edit, details:", err);
+            throw new GroupErrorGeneric(err);
+        }
+
+        if(_.isNil(group)){
+            throw new GroupNotFound(`Not found group id "${id}"`);
+        }
+
+        return group;
     }
+
     async create(data: IGroup): Promise<void> {
-        await modelGroup.create(data);
+        try{
+            await modelGroup.create(data);
+        }catch(err){
+            logger.error("Error create, details:", err);
+            throw new GroupErrorGeneric(err);
+        }
     }
+
     async delete(id: number): Promise<void>{
-        await modelGroup.deleteOne({
-            id
-        });
+        let count: number = 0;
+        try{
+            count = (await modelGroup.deleteOne({ id })).deletedCount;
+        }catch(err){
+            logger.error("Error create, details:", err);
+            throw new GroupErrorGeneric(err);
+        }
+
+        if(count === 0){
+            throw new GroupNotFound(`Not found group id "${id}"`);
+        }
     }
 }
