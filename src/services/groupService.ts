@@ -21,6 +21,8 @@ export class GroupService {
         await this.groupRepository.create({
             id,
             enabled: true,
+            latitude: 41.8919,
+            longitude: 12.5113,
             location: "rome",
             time_trigger: "07:00",
             monday: true,
@@ -43,5 +45,9 @@ export class GroupService {
 
     async find(id: number): Promise<IGroup | null> {
         return await this.groupRepository.find(id);
+    }
+
+    async listActiveWithTimeNow(): Promise<IGroup[]> {
+        return await this.groupRepository.listActiveWithTimeNow();
     }
 }

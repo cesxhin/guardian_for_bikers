@@ -4,6 +4,10 @@ import _ from "lodash";
 import Logger from "./lib/logger";
 import mongoose from "mongoose";
 import listenersBot from "./bot";
+import cronWeather from "./cron/cronWeather";
+import { DateTime } from "luxon";
+
+export let bot: TelegramBot;
 
 const logger = Logger("main");
 
@@ -19,6 +23,8 @@ if(_.isNil(USERNAME_BOT)){
 
 async function main(){
 
+    logger.info("Current timezone:", DateTime.local().zoneName);
+
     //mongo
     logger.debug("Try connect to mongo with this url: "+URL_MONGO);
     try{
@@ -30,7 +36,6 @@ async function main(){
     logger.info("Mongo connected!");
 
     //telegram
-    let bot: TelegramBot;
     try{
         bot = new TelegramBot(TOKEN_BOT, { polling: true });
     }catch(err){
@@ -39,8 +44,7 @@ async function main(){
     }
 
     listenersBot(bot);
-
-    logger.info("Bot started!");
+    cronWeather(bot);
 }
 
 try{

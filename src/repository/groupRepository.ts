@@ -4,6 +4,7 @@ import Logger from "../lib/logger";
 import { IGroup } from "../domains/interfaces/IGroup";
 import { modelGroup } from "../domains/models/group";
 import { GroupErrorGeneric, GroupNotFound } from "../utils/exceptionsUtils";
+import { DateTime } from "luxon";
 
 const logger = Logger("group-repository");
 
@@ -60,6 +61,18 @@ export class GroupRepository {
 
         if(count === 0){
             throw new GroupNotFound(`Not found group id "${id}"`);
+        }
+    }
+
+    async listActiveWithTimeNow(): Promise<IGroup[]>{
+        try{
+            return await modelGroup.find({
+                enabled: true,
+                time_trigger: DateTime.now().toFormat("HH:mm")
+            }).lean();
+        }catch(err){
+            logger.error("Error list, details:", err);
+            throw new GroupErrorGeneric(err);
         }
     }
 }

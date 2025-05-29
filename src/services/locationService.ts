@@ -1,12 +1,14 @@
+import _ from "lodash";
 import { LocationRepository } from "../repository/locationRepository";
+import { ILocation } from "../domains/interfaces/ILocation";
 
 export class LocationSerivce {
     private locationRepository = new LocationRepository();
 
-    async exist(location: string): Promise<boolean> {
+    async exist(location: string): Promise<ILocation | null> {
         location = location.toLowerCase().trim();
         const locations = await this.locationRepository.findMany(location);
 
-        return locations.length > 0 && locations[0].name.toLowerCase() === location;
+        return _.find(locations.results, { name: location });
     }
 }

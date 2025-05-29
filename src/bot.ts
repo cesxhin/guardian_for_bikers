@@ -5,13 +5,11 @@ import Logger from "./lib/logger";
 import { USERNAME_BOT } from "./env";
 import commandsUtils from "./utils/commandsUtils";
 import { GroupService } from "./services/groupService";
-import { WeatherService } from "./services/weatherService";
 import {commands, wrapBotMessage } from "./utils/botUtils";
 import { LocationSerivce } from "./services/locationService";
 
 const logger = Logger("bot");
 
-const weatherService = new WeatherService();
 const groupSerivce = new GroupService();
 const locationService = new LocationSerivce();
 
@@ -20,7 +18,8 @@ export default function (bot: TelegramBot){
     bot.setMyCommands([
         { command: commands.SET_LOCATION, description: "Set the desired location to monitor the weather" },
         { command: commands.SET_DAYS, description: "Activate or deactivate the day you want to be monitored" },
-        { command: commands.SET_ENABLE, description: "Activate or deactivate bot" }
+        { command: commands.SET_ENABLE, description: "Activate or deactivate bot" },
+        { command: commands.SET_TIME, description: "Set time for show information of the weather" }
     ]);
 
     //debug
@@ -53,8 +52,13 @@ export default function (bot: TelegramBot){
             message,
             commands.SET_LOCATION,
             async (location) => {
-                if(await locationService.exist(location)){
-                    await groupSerivce.edit(message.chat.id, { location: location.toLowerCase().trim() });
+                const findLocation = await locationService.exist(location);
+                if(!_.isNil(findLocation)){
+                    await groupSerivce.edit(message.chat.id, {
+                        latitude: findLocation.latitude,
+                        longitude: findLocation.longitude,
+                        location
+                    });
                     bot.sendMessage(message.chat.id, `Updated location current: ${location}`);
                 }else{
                     bot.sendMessage(message.chat.id, `Location not recognized "${location}"`);
@@ -86,10 +90,12 @@ export default function (bot: TelegramBot){
                     const group = await groupSerivce.find(message.chat.id);
                     
                     await groupSerivce.edit(message.chat.id, {
+                        //@ts-ignore
                         [day.toLocaleLowerCase()]: !group[day.toLocaleLowerCase()]
                     });
                     
 
+                    //@ts-ignore
                     bot.sendMessage(message.chat.id, `${!group[day]? 'Actived' : 'Deactivated' } ${day}`, {
                         reply_markup: {
                             remove_keyboard: true
@@ -129,6 +135,84 @@ export default function (bot: TelegramBot){
                             [
                                 {text: `Sunday ${group.sunday? '✅' : '❌' }`},
                                 {text: "Cancel"}
+                            ]
+                        ]
+                    }
+                })
+            }
+        )
+    })
+    
+    //command set days
+    wrapBotMessage(bot, async (message) => {
+        commandsUtils.command(
+            message,
+            commands.SET_TIME,
+            async (time) => {
+                time = time.replace(" ✅", "");
+
+                const checkFormatTime = /^(0[0-9]|1[0-9]|2[0-3]):00$/;
+
+                if(checkFormatTime.test(time)){
+                    await groupSerivce.edit(message.chat.id, {
+                        time_trigger: time
+                    });
+
+                    bot.sendMessage(message.chat.id, `Okay set to this time: "${time}"`, { reply_markup: { remove_keyboard: true } });
+                }else if(time === "Cancel"){
+                    bot.sendMessage(message.chat.id, `Ok, I'm not doing anything`, {
+                        reply_markup: {
+                            remove_keyboard: true
+                        }
+                    })
+                }else{
+                    bot.sendMessage(message.chat.id, `Invalid format time "${time}", I only accept hours from 00 to 23.\nExample: HH:00`, { reply_markup: { remove_keyboard: true } });
+                }
+            },
+            async () => {
+                const group = await groupSerivce.find(message.chat.id);
+                bot.sendMessage(message.chat.id, "Active/Deactivated Days for Weather Control", {
+                    reply_markup: {
+                        one_time_keyboard: true,
+                        keyboard: [
+                            [
+                                {text: `00:00 ${group.time_trigger == "00:00"? '✅' : '' }`},
+                                {text: `01:00 ${group.time_trigger == "01:00"? '✅' : '' }`},
+                                {text: `02:00 ${group.time_trigger == "02:00"? '✅' : '' }`},
+                                {text: `03:00 ${group.time_trigger == "03:00"? '✅' : '' }`},
+                            ],
+                            [
+                                {text: `04:00 ${group.time_trigger == "04:00"? '✅' : '' }`},
+                                {text: `05:00 ${group.time_trigger == "05:00"? '✅' : '' }`},
+                                {text: `06:00 ${group.time_trigger == "06:00"? '✅' : '' }`},
+                                {text: `07:00 ${group.time_trigger == "07:00"? '✅' : '' }`},
+                            ],
+                            [
+                                {text: `08:00 ${group.time_trigger == "09:00"? '✅' : '' }`},
+                                {text: `09:00 ${group.time_trigger == "09:00"? '✅' : '' }`},
+                                {text: `10:00 ${group.time_trigger == "10:00"? '✅' : '' }`},
+                                {text: `11:00 ${group.time_trigger == "11:00"? '✅' : '' }`},
+                            ],
+                            [
+                                {text: `12:00 ${group.time_trigger == "12:00"? '✅' : '' }`},
+                                {text: `13:00 ${group.time_trigger == "13:00"? '✅' : '' }`},
+                                {text: `14:00 ${group.time_trigger == "14:00"? '✅' : '' }`},
+                                {text: `15:00 ${group.time_trigger == "15:00"? '✅' : '' }`},
+                            ],
+                            [
+                                {text: `16:00 ${group.time_trigger == "16:00"? '✅' : '' }`},
+                                {text: `17:00 ${group.time_trigger == "17:00"? '✅' : '' }`},
+                                {text: `18:00 ${group.time_trigger == "18:00"? '✅' : '' }`},
+                                {text: `19:00 ${group.time_trigger == "19:00"? '✅' : '' }`},
+                            ],
+                            [
+                                {text: `20:00 ${group.time_trigger == "20:00"? '✅' : '' }`},
+                                {text: `21:00 ${group.time_trigger == "21:00"? '✅' : '' }`},
+                                {text: `22:00 ${group.time_trigger == "22:00"? '✅' : '' }`},
+                                {text: `23:00 ${group.time_trigger == "23:00"? '✅' : '' }`},
+                            ],
+                            [
+                                {text: `Cancel`},
                             ]
                         ]
                     }
@@ -194,4 +278,6 @@ export default function (bot: TelegramBot){
             //TODO eliminare un utente se è uscito
         }
     });
+    
+    logger.info("Started!");
 }

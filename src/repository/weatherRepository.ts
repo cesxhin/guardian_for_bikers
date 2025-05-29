@@ -1,18 +1,17 @@
 import axios from "axios";
 
-import { TOKEN_WEATHER } from "../env";
 import { IForecast } from "../domains/interfaces/IForecast";
 
 export class WeatherRepository {
-    private URL_API = "https://api.weatherapi.com/v1/forecast.json"
+    private URL_API = "https://api.open-meteo.com/v1/forecast"
 
-    async get(location: string): Promise<IForecast>{
+    async get(lat: number, lon: number): Promise<IForecast>{
         return (await axios.get(this.URL_API, {
             params: {
-                q: location,
-                aqi: "no",
-                alerts: "no",
-                key: TOKEN_WEATHER
+                latitude: lat,
+                longitude: lon,
+                forecast_days: 1,
+                hourly: ["rain", "precipitation_probability", "temperature_2m"]
             }
         })).data as IForecast;
     }

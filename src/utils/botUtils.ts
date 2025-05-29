@@ -9,7 +9,8 @@ const logger = Logger('bot-utils');
 export enum commands {
     SET_LOCATION = "set_location",
     SET_DAYS = "set_days",
-    SET_ENABLE = "set_enable"
+    SET_ENABLE = "set_enable",
+    SET_TIME = "set_time"
 }
 
 export function onlyPermissionGroup(message: TelegramBot.Message){
@@ -32,22 +33,28 @@ export function checkMyCommand(text: string | undefined | null, command: command
 
 
 
-export function wrapBotMessage(bot: TelegramBot, main: (message: TelegramBot.Message) => Promise<void>, functionNotPermission?: (message: TelegramBot.Message) => Promise<void>){
+export function wrapBotMessage(bot: TelegramBot, main: (message: TelegramBot.Message) => Promise<void>, functionNotPermission?: (message: TelegramBot.Message) => Promise<void>): void{
     bot.on('message', async (message) => {
-        try{
+        await exceptionsHandler(bot, message.chat.id, async () => {
             if(onlyPermissionGroup(message)){
                 await main(message);
             }else if(!_.isNil(functionNotPermission)){
                 await functionNotPermission(message);
             }
-        }catch(err){
-            if(err instanceof GroupNotFound){
-                bot.sendMessage(message.chat.id, 'Sorry, Something Went Wrong.\nRemove me from the group and add me back!', { reply_markup: { remove_keyboard: true } });
-            } else if(err instanceof GroupErrorGeneric){
-                bot.sendMessage(message.chat.id, 'Sorry, Something Went Wrong. Try again!', { reply_markup: { remove_keyboard: true } });
-            } else {
-                logger.error("Error generic, details:", err);
-            }
-        }
+        })
     })
+}
+
+export async function exceptionsHandler(bot: TelegramBot, chatId: number, genericFunction: () => Promise<any>){
+    try{
+        await genericFunction();
+    }catch(err){
+        if(err instanceof GroupNotFound){
+            bot.sendMessage(chatId, 'Sorry, Something Went Wrong.\nRemove me from the group and add me back!', { reply_markup: { remove_keyboard: true } });
+        } else if(err instanceof GroupErrorGeneric){
+            bot.sendMessage(chatId, 'Sorry, Something Went Wrong. Try again!', { reply_markup: { remove_keyboard: true } });
+        } else {
+            logger.error("Error generic, details:", err);
+        }
+    }
 }

@@ -1,6 +1,8 @@
 export interface IGroup {
     id: number,
     enabled: boolean,
+    latitude: number,
+    longitude: number,
     location: string,
     time_trigger: string,
     monday: boolean,

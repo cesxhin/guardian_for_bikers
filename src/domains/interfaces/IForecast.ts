@@ -1,11 +1,8 @@
-import { IForecastDay } from "./IForecastDay";
-import { IForecastHour } from "./IForecastHour";
-
 export interface IForecast {
-    current: IForecastDay,
-    forecast: {
-        forecastday: [{
-            hour: IForecastHour[]
-        }]
+    hourly: {
+      time: string[]
+      rain: number[]
+      precipitation_probability: number[]
+      temperature_2m: number[]
     }
 }
