@@ -34,10 +34,10 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "latest=$LATEST" >> $GITHUB_OUTPUT
 
-    - name: Build the Docker image guards_for_bikers
+    - name: Build the Docker image guardian_for_bikers
       uses: docker/build-push-action@v6
       with:
         context: .
         file: Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_USER }}/guards_for_bikers:${{ steps.get_version.outputs.version }}, ${{ secrets.DOCKER_USER }}/guards_for_bikers:${{ steps.get_version.outputs.latest }}
+        tags: ${{ secrets.DOCKER_USER }}/guardian_for_bikers:${{ steps.get_version.outputs.version }}, ${{ secrets.DOCKER_USER }}/guardian_for_bikers:${{ steps.get_version.outputs.latest }}
