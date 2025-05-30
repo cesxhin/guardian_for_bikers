@@ -11,12 +11,12 @@ export let bot: TelegramBot;
 
 const logger = Logger("main");
 
-if(_.isNil(TOKEN_BOT)){
+if (_.isNil(TOKEN_BOT)){
     logger.error("Missing token bot");
     process.exit(1);
 }
 
-if(_.isNil(USERNAME_BOT)){
+if (_.isNil(USERNAME_BOT)){
     logger.error("Missing username bot");
     process.exit(1);
 }
@@ -27,18 +27,18 @@ async function main(){
 
     //mongo
     logger.debug("Try connect to mongo with this url: "+URL_MONGO);
-    try{
+    try {
         await mongoose.connect(URL_MONGO);
-    }catch(err){
+    } catch (err){
         logger.error("Failed connect to mongo, details:", err);
         process.exit(1);
     }
     logger.info("Mongo connected!");
 
     //telegram
-    try{
+    try {
         bot = new TelegramBot(TOKEN_BOT, { polling: true });
-    }catch(err){
+    } catch (err){
         logger.error("Error telegram bot, details:", err);
         process.exit(1);
     }
@@ -47,8 +47,8 @@ async function main(){
     cronWeather(bot);
 }
 
-try{
+try {
     await main();
-}catch(err){
-    logger.error("Generic error not handled, details:", err)
+} catch (err){
+    logger.error("Generic error not handled, details:", err);
 }

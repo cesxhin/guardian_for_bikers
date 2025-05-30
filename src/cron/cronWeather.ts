@@ -1,11 +1,12 @@
 import { CronJob } from "cron";
-import { GroupService } from "../services/groupService";
-import TelegramBot from "node-telegram-bot-api";
-import { exceptionsHandler, wrapBotMessage } from "../utils/botUtils";
-import { WeatherService } from "../services/weatherService";
-import Logger from "../lib/logger";
 import { DateTime } from "luxon";
+import TelegramBot from "node-telegram-bot-api";
+
+import Logger from "../lib/logger";
+import { exceptionsHandler } from "../utils/botUtils";
 import { IGroup } from "../domains/interfaces/IGroup";
+import { GroupService } from "../services/groupService";
+import { WeatherService } from "../services/weatherService";
 
 const logger = Logger("cron-weather");
 
@@ -14,14 +15,14 @@ const weatherService = new WeatherService();
 
 export default (bot: TelegramBot) => {
     new CronJob(
-        '0 0 * * * *',
+        "0 0 * * * *",
         async () => {
             logger.info("Check groups...");
             let groups: IGroup[] = [];
 
-            try{
+            try {
                 groups = await groupService.listActiveWithTimeNow();
-            }catch(err){
+            } catch (err){
                 logger.error("Failed get list groups, details:", err);
             }
 
@@ -38,15 +39,15 @@ export default (bot: TelegramBot) => {
                         const weather = await weatherService.get(group.latitude, group.longitude);
 
                         //create message
-                        let message = `Hello bikers! Let's see what the weather has to offer today!\n\n`;
+                        let message = "Hello bikers! Let's see what the weather has to offer today!\n\n";
 
-                        for(let i = 0; i < weather.hourly.time.length; i++){
-                            message += `${DateTime.fromISO(weather.hourly.time[i]).toFormat("HH:mm")} - ${weather.hourly.temperature_2m[i]}°C ${weather.hourly.rain[i] > 0? '🌧️' : weather.hourly.precipitation_probability[i] > 0? `🌧️? ${weather.hourly.precipitation_probability[i]}%` : '☀️'}\n`
+                        for (let i = 0; i < weather.hourly.time.length; i++){
+                            message += `${DateTime.fromISO(weather.hourly.time[i]).toFormat("HH:mm")} - ${weather.hourly.temperature_2m[i]}°C ${weather.hourly.rain[i] > 0? "🌧️" : weather.hourly.precipitation_probability[i] > 0? `🌧️? ${weather.hourly.precipitation_probability[i]}%` : "☀️"}\n`;
                         }
         
                         bot.sendMessage(group.id, message);
                     }
-                )
+                );
             }
             
             logger.info("Finish check groups");
@@ -54,7 +55,7 @@ export default (bot: TelegramBot) => {
         null,
         true,
         DateTime.local().zoneName
-    )
+    );
     
     logger.info("Started!");
-}
+};

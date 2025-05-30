@@ -1,19 +1,16 @@
-import _ from "lodash";
-import { GroupRepository } from "../repository/groupRepository";
-import Logger from "../lib/logger";
 import { IGroup } from "../domains/interfaces/IGroup";
 import { GroupNotFound } from "../utils/exceptionsUtils";
+import { GroupRepository } from "../repository/groupRepository";
 
-const logger = Logger("grop-service");
 
 export class GroupService {
     private groupRepository = new GroupRepository();
 
     async create(id: number): Promise<void>{
-        try{
+        try {
             await this.groupRepository.find(id);
-        }catch(err){
-            if(!(err instanceof GroupNotFound)){
+        } catch (err){
+            if (!(err instanceof GroupNotFound)){
                 throw err;
             }
         }

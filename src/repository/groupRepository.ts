@@ -11,14 +11,14 @@ const logger = Logger("group-repository");
 export class GroupRepository {
     async find(id: number): Promise<IGroup>{
         let group: IGroup | null;
-        try{
+        try {
             group = await modelGroup.findOne({ id }).lean();
-        }catch(err){
+        } catch (err){
             logger.error("Error find, details:", err);
             throw new GroupErrorGeneric(err);
         }
 
-        if(_.isNil(group)){
+        if (_.isNil(group)){
             throw new GroupNotFound(`Not found group id "${id}"`);
         }
 
@@ -27,14 +27,14 @@ export class GroupRepository {
 
     async edit(id: number, data: Omit<Partial<IGroup>, "id">): Promise<IGroup>{
         let group: IGroup | null;
-        try{
+        try {
             group = await modelGroup.findOneAndUpdate({ id }, data, { new: true }).lean();
-        }catch(err){
+        } catch (err){
             logger.error("Error edit, details:", err);
             throw new GroupErrorGeneric(err);
         }
 
-        if(_.isNil(group)){
+        if (_.isNil(group)){
             throw new GroupNotFound(`Not found group id "${id}"`);
         }
 
@@ -42,35 +42,35 @@ export class GroupRepository {
     }
 
     async create(data: IGroup): Promise<void> {
-        try{
+        try {
             await modelGroup.create(data);
-        }catch(err){
+        } catch (err){
             logger.error("Error create, details:", err);
             throw new GroupErrorGeneric(err);
         }
     }
 
     async delete(id: number): Promise<void>{
-        let count: number = 0;
-        try{
+        let count = 0;
+        try {
             count = (await modelGroup.deleteOne({ id })).deletedCount;
-        }catch(err){
+        } catch (err){
             logger.error("Error create, details:", err);
             throw new GroupErrorGeneric(err);
         }
 
-        if(count === 0){
+        if (count === 0){
             throw new GroupNotFound(`Not found group id "${id}"`);
         }
     }
 
     async listActiveWithTimeNow(): Promise<IGroup[]>{
-        try{
+        try {
             return await modelGroup.find({
                 enabled: true,
                 time_trigger: DateTime.now().toFormat("HH:mm")
             }).lean();
-        }catch(err){
+        } catch (err){
             logger.error("Error list, details:", err);
             throw new GroupErrorGeneric(err);
         }

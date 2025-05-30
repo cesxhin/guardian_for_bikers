@@ -6,16 +6,16 @@ import { LOG_LEVEL } from "../env";
 export default (nameService: string) => winston.createLogger({
     level: LOG_LEVEL,
     format: winston.format.combine(
-        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
         winston.format.printf(({ level, message, timestamp, service, ...args }) => {
-            let meta = []
-            let symbols = Object.getOwnPropertySymbols(args)
+            const meta = [];
+            const symbols = Object.getOwnPropertySymbols(args);
             if (symbols.length == 2) {
-                if(_.isArray(args[symbols[1]])){
+                if (_.isArray(args[symbols[1]])){
                     for (const arg of (args[symbols[1]] as any[])) {
-                        if(_.isObject(arg)){
+                        if (_.isObject(arg)){
                             meta.push(JSON.stringify(arg));
-                        }else{
+                        } else {
                             meta.push(arg);
                         }
                     }
@@ -24,7 +24,7 @@ export default (nameService: string) => winston.createLogger({
 
             let messageLog = `[${timestamp}] [${level.toUpperCase()}] [${((service as string) || "unknown").toUpperCase()}] ${message}`;
 
-            if(meta.length > 0){
+            if (meta.length > 0){
                 messageLog += ` ${meta.join(" ")}`;
             }
             
@@ -32,7 +32,5 @@ export default (nameService: string) => winston.createLogger({
         })
     ),
     defaultMeta: { service: nameService },
-    transports: [
-        new winston.transports.Console()
-    ]
+    transports: [new winston.transports.Console()]
 });

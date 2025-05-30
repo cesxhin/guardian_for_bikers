@@ -17,4 +17,4 @@ const schemaGroup = new mongoose.Schema<IGroup>({
     sunday: Boolean
 });
 
-export const modelGroup = mongoose.model('group', schemaGroup, 'groups');
+export const modelGroup = mongoose.model("group", schemaGroup, "groups");
