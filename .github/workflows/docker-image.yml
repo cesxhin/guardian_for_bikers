@@ -19,7 +19,7 @@ jobs:
       id: get_version
       run: |
         BRANCH=${GITHUB_REF##*/}
-        VERSION=$(jq -r .version package.json)
+        VERSION=$(jq -r .version ./src/package.json)
         LATEST="latest"
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
