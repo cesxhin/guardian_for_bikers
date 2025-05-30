@@ -1,6 +1,8 @@
 name: Docker Image CI
 on:
   push:
+    paths:
+      - src/*
     branches:
       - main
       - dev
@@ -32,7 +34,7 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "latest=$LATEST" >> $GITHUB_OUTPUT
 
-    - name: Build the Docker image Api Service
+    - name: Build the Docker image guards_for_bikers
       uses: docker/build-push-action@v6
       with:
         context: .
