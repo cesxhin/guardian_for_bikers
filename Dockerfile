@@ -2,8 +2,6 @@ FROM node:24-alpine
 
 WORKDIR /app
 
-COPY ./src ./src
+COPY ./src/dist .
 
-RUN (cd ./src && npm i && npm run build && mv ./dist ../) && rm -rf ./src
-
-CMD ["node", "./dist/main.mjs"]
+CMD ["node", "./main.mjs"]

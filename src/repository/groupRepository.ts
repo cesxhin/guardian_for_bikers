@@ -64,12 +64,9 @@ export class GroupRepository {
         }
     }
 
-    async listActiveWithTimeNow(): Promise<IGroup[]>{
+    async listActive(): Promise<IGroup[]>{
         try {
-            return await modelGroup.find({
-                enabled: true,
-                time_trigger: DateTime.now().toFormat("HH:mm")
-            }).lean();
+            return await modelGroup.find({ enabled: true }).lean();
         } catch (err){
             logger.error("Error list, details:", err);
             throw new GroupErrorGeneric(err);

@@ -15,39 +15,41 @@ const weatherService = new WeatherService();
 
 export default (bot: TelegramBot) => {
     new CronJob(
-        "0 0 * * * *",
+        "0 */1 * * * *",
         async () => {
             logger.info("Check groups...");
             let groups: IGroup[] = [];
 
             try {
-                groups = await groupService.listActiveWithTimeNow();
+                groups = await groupService.listActive();
             } catch (err){
                 logger.error("Failed get list groups, details:", err);
             }
 
-            logger.debug("Find groups for send message, total count:"+groups.length);
+            logger.debug("Find groups active, total count:"+groups.length);
 
             for (const group of groups) {
-                
+                if (DateTime.now().setZone(group.timezone).toFormat("HH:mm") === group.time_trigger){
+                    await exceptionsHandler(
+                        bot,
+                        group.id,
+                        async () => {
+                            //get data weather from api
+                            const weather = await weatherService.get(group.latitude, group.longitude);
 
-                await exceptionsHandler(
-                    bot,
-                    group.id,
-                    async () => {
-                        //get data weather from api
-                        const weather = await weatherService.get(group.latitude, group.longitude);
+                            //create message
+                            let message = "Hello bikers! Let's see what the weather has to offer today!\n\n";
 
-                        //create message
-                        let message = "Hello bikers! Let's see what the weather has to offer today!\n\n";
+                            for (let i = 0; i < weather.hourly.time.length; i++){
+                                message += `${DateTime.fromISO(weather.hourly.time[i]).toFormat("HH:mm")} - ${weather.hourly.temperature_2m[i]}°C ${weather.hourly.rain[i] > 0? "🌧️" : weather.hourly.precipitation_probability[i] > 0? `🌧️? ${weather.hourly.precipitation_probability[i]}%` : "☀️"}\n`;
+                            }
 
-                        for (let i = 0; i < weather.hourly.time.length; i++){
-                            message += `${DateTime.fromISO(weather.hourly.time[i]).toFormat("HH:mm")} - ${weather.hourly.temperature_2m[i]}°C ${weather.hourly.rain[i] > 0? "🌧️" : weather.hourly.precipitation_probability[i] > 0? `🌧️? ${weather.hourly.precipitation_probability[i]}%` : "☀️"}\n`;
+                            message += `\n\nYour settings:\nCurrent Location: ${group.location}\nCurrent timezone: ${group.timezone}\nCurrent time: ${group.time_trigger}`;
+            
+                            bot.sendMessage(group.id, message);
                         }
-        
-                        bot.sendMessage(group.id, message);
-                    }
-                );
+                    );
+                }
             }
             
             logger.info("Finish check groups");

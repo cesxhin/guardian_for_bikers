@@ -6,7 +6,7 @@ import { GroupRepository } from "../repository/groupRepository";
 export class GroupService {
     private groupRepository = new GroupRepository();
 
-    async create(id: number): Promise<void>{
+    async create(id: number, name: string): Promise<void>{
         try {
             await this.groupRepository.find(id);
         } catch (err){
@@ -17,10 +17,12 @@ export class GroupService {
 
         await this.groupRepository.create({
             id,
+            name,
             enabled: true,
             latitude: 41.8919,
             longitude: 12.5113,
             location: "rome",
+            timezone: "Europe/Rome",
             time_trigger: "07:00",
             monday: true,
             friday: true,
@@ -44,7 +46,7 @@ export class GroupService {
         return await this.groupRepository.find(id);
     }
 
-    async listActiveWithTimeNow(): Promise<IGroup[]> {
-        return await this.groupRepository.listActiveWithTimeNow();
+    async listActive(): Promise<IGroup[]> {
+        return await this.groupRepository.listActive();
     }
 }

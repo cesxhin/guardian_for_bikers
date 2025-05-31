@@ -9,6 +9,6 @@ export class LocationSerivce {
         location = location.toLowerCase().trim();
         const locations = await this.locationRepository.findMany(location);
 
-        return _.find(locations.results, { name: location });
+        return _.find(locations.results, (currentLocation) => currentLocation.name.toLowerCase() === location);
     }
 }

@@ -5,7 +5,7 @@ import Logger from "./lib/logger";
 import { USERNAME_BOT } from "./env";
 import commandsUtils from "./utils/commandsUtils";
 import { GroupService } from "./services/groupService";
-import {commands, wrapBotMessage } from "./utils/botUtils";
+import {commands, exceptionsHandler, wrapBotMessage } from "./utils/botUtils";
 import { LocationSerivce } from "./services/locationService";
 
 const logger = Logger("bot");
@@ -40,7 +40,9 @@ export default function (bot: TelegramBot){
             const findMyBot = _.find(message.new_chat_members, {is_bot: true, username: USERNAME_BOT});
 
             if (!_.isNil(findMyBot)){
-                await groupSerivce.create(message.chat.id);
+                await groupSerivce.create(message.chat.id, message.chat.title || "unknwon");
+                logger.info(`Someone added me to the group id "${message.chat.id}"`);
+                
                 bot.sendMessage(message.chat.id, "Hello bikers! 🏍️\n\nFrom now on I will be your guardian for bad weather.\n\nWhat can this bot do?\n\nOnce you have set the area you want to monitor, if there is bad weather I'm sorry bikers it's better for you to stay home but if the weather is good it's time to go out!\n\nThere is a ranking of who goes out the most, go bikers! 🏍️🏍️🏍️");
             }
         }
@@ -268,9 +270,24 @@ export default function (bot: TelegramBot){
         if (!_.isNil(message.left_chat_member)){
             if (message.left_chat_member.is_bot && message.left_chat_member.username === USERNAME_BOT){
                 await groupSerivce.delete(message.chat.id);
+                
+                logger.info(`Someone kicked out of the group id "${message.chat.id}"`);
             }
             //TODO eliminare un utente se è uscito
         }
+    });
+
+    //change name of group
+    bot.on("new_chat_title", async (message) => {
+        await exceptionsHandler(bot, message.chat.id, async () => {
+            if (!_.isNil(message.new_chat_title)){
+                await groupSerivce.edit(message.chat.id, {
+                    name: message.new_chat_title
+                });
+
+                logger.info(`Changed title from group id "${message.chat.id}" with new name "${message.new_chat_title}"`);
+            }
+        });
     });
     
     logger.info("Started!");

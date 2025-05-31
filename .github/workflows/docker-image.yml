@@ -11,7 +11,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+    - name: Current workdir is "./src"
+      run: cd ./src
+    - name: Install packages
+      run: npm i
+    - name: Check typescript
+      run: npm run typecheck
+    - name: Build code
+      run: npm run build
+    - name: Current workdir is root
+      run: cd ..
     - name: Docker Login
       uses: docker/login-action@v2.1.0
       with:
