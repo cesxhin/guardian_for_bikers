@@ -15,7 +15,7 @@ const weatherService = new WeatherService();
 
 export default (bot: TelegramBot) => {
     new CronJob(
-        "0 */1 * * * *",
+        "0 0 * * * *",
         async () => {
             logger.info("Check groups...");
             let groups: IGroup[] = [];
