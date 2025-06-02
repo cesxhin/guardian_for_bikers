@@ -34,7 +34,7 @@ export class GroupRepository {
         }
 
         if (_.isNil(group)){
-            throw new GroupNotFound(`Not found group id "${id}"`);
+            throw new GroupNotFound(`Not found group id "${id}" for edit`);
         }
 
         return group;
@@ -59,7 +59,7 @@ export class GroupRepository {
         }
 
         if (count === 0){
-            throw new GroupNotFound(`Not found group id "${id}"`);
+            throw new GroupNotFound(`Not found group id "${id}" for delete`);
         }
     }
 

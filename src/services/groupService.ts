@@ -1,18 +1,25 @@
 import { IGroup } from "../domains/interfaces/IGroup";
-import { GroupNotFound } from "../utils/exceptionsUtils";
+import { GroupConflict, GroupNotFound } from "../utils/exceptionsUtils";
 import { GroupRepository } from "../repository/groupRepository";
+import _ from "lodash";
 
 
 export class GroupService {
     private groupRepository = new GroupRepository();
 
     async create(id: number, name: string): Promise<void>{
+
+        let findGroup: IGroup | null = null;
         try {
-            await this.groupRepository.find(id);
+            findGroup = await this.groupRepository.find(id);
         } catch (err){
             if (!(err instanceof GroupNotFound)){
                 throw err;
             }
+        }
+
+        if(!_.isNil(findGroup)){
+            throw new GroupConflict(`Group id "${id}" already exist`);
         }
 
         await this.groupRepository.create({

@@ -7,11 +7,15 @@ import commandsUtils from "./utils/commandsUtils";
 import { GroupService } from "./services/groupService";
 import {commands, exceptionsHandler, wrapBotMessage } from "./utils/botUtils";
 import { LocationSerivce } from "./services/locationService";
+import { UserNotFound } from "./utils/exceptionsUtils";
+import { UserService } from "./services/userService";
+import userCacheUtils from "./utils/userCacheUtils";
 
 const logger = Logger("bot");
 
 const groupSerivce = new GroupService();
 const locationService = new LocationSerivce();
+const userService = new UserService();
 
 export default function (bot: TelegramBot){
     //init command
@@ -31,20 +35,6 @@ export default function (bot: TelegramBot){
     wrapBotMessage(bot, () => null, async (message) => {
         if (message.text.startsWith("/start")){
             bot.sendMessage(message.chat.id, "I can only use in groups!");
-        }
-    });
-
-    //check exist group to db
-    wrapBotMessage(bot, async (message) => {
-        if (!_.isNil(message.new_chat_members) && message.new_chat_members.length > 0){
-            const findMyBot = _.find(message.new_chat_members, {is_bot: true, username: USERNAME_BOT});
-
-            if (!_.isNil(findMyBot)){
-                await groupSerivce.create(message.chat.id, message.chat.title || "unknwon");
-                logger.info(`Someone added me to the group id "${message.chat.id}"`);
-                
-                bot.sendMessage(message.chat.id, "Hello bikers! 🏍️\n\nFrom now on I will be your guardian for bad weather.\n\nWhat can this bot do?\n\nOnce you have set the area you want to monitor, if there is bad weather I'm sorry bikers it's better for you to stay home but if the weather is good it's time to go out!\n\nThere is a ranking of who goes out the most, go bikers! 🏍️🏍️🏍️");
-            }
         }
     });
 
@@ -277,14 +267,61 @@ export default function (bot: TelegramBot){
     //leave someone
     wrapBotMessage(bot, async (message) => {
         if (!_.isNil(message.left_chat_member)){
-            if (message.left_chat_member.is_bot && message.left_chat_member.username === USERNAME_BOT){
-                await groupSerivce.delete(message.chat.id);
-                
-                logger.info(`Someone kicked out of the group id "${message.chat.id}"`);
+            if (message.left_chat_member.is_bot){
+                if(message.left_chat_member.username === USERNAME_BOT){
+                    await groupSerivce.delete(message.chat.id);
+                    const listIds = await userService.getIdsByChatId(message.chat.id);
+                    await userService.deleteManyByChatId(message.chat.id);
+
+                    userCacheUtils.userCache.del(userCacheUtils.getMultiplePrimaryKeyCompose(message.chat.id, listIds));
+
+                    logger.info(`Someone kicked out of the group id "${message.chat.id}"`);
+                }
+            }else{
+                try{
+                    await userService.deleteById(message.left_chat_member.id);
+                }catch(err){
+                    if(!(err instanceof UserNotFound)){
+                        throw err;
+                    }else{
+                        logger.error(`Not found user id "${message.left_chat_member.id}" for delete document user`);
+                        return;
+                    }
+                }
+
+                userCacheUtils.userCache.del(userCacheUtils.getPrimaryKeyCompose(message.chat.id, message.left_chat_member.id));
             }
-            //TODO eliminare un utente se è uscito
         }
     });
+
+    //check exist group to db
+    wrapBotMessage(bot, async (message) => {
+        if (!_.isNil(message.new_chat_members) && message.new_chat_members.length > 0){
+        }
+    });
+
+    //entry someone
+    wrapBotMessage(bot, async (message) => {
+        if (!_.isNil(message.new_chat_members)){
+            for (const new_chat_member of message.new_chat_members) {
+                if (new_chat_member.is_bot){
+                    if(new_chat_member.username === USERNAME_BOT){
+                        const findMyBot = _.find(message.new_chat_members, {is_bot: true, username: USERNAME_BOT});
+
+                        if (!_.isNil(findMyBot)){
+                            await groupSerivce.create(message.chat.id, message.chat.title || "unknwon");
+                            logger.info(`Someone added me to the group id "${message.chat.id}"`);
+                            
+                            bot.sendMessage(message.chat.id, "Hello bikers! 🏍️\n\nFrom now on I will be your guardian for bad weather.\n\nWhat can this bot do?\n\nOnce you have set the area you want to monitor, if there is bad weather I'm sorry bikers it's better for you to stay home but if the weather is good it's time to go out!\n\nThere is a ranking of who goes out the most, go bikers! 🏍️🏍️🏍️");
+                        }
+                    }
+                }else{
+                    const user = await userService.create(message.chat.id, new_chat_member.id, new_chat_member.username || new_chat_member.first_name);
+                    userCacheUtils.userCache.set(userCacheUtils.getPrimaryKeyCompose(message.chat.id, new_chat_member.id), user);
+                }
+            }
+        }
+    }); 
 
     //change name of group
     bot.on("new_chat_title", async (message) => {
