@@ -1,11 +1,13 @@
-import TelegramBot from "node-telegram-bot-api";
-import { TOKEN_BOT, URL_MONGO, USERNAME_BOT } from "./env";
 import _ from "lodash";
-import Logger from "./lib/logger";
 import mongoose from "mongoose";
+import { DateTime } from "luxon";
+import TelegramBot from "node-telegram-bot-api";
+
+import Logger from "./lib/logger";
 import listenersBot from "./bot";
 import cronWeather from "./cron/cronWeather";
-import { DateTime } from "luxon";
+import { modelVersion } from "./domains/models/versionModel";
+import { TOKEN_BOT, URL_MONGO, USERNAME_BOT, VERSION_CURRENT_DB } from "./env";
 
 export let bot: TelegramBot;
 
@@ -34,6 +36,15 @@ async function main(){
         process.exit(1);
     }
     logger.info("Mongo connected!");
+
+    //check version
+    const find = await modelVersion.findOne({name: "gfb"});
+    if (_.isNil(find)){
+        logger.debug("Not found document for track version for services");
+        modelVersion.insertOne({name: "gfb", version: VERSION_CURRENT_DB});
+        logger.info("Created track version for services");
+    }
+    //! altrimenti sará uno switch con le versioni opportune con le modifiche opportune dei dati
 
     //telegram
     try {

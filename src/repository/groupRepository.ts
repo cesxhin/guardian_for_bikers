@@ -2,7 +2,7 @@ import _ from "lodash";
 
 import Logger from "../lib/logger";
 import { IGroup } from "../domains/interfaces/IGroup";
-import { modelGroup } from "../domains/models/group";
+import { modelGroup } from "../domains/models/groupModel";
 import { GroupErrorGeneric, GroupNotFound } from "../utils/exceptionsUtils";
 
 const logger = Logger("group-repository");
