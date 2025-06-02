@@ -74,31 +74,40 @@ export default function (bot: TelegramBot){
     
     //command set days
     wrapBotMessage(bot, async (message) => {
+        const arrayDays = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        ];
+
         commandsUtils.command(
             message,
             commands.SET_DAYS,
             async (day) => {
                 day = day.replace(" ✅", "").replace(" ❌", "");
 
-                if ([
-                    "Monday",
-                    "Tuesday",
-                    "Wednesday",
-                    "Thursday",
-                    "Friday",
-                    "Saturday",
-                    "Sunday"
-                ].includes(day)){
-                    const group = await groupSerivce.find(message.chat.id);
+                if (arrayDays.includes(day)){
+                    //get data group
+                    let group = await groupSerivce.find(message.chat.id);
+
+                    //get index day for change state
+                    const currentIndex = arrayDays.findIndex((value) => value === day);
+
+                    //clone data and change state
+                    const currentDaysTrigger = _.cloneDeep(group.days_trigger);
+                    currentDaysTrigger[currentIndex] = !currentDaysTrigger[currentIndex];
                     
-                    await groupSerivce.edit(message.chat.id, {
-                        //@ts-ignore
-                        [day.toLocaleLowerCase()]: !group[day.toLocaleLowerCase()]
+                    //save data edited
+                    group = await groupSerivce.edit(message.chat.id, {
+                        days_trigger: currentDaysTrigger
                     });
                     
 
-                    //@ts-ignore
-                    bot.sendMessage(message.chat.id, `${!group[day]? "Actived" : "Deactivated" } ${day}`, {
+                    bot.sendMessage(message.chat.id, `${group.days_trigger[currentIndex]? "Actived" : "Deactivated" } ${day}`, {
                         reply_markup: {
                             remove_keyboard: true
                         }
@@ -125,17 +134,17 @@ export default function (bot: TelegramBot){
                         one_time_keyboard: true,
                         keyboard: [
                             [
-                                {text: `Monday ${group.monday? "✅" : "❌" }`},
-                                {text: `Tuesday ${group.tuesday? "✅" : "❌" }`},
-                                {text: `Wednesday ${group.wednesday? "✅" : "❌" }`}
+                                {text: `Monday ${group.days_trigger[0]? "✅" : "❌" }`},
+                                {text: `Tuesday ${group.days_trigger[1]? "✅" : "❌" }`},
+                                {text: `Wednesday ${group.days_trigger[2]? "✅" : "❌" }`}
                             ],
                             [
-                                {text: `Thursday ${group.thursday? "✅" : "❌" }`},
-                                {text: `Friday ${group.friday? "✅" : "❌" }`},
-                                {text: `Saturday ${group.saturday? "✅" : "❌" }`}
+                                {text: `Thursday ${group.days_trigger[3]? "✅" : "❌" }`},
+                                {text: `Friday ${group.days_trigger[4]? "✅" : "❌" }`},
+                                {text: `Saturday ${group.days_trigger[5]? "✅" : "❌" }`}
                             ],
                             [
-                                {text: `Sunday ${group.sunday? "✅" : "❌" }`},
+                                {text: `Sunday ${group.days_trigger[6]? "✅" : "❌" }`},
                                 {text: "Cancel"}
                             ]
                         ]
@@ -145,7 +154,7 @@ export default function (bot: TelegramBot){
         );
     });
     
-    //command set days
+    //command set time
     wrapBotMessage(bot, async (message) => {
         commandsUtils.command(
             message,

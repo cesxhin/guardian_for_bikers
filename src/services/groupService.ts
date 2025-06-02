@@ -24,13 +24,7 @@ export class GroupService {
             location: "rome",
             timezone: "Europe/Rome",
             time_trigger: "07:00",
-            monday: true,
-            friday: true,
-            saturday: true,
-            sunday: true,
-            tuesday: true,
-            wednesday: true,
-            thursday: true
+            days_trigger: [true, true, true, true, true, true, true]
         });
     }
 

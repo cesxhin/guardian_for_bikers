@@ -29,7 +29,7 @@ export default (bot: TelegramBot) => {
             logger.debug("Find groups active, total count:"+groups.length);
 
             for (const group of groups) {
-                if (DateTime.now().setZone(group.timezone).toFormat("HH:mm") === group.time_trigger){
+                if (DateTime.now().setZone(group.timezone).toFormat("HH:mm") === group.time_trigger && group.days_trigger[DateTime.now().weekday - 1] === true){
                     await exceptionsHandler(
                         bot,
                         group.id,

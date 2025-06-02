@@ -4,7 +4,6 @@ import Logger from "../lib/logger";
 import { IGroup } from "../domains/interfaces/IGroup";
 import { modelGroup } from "../domains/models/group";
 import { GroupErrorGeneric, GroupNotFound } from "../utils/exceptionsUtils";
-import { DateTime } from "luxon";
 
 const logger = Logger("group-repository");
 
