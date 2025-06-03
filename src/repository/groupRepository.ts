@@ -4,6 +4,7 @@ import Logger from "../lib/logger";
 import { IGroup } from "../domains/interfaces/IGroup";
 import { modelGroup } from "../domains/models/groupModel";
 import { GroupErrorGeneric, GroupNotFound } from "../utils/exceptionsUtils";
+import { StrictOmit } from "../lib/types";
 
 const logger = Logger("group-repository");
 
@@ -40,9 +41,9 @@ export class GroupRepository {
         return group;
     }
 
-    async create(data: IGroup): Promise<void> {
+    async create(data: StrictOmit<IGroup, "created" | "updated">): Promise<IGroup> {
         try {
-            await modelGroup.create(data);
+            return (await modelGroup.create(data)).toObject();
         } catch (err){
             logger.error("Error create, details:", err);
             throw new GroupErrorGeneric(err);

@@ -7,5 +7,7 @@ export interface IGroup {
     location: string,
     timezone: string,
     time_trigger: string,
-    days_trigger: [boolean, boolean, boolean, boolean, boolean, boolean, boolean]
+    days_trigger: [boolean, boolean, boolean, boolean, boolean, boolean, boolean],
+    created: Date,
+    updated: Date | null
 }

@@ -23,7 +23,7 @@ export class UserService {
             throw new UserConflict(`User id "${id}" already exist`);
         }
 
-        let user: IUser = {
+        return await this.userRepository.create({
             id,
             chat_id,
             currentYear: DateTime.now().year,
@@ -31,11 +31,7 @@ export class UserService {
             skipOutWithBike: 0,
             totalKm: 0,
             username
-        };
-
-        await this.userRepository.create(user)
-
-        return user;
+        });
     }
 
     async findById(id: number): Promise<IUser>{

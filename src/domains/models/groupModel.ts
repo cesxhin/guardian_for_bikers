@@ -10,7 +10,9 @@ const schemaGroup = new mongoose.Schema<IGroup>({
     longitude: Number,
     timezone: String,
     time_trigger: String,
-    days_trigger: Array<boolean>
+    days_trigger: Array<boolean>,
+    created: { type: Date, default: new Date() },
+    updated: { type: Date, default: null }
 });
 
 export const modelGroup = mongoose.model("group", schemaGroup, "groups");

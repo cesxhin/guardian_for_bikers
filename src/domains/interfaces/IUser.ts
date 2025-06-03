@@ -5,5 +5,7 @@ export interface IUser {
     outWithBike: number,
     skipOutWithBike: number,
     currentYear: number,
-    totalKm: number
+    totalKm: number,
+    created: Date,
+    updated: Date | null,
 }

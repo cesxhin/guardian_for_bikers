@@ -2,12 +2,13 @@ import { IGroup } from "../domains/interfaces/IGroup";
 import { GroupConflict, GroupNotFound } from "../utils/exceptionsUtils";
 import { GroupRepository } from "../repository/groupRepository";
 import _ from "lodash";
+import { StrictOmit } from "../lib/types";
 
 
 export class GroupService {
     private groupRepository = new GroupRepository();
 
-    async create(id: number, name: string): Promise<void>{
+    async create(id: number, name: string): Promise<IGroup>{
 
         let findGroup: IGroup | null = null;
         try {
@@ -22,7 +23,7 @@ export class GroupService {
             throw new GroupConflict(`Group id "${id}" already exist`);
         }
 
-        await this.groupRepository.create({
+        return await this.groupRepository.create({
             id,
             name,
             enabled: true,
@@ -35,8 +36,11 @@ export class GroupService {
         });
     }
 
-    async edit(id: number, data: Omit<Partial<IGroup>, "id">): Promise<IGroup>{
-        return await this.groupRepository.edit(id, data);
+    async edit(id: number, data: StrictOmit<Partial<IGroup>, "id" | "created" | "updated">): Promise<IGroup>{
+        return await this.groupRepository.edit(id, {
+            ...data,
+            updated: new Date()
+        });
     }
 
     async delete(id: number): Promise<void>{

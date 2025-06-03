@@ -4,6 +4,7 @@ import Logger from "../lib/logger";
 import { IUser } from "../domains/interfaces/IUser";
 import { modelUser } from "../domains/models/userMode";
 import { UserErrorGeneric, UserNotFound } from "../utils/exceptionsUtils";
+import { StrictOmit } from "../lib/types";
 
 const logger = Logger("user-repository");
 
@@ -47,9 +48,9 @@ export class UserRepository {
             return user;
     }
 
-    async create(data: IUser): Promise<void> {
+    async create(data: StrictOmit<IUser, "created" | "updated">): Promise<IUser> {
         try {
-            await modelUser.create(data);
+            return (await modelUser.create(data)).toObject();
         } catch (err){
             logger.error("Error create, details:", err);
             throw new UserErrorGeneric(err);
