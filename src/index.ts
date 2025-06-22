@@ -5,6 +5,7 @@ import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "./lib/logger";
 import listenersBot from "./bot";
+import cronPoll from "./cron/cronPoll";
 import cronWeather from "./cron/cronWeather";
 import { modelVersion } from "./domains/models/versionModel";
 import { TOKEN_BOT, URL_MONGO, USERNAME_BOT, VERSION_CURRENT_DB } from "./env";
@@ -48,7 +49,14 @@ async function main(){
 
     //telegram
     try {
-        bot = new TelegramBot(TOKEN_BOT, { polling: true });
+        bot = new TelegramBot(TOKEN_BOT, {
+            polling: {
+                autoStart: true,
+                params: {
+                    allowed_updates: ["message", "new_chat_title", "poll_answer"]
+                }
+            }
+        });
     } catch (err){
         logger.error("Error telegram bot, details:", err);
         process.exit(1);
@@ -56,6 +64,7 @@ async function main(){
 
     listenersBot(bot);
     cronWeather(bot);
+    cronPoll(bot);
 }
 
 try {

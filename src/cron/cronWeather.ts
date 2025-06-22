@@ -1,10 +1,13 @@
+import _ from "lodash";
 import { CronJob } from "cron";
 import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "../lib/logger";
+import { CRON_WEATHER } from "../env";
 import { exceptionsHandler } from "../utils/botUtils";
 import { IGroup } from "../domains/interfaces/IGroup";
+import { PollService } from "../services/pollService";
 import { GroupService } from "../services/groupService";
 import { WeatherService } from "../services/weatherService";
 
@@ -12,10 +15,11 @@ const logger = Logger("cron-weather");
 
 const groupService = new GroupService();
 const weatherService = new WeatherService();
+const pollService = new PollService();
 
 export default (bot: TelegramBot) => {
     new CronJob(
-        "0 0 * * * *",
+        CRON_WEATHER,
         async () => {
             logger.info("Check groups...");
             let groups: IGroup[] = [];
@@ -46,7 +50,31 @@ export default (bot: TelegramBot) => {
 
                             message += `\n\nYour settings:\nCurrent Location: ${group.location}\nCurrent timezone: ${group.timezone}\nCurrent time: ${group.time_trigger}`;
             
-                            bot.sendMessage(group.id, message);
+                            await bot.sendMessage(group.id, message);
+
+                            //send question if zero rain or percentage rain
+                            const findRain = _.find(weather.hourly.rain, (val) => val > 0);
+                            const findPercentageRain = _.find(weather.hourly.precipitation_probability, (val) => val > 25);
+
+                            if (_.isNil(findRain)){
+                                let messagePoll: TelegramBot.Message;
+                                let typePoll: "question" | "out";
+                                
+                                if (!_.isNil(findPercentageRain)){
+                                    messagePoll = await bot.sendPoll(group.id, "is there any chance of rain, are you sure you want to go out anyway?", ["Yes!", "No"], { is_anonymous: false });
+                                    typePoll = "question";
+                                } else {
+                                    messagePoll = await bot.sendPoll(group.id, "Great news!\nThe weather is nice today, who's going out?", ["I'm here", "No"], { is_anonymous: false });
+                                    typePoll = "out";
+                                }
+
+                                await pollService.create({
+                                    id: messagePoll.poll.id,
+                                    message_id: messagePoll.message_id,
+                                    group_id: group.id,
+                                    type: typePoll
+                                });
+                            }
                         }
                     );
                 }

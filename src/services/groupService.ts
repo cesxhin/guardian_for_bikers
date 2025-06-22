@@ -19,7 +19,7 @@ export class GroupService {
             }
         }
 
-        if(!_.isNil(findGroup)){
+        if (!_.isNil(findGroup)){
             throw new GroupConflict(`Group id "${id}" already exist`);
         }
 

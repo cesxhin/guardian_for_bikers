@@ -1,21 +1,28 @@
 import _ from "lodash";
+import AsyncLock from "async-lock";
 import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "./lib/logger";
 import { USERNAME_BOT } from "./env";
 import commandsUtils from "./utils/commandsUtils";
-import { GroupService } from "./services/groupService";
-import {commands, exceptionsHandler, wrapBotMessage } from "./utils/botUtils";
-import { LocationSerivce } from "./services/locationService";
-import { UserNotFound } from "./utils/exceptionsUtils";
-import { UserService } from "./services/userService";
+import { IPoll } from "./domains/interfaces/IPoll";
 import userCacheUtils from "./utils/userCacheUtils";
+import pollCacheUtils from "./utils/pollCacheUtils";
+import { UserService } from "./services/userService";
+import { PollService } from "./services/pollService";
+import { GroupService } from "./services/groupService";
+import { UserNotFound } from "./utils/exceptionsUtils";
+import { LocationSerivce } from "./services/locationService";
+import {commands, exceptionsHandler, wrapBotMessage } from "./utils/botUtils";
 
 const logger = Logger("bot");
 
 const groupSerivce = new GroupService();
 const locationService = new LocationSerivce();
 const userService = new UserService();
+const pollService = new PollService();
+
+const lockPollCache = new AsyncLock();
 
 export default function (bot: TelegramBot){
     //init command
@@ -34,7 +41,7 @@ export default function (bot: TelegramBot){
     //permission only group
     wrapBotMessage(bot, () => null, async (message) => {
         if (message.text.startsWith("/start")){
-            bot.sendMessage(message.chat.id, "I can only use in groups!");
+            await bot.sendMessage(message.chat.id, "I can only use in groups!");
         }
     });
 
@@ -51,13 +58,13 @@ export default function (bot: TelegramBot){
                         longitude: findLocation.longitude,
                         location
                     });
-                    bot.sendMessage(message.chat.id, `Updated location current: ${location}`);
+                    await bot.sendMessage(message.chat.id, `Updated location current: ${location}`);
                 } else {
-                    bot.sendMessage(message.chat.id, `Location not recognized "${location}"`);
+                    await bot.sendMessage(message.chat.id, `Location not recognized "${location}"`);
                 }
             },
             async () => {
-                bot.sendMessage(message.chat.id, "Tell me the location");
+                await bot.sendMessage(message.chat.id, "Tell me the location");
             }
         );
     });
@@ -97,19 +104,19 @@ export default function (bot: TelegramBot){
                     });
                     
 
-                    bot.sendMessage(message.chat.id, `${group.days_trigger[currentIndex]? "Actived" : "Deactivated" } ${day}`, {
+                    await bot.sendMessage(message.chat.id, `${group.days_trigger[currentIndex]? "Actived" : "Deactivated" } ${day}`, {
                         reply_markup: {
                             remove_keyboard: true
                         }
                     });
                 } else if (day === "Cancel"){
-                    bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
+                    await bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
                         reply_markup: {
                             remove_keyboard: true
                         }
                     });
                 } else {
-                    bot.sendMessage(message.chat.id, `I can't recognize this "${day}" as the day of the week`, {
+                    await bot.sendMessage(message.chat.id, `I can't recognize this "${day}" as the day of the week`, {
                         reply_markup: {
                             remove_keyboard: true
                         }
@@ -119,7 +126,7 @@ export default function (bot: TelegramBot){
             },
             async () => {
                 const group = await groupSerivce.find(message.chat.id);
-                bot.sendMessage(message.chat.id, "Active/Deactivated Days for Weather Control", {
+                await bot.sendMessage(message.chat.id, "Active/Deactivated Days for Weather Control", {
                     reply_markup: {
                         one_time_keyboard: true,
                         keyboard: [
@@ -159,20 +166,20 @@ export default function (bot: TelegramBot){
                         time_trigger: time
                     });
 
-                    bot.sendMessage(message.chat.id, `Okay set to this time: "${time}"`, { reply_markup: { remove_keyboard: true } });
+                    await bot.sendMessage(message.chat.id, `Okay set to this time: "${time}"`, { reply_markup: { remove_keyboard: true } });
                 } else if (time === "Cancel"){
-                    bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
+                    await bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
                         reply_markup: {
                             remove_keyboard: true
                         }
                     });
                 } else {
-                    bot.sendMessage(message.chat.id, `Invalid format time "${time}", I only accept hours from 00 to 23.\nExample: HH:00`, { reply_markup: { remove_keyboard: true } });
+                    await bot.sendMessage(message.chat.id, `Invalid format time "${time}", I only accept hours from 00 to 23.\nExample: HH:00`, { reply_markup: { remove_keyboard: true } });
                 }
             },
             async () => {
                 const group = await groupSerivce.find(message.chat.id);
-                bot.sendMessage(message.chat.id, "Active/Deactivated Days for Weather Control", {
+                await bot.sendMessage(message.chat.id, "Active/Deactivated Days for Weather Control", {
                     reply_markup: {
                         one_time_keyboard: true,
                         keyboard: [
@@ -229,19 +236,19 @@ export default function (bot: TelegramBot){
                 if (enable === "✅" || enable === "❌"){
                     await groupSerivce.edit(message.chat.id, { enabled: enable === "✅" });
 
-                    bot.sendMessage(message.chat.id, `${enable === "✅"? "Actived" : "Deactivated" } bot`, {
+                    await bot.sendMessage(message.chat.id, `${enable === "✅"? "Actived" : "Deactivated" } bot`, {
                         reply_markup: {
                             remove_keyboard: true
                         }
                     });
                 } else if (enable === "Cancel"){
-                    bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
+                    await bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
                         reply_markup: {
                             remove_keyboard: true
                         }
                     });
                 } else {
-                    bot.sendMessage(message.chat.id, `I can't recognize this "${enable}" for Active/Deactive bot`, {
+                    await bot.sendMessage(message.chat.id, `I can't recognize this "${enable}" for Active/Deactive bot`, {
                         reply_markup: {
                             remove_keyboard: true
                         }
@@ -251,7 +258,7 @@ export default function (bot: TelegramBot){
             },
             async () => {
                 const group = await groupSerivce.find(message.chat.id);
-                bot.sendMessage(message.chat.id, "Active/Deactivate bot", {
+                await bot.sendMessage(message.chat.id, "Active/Deactivate bot", {
                     reply_markup: {
                         one_time_keyboard: true,
                         keyboard: [
@@ -268,7 +275,7 @@ export default function (bot: TelegramBot){
     wrapBotMessage(bot, async (message) => {
         if (!_.isNil(message.left_chat_member)){
             if (message.left_chat_member.is_bot){
-                if(message.left_chat_member.username === USERNAME_BOT){
+                if (message.left_chat_member.username === USERNAME_BOT){
                     await groupSerivce.delete(message.chat.id);
                     const listIds = await userService.getIdsByChatId(message.chat.id);
                     await userService.deleteManyByChatId(message.chat.id);
@@ -277,13 +284,13 @@ export default function (bot: TelegramBot){
 
                     logger.info(`Someone kicked out of the group id "${message.chat.id}"`);
                 }
-            }else{
-                try{
-                    await userService.deleteById(message.left_chat_member.id);
-                }catch(err){
-                    if(!(err instanceof UserNotFound)){
+            } else {
+                try {
+                    await userService.deleteById(message.chat.id, message.left_chat_member.id);
+                } catch (err){
+                    if (!(err instanceof UserNotFound)){
                         throw err;
-                    }else{
+                    } else {
                         logger.error(`Not found user id "${message.left_chat_member.id}" for delete document user`);
                         return;
                     }
@@ -305,17 +312,17 @@ export default function (bot: TelegramBot){
         if (!_.isNil(message.new_chat_members)){
             for (const new_chat_member of message.new_chat_members) {
                 if (new_chat_member.is_bot){
-                    if(new_chat_member.username === USERNAME_BOT){
+                    if (new_chat_member.username === USERNAME_BOT){
                         const findMyBot = _.find(message.new_chat_members, {is_bot: true, username: USERNAME_BOT});
 
                         if (!_.isNil(findMyBot)){
                             await groupSerivce.create(message.chat.id, message.chat.title || "unknwon");
                             logger.info(`Someone added me to the group id "${message.chat.id}"`);
                             
-                            bot.sendMessage(message.chat.id, "Hello bikers! 🏍️\n\nFrom now on I will be your guardian for bad weather.\n\nWhat can this bot do?\n\nOnce you have set the area you want to monitor, if there is bad weather I'm sorry bikers it's better for you to stay home but if the weather is good it's time to go out!\n\nThere is a ranking of who goes out the most, go bikers! 🏍️🏍️🏍️");
+                            await bot.sendMessage(message.chat.id, "Hello bikers! 🏍️\n\nFrom now on I will be your guardian for bad weather.\n\nWhat can this bot do?\n\nOnce you have set the area you want to monitor, if there is bad weather I'm sorry bikers it's better for you to stay home but if the weather is good it's time to go out!\n\nThere is a ranking of who goes out the most, go bikers! 🏍️🏍️🏍️");
                         }
                     }
-                }else{
+                } else {
                     const user = await userService.create(message.chat.id, new_chat_member.id, new_chat_member.username || new_chat_member.first_name);
                     userCacheUtils.userCache.set(userCacheUtils.getPrimaryKeyCompose(message.chat.id, new_chat_member.id), user);
                 }
@@ -333,6 +340,62 @@ export default function (bot: TelegramBot){
 
                 logger.info(`Changed title from group id "${message.chat.id}" with new name "${message.new_chat_title}"`);
             }
+        });
+    });
+
+    //answer
+    bot.on("poll_answer", async (pollAnswer) => {
+        await lockPollCache.acquire(pollAnswer.poll_id, async () => {
+
+            let poll: IPoll;
+            try {
+                poll = await pollCacheUtils.getPollCache(pollAnswer.poll_id);
+            } catch (err){
+                logger.error("Failed get data poll from cache, details:", err);
+                return;
+            }
+
+            if (poll.type === "question"){
+                logger.debug(`This poll id "${pollAnswer.poll_id}" is a question so skip evalutate points for user id ${pollAnswer.user.id}`);
+                return;
+            }
+
+            await exceptionsHandler(bot, poll.group_id, async () => {
+                const user = await userCacheUtils.getUserCache(poll.group_id, pollAnswer.user.id, pollAnswer.user.username);
+                
+                let points = 0;
+                let skipOut = false;
+                
+                switch (poll.type){
+                case "out":
+                    if (pollAnswer.option_ids[0] === 0){
+                        points++;
+                    } else {
+                        skipOut = true;
+                    }
+                    break;
+                case "out_x2":
+                    if (pollAnswer.option_ids[0] === 0){
+                        points = 2;
+                    } else if (pollAnswer.option_ids[0] === 1){
+                        points = -2;
+                    } else {
+                        skipOut = true;
+                    }
+                    break;
+                default:
+                    logger.error(`Unknwon type poll "${poll.type}"`);
+                    return;
+                }
+
+                await userService.edit(user.chat_id, user.id, {
+                    points: user.points + points,
+                    outWithBike: user.outWithBike + (skipOut? 0 : 1),
+                    skipOutWithBike: user.skipOutWithBike + (skipOut? 1 : 0)
+                });
+
+                await pollService.answered(pollAnswer.poll_id, user.id);
+            });
         });
     });
     

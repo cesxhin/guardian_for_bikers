@@ -7,8 +7,8 @@ const schemaUser = new mongoose.Schema<IUser>({
     currentYear: Number,
     outWithBike: Number,
     skipOutWithBike: Number,
-    totalKm: Number,
     username: String,
+    points: Number,
     updated: { type: Date, default: null },
     created: { type: Date, default: new Date() }
 });

@@ -1,7 +1,9 @@
 import _ from "lodash";
 import { DateTime } from "luxon";
 
+import { StrictOmit } from "../lib/types";
 import { IUser } from "../domains/interfaces/IUser";
+import userCacheUtils from "../utils/userCacheUtils";
 import { UserRepository } from "../repository/userRepository";
 import { UserConflict, UserNotFound } from "../utils/exceptionsUtils";
 
@@ -12,14 +14,14 @@ export class UserService {
     async create(chat_id: number, id: number, username: string): Promise<IUser>{
         let findUser: IUser | null = null;
         try {
-            findUser = await this.userRepository.findById(id);
+            findUser = await this.userRepository.findById(chat_id, id);
         } catch (err){
             if (!(err instanceof UserNotFound)){
                 throw err;
             }
         }
 
-        if(!_.isNil(findUser)){
+        if (!_.isNil(findUser)){
             throw new UserConflict(`User id "${id}" already exist`);
         }
 
@@ -29,21 +31,34 @@ export class UserService {
             currentYear: DateTime.now().year,
             outWithBike: 0,
             skipOutWithBike: 0,
-            totalKm: 0,
-            username
+            username,
+            points: 0
         });
     }
+    
+    async edit(chatId: number, id: number, data: StrictOmit<Partial<IUser>, "id" | "created" | "updated" | "chat_id">): Promise<IUser>{
+        const user = await this.userRepository.edit(chatId, id, {
+            ...data,
+            updated: new Date()
+        });
 
-    async findById(id: number): Promise<IUser>{
-        return await this.userRepository.findById(id);
+        userCacheUtils.userCache.set(userCacheUtils.getPrimaryKeyCompose(user.chat_id, user.id), user);
+
+        return user;
     }
 
-    async deleteById(id: number): Promise<void>{
-        await this.userRepository.deleteById(id);
+    async findById(chatId: number, id: number): Promise<IUser>{
+        return await this.userRepository.findById(chatId, id);
+    }
+
+    async deleteById(chatId: number, id: number): Promise<void>{
+        await this.userRepository.deleteById(chatId, id);
+        userCacheUtils.userCache.del(userCacheUtils.getPrimaryKeyCompose(chatId, id));
     }
 
     async deleteManyByChatId(chatId: number): Promise<void>{
         await this.userRepository.deleteManyByChatId(chatId);
+        userCacheUtils.userCache.del(userCacheUtils.getKeysFromChatId(chatId));
     }
 
     async getIdsByChatId(chatId: number): Promise<number[]>{

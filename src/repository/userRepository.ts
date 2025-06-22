@@ -9,10 +9,10 @@ import { StrictOmit } from "../lib/types";
 const logger = Logger("user-repository");
 
 export class UserRepository {
-    async findById(id: number): Promise<IUser>{
+    async findById(chat_id: number, id: number): Promise<IUser>{
         let user: IUser | null;
         try {
-            user = await modelUser.findOne({ id }).lean();
+            user = await modelUser.findOne({ id, chat_id }).lean();
         } catch (err){
             logger.error("Error find, details:", err);
             throw new UserErrorGeneric(err);
@@ -34,18 +34,18 @@ export class UserRepository {
         }
     }
     
-    async edit(id: number, data: Omit<Partial<IUser>, "id">): Promise<IUser>{
+    async edit(chat_id: number, id: number, data: Omit<Partial<IUser>, "id">): Promise<IUser>{
         let user: IUser | null;
         try {
-            user = await modelUser.findOneAndUpdate({ id }, data, { new: true }).lean();
+            user = await modelUser.findOneAndUpdate({ id, chat_id }, data, { new: true }).lean();
         } catch (err){
             logger.error("Error edit, details:", err);
             throw new UserErrorGeneric(err);
         }
-            if (_.isNil(user)){
+        if (_.isNil(user)){
             throw new UserNotFound(`Not found user id "${id}" for edit`);
         }
-            return user;
+        return user;
     }
 
     async create(data: StrictOmit<IUser, "created" | "updated">): Promise<IUser> {
@@ -57,10 +57,10 @@ export class UserRepository {
         }
     }
     
-    async deleteById(id: number): Promise<void>{
+    async deleteById(chat_id: number, id: number): Promise<void>{
         let count = 0;
         try {
-            count = (await modelUser.deleteOne({ id })).deletedCount;
+            count = (await modelUser.deleteOne({ id, chat_id })).deletedCount;
         } catch (err){
             logger.error("Error create, details:", err);
             throw new UserErrorGeneric(err);

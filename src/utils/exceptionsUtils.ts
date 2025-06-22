@@ -34,3 +34,21 @@ export class UserConflict extends Error {
         this.name = "UserConflict";
     }
 }
+export class PollNotFound extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "PollNotFound";
+    }
+}
+export class PollErrorGeneric extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "PollErrorGeneric";
+    }
+}
+export class PollConflict extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "PollConflict";
+    }
+}
