@@ -2,10 +2,10 @@ import { CronJob } from "cron";
 import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
-import { CRON_POLL } from "../env";
 import Logger from "../lib/logger";
 import { PollService } from "../services/pollService";
 import { exceptionsHandler } from "../utils/botUtils";
+import { CRON_POLL, POLLS_EXPIRE_ACTION_SECONDS } from "../env";
 
 const logger = Logger("cron-poll");
 
@@ -50,7 +50,8 @@ export default (bot: TelegramBot) => {
                                     id: newPoll.poll.id,
                                     message_id: newPoll.message_id,
                                     group_id: poll.group_id,
-                                    type: "out_x2"
+                                    type: "out_x2",
+                                    expire: DateTime.now().plus({ seconds: POLLS_EXPIRE_ACTION_SECONDS }).toJSDate()
                                 });
                             } else {
                                 await bot.sendMessage(poll.group_id, "Great bikers, great choice stay home! It will be better next time");

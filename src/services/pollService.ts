@@ -17,7 +17,7 @@ export class PollService {
         return await this.pollRepository.findById(id);
     }
 
-    async create(data: StrictOmit<IPoll, "expire" | "answered" | "stop">): Promise<IPoll>{
+    async create(data: StrictOmit<IPoll, "answered" | "stop">): Promise<IPoll>{
         let find: IPoll | null = null;
         try {
             find = await this.pollRepository.findById(data.id);
