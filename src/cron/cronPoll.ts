@@ -6,10 +6,12 @@ import Logger from "../lib/logger";
 import { PollService } from "../services/pollService";
 import { exceptionsHandler } from "../utils/botUtils";
 import { CRON_POLL, POLLS_EXPIRE_ACTION_SECONDS } from "../env";
+import { UserService } from "../services/userService";
 
 const logger = Logger("cron-poll");
 
 const pollService = new PollService();
+const userService = new UserService();
 
 export default (bot: TelegramBot) => {
     new CronJob(
@@ -58,6 +60,17 @@ export default (bot: TelegramBot) => {
                             }
                         } else {
                             await pollService.edit(poll.id, { stop: true });
+
+                            const users = await userService.findManyByGroupId(poll.group_id);
+
+                            let message = "The poll has been closed!\nLet's see the ranking right now!\n";
+
+                            let rank = 1;
+                            for (const user of users.sort((userA, userB) => userA.points - userB.points)) {
+                                message += `${rank}${rank === 1? '🥇' : rank === 2? '🥈' : rank === 3? '🥉' : ''} -> ${user.username}: ${user.points} PT`
+                            }
+
+                            await bot.sendMessage(poll.group_id, message)
                         }
                     }
                 );

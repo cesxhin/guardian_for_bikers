@@ -51,6 +51,10 @@ export class UserService {
         return await this.userRepository.findById(chatId, id);
     }
 
+    async findManyByGroupId(chatId: number): Promise<IUser[]>{
+        return await this.userRepository.findManyByGroupId(chatId);
+    }
+
     async deleteById(chatId: number, id: number): Promise<void>{
         await this.userRepository.deleteById(chatId, id);
         userCacheUtils.userCache.del(userCacheUtils.getPrimaryKeyCompose(chatId, id));

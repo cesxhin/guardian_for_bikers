@@ -25,6 +25,15 @@ export class UserRepository {
         return user;
     }
     
+    async findManyByGroupId(chat_id: number): Promise<IUser[]> {
+        try {
+            return await modelUser.find({ chat_id }).lean();
+        } catch (err){
+            logger.error("Error find many by group id, details:", err);
+            throw new UserErrorGeneric(err);
+        }
+    }
+
     async getIdsByChatId(chatId: number): Promise<number[]>{
         try {
             return await modelUser.distinct("id", {chat_id: chatId}).lean();
