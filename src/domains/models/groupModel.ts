@@ -9,6 +9,8 @@ const schemaGroup = new mongoose.Schema<IGroup>({
     latitude: Number,
     longitude: Number,
     timezone: String,
+    start_time_guardian: String,
+    end_time_guardian: String,
     time_trigger: String,
     days_trigger: Array<boolean>,
     created: { type: Date, default: new Date() },

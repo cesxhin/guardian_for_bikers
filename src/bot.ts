@@ -13,7 +13,7 @@ import { PollService } from "./services/pollService";
 import { GroupService } from "./services/groupService";
 import { UserNotFound } from "./utils/exceptionsUtils";
 import { LocationSerivce } from "./services/locationService";
-import {commands, exceptionsHandler, wrapBotMessage } from "./utils/botUtils";
+import {commands, exceptionsHandler, timeCommand, wrapBotMessage } from "./utils/botUtils";
 import { DateTime } from "luxon";
 
 const logger = Logger("bot");
@@ -40,11 +40,13 @@ export default async function (bot: TelegramBot){
     //set commands
     logger.debug("settings commands")
     bot.setMyCommands([
-        { command: commands.SET_LOCATION, description: "Set a location where you want to receive weather updates" },
-        { command: commands.SET_DAYS, description: "Manage the days of the week to receive weather updates" },
-        { command: commands.SET_ENABLE, description: "Manage whether to suspend the bot" },
-        { command: commands.SET_TIME, description: "Set the time to receive weather updates" },
-        { command: commands.SHOW_SETTINGS, description: "Show current settings" }
+        { command: commands.SET_LOCATION, description: "Set a location where you want to receive weather updates." },
+        { command: commands.SET_DAYS, description: "Manage the days of the week to receive weather updates." },
+        { command: commands.SET_ENABLE, description: "Manage whether to suspend the bot." },
+        { command: commands.SET_TIME, description: "Set the time to receive weather updates." },
+        { command: commands.SET_START_TIME_GUARDIAN, description: "Check the weather only from the time you set onward." },
+        { command: commands.SET_END_TIME_GUARDIAN, description: "Check the weather up to the time that was set." },
+        { command: commands.SHOW_SETTINGS, description: "Show current settings." },
     ], {
         scope: {
             type: "all_chat_administrators"
@@ -189,45 +191,7 @@ export default async function (bot: TelegramBot){
                 await bot.sendMessage(message.chat.id, "You can choose what time you want to receive the updates", {
                     reply_markup: {
                         one_time_keyboard: true,
-                        keyboard: [
-                            [
-                                {text: `00:00 ${group.time_trigger == "00:00"? "✅" : "" }`},
-                                {text: `01:00 ${group.time_trigger == "01:00"? "✅" : "" }`},
-                                {text: `02:00 ${group.time_trigger == "02:00"? "✅" : "" }`},
-                                {text: `03:00 ${group.time_trigger == "03:00"? "✅" : "" }`}
-                            ],
-                            [
-                                {text: `04:00 ${group.time_trigger == "04:00"? "✅" : "" }`},
-                                {text: `05:00 ${group.time_trigger == "05:00"? "✅" : "" }`},
-                                {text: `06:00 ${group.time_trigger == "06:00"? "✅" : "" }`},
-                                {text: `07:00 ${group.time_trigger == "07:00"? "✅" : "" }`}
-                            ],
-                            [
-                                {text: `08:00 ${group.time_trigger == "09:00"? "✅" : "" }`},
-                                {text: `09:00 ${group.time_trigger == "09:00"? "✅" : "" }`},
-                                {text: `10:00 ${group.time_trigger == "10:00"? "✅" : "" }`},
-                                {text: `11:00 ${group.time_trigger == "11:00"? "✅" : "" }`}
-                            ],
-                            [
-                                {text: `12:00 ${group.time_trigger == "12:00"? "✅" : "" }`},
-                                {text: `13:00 ${group.time_trigger == "13:00"? "✅" : "" }`},
-                                {text: `14:00 ${group.time_trigger == "14:00"? "✅" : "" }`},
-                                {text: `15:00 ${group.time_trigger == "15:00"? "✅" : "" }`}
-                            ],
-                            [
-                                {text: `16:00 ${group.time_trigger == "16:00"? "✅" : "" }`},
-                                {text: `17:00 ${group.time_trigger == "17:00"? "✅" : "" }`},
-                                {text: `18:00 ${group.time_trigger == "18:00"? "✅" : "" }`},
-                                {text: `19:00 ${group.time_trigger == "19:00"? "✅" : "" }`}
-                            ],
-                            [
-                                {text: `20:00 ${group.time_trigger == "20:00"? "✅" : "" }`},
-                                {text: `21:00 ${group.time_trigger == "21:00"? "✅" : "" }`},
-                                {text: `22:00 ${group.time_trigger == "22:00"? "✅" : "" }`},
-                                {text: `23:00 ${group.time_trigger == "23:00"? "✅" : "" }`}
-                            ],
-                            [{text: "Cancel"}]
-                        ]
+                        keyboard: timeCommand(group.time_trigger)
                     }
                 });
             }
@@ -439,14 +403,103 @@ Enough with the explanations now, have fun bikers!🏍️💨
                 await bot.sendMessage(message.chat.id,
 `
 Your current settings:
-    🤖 Bot is ${group.enabled? 'activaed' : "suspended"}
-    📍 Location: ${group.location}
-    🕑 Time zone: ${group.timezone}
-    ⏰ Time for weather monitoring: ${group.time_trigger}
-    📅 Days for weather monitoring: ${arrayDays.filter((_, index) => group.days_trigger[index]).join(", ")}
-    📝 Last date of settings update: ${DateTime.fromJSDate(group.updated).setZone(group.timezone).toLocaleString(DateTime.DATETIME_SHORT)}
+🤖 Bot is ${group.enabled? 'activaed' : "suspended"}
+📍 Location: ${group.location}
+🕑 Time zone: ${group.timezone}
+⏰ Weather time check: ${group.time_trigger}
+📅 Weather days check: ${arrayDays.filter((_, index) => group.days_trigger[index]).join(", ")}
+💂 Time guardian: ${group.start_time_guardian} - ${group.end_time_guardian}
+📝 Last update: ${DateTime.fromJSDate(group.updated).setZone(group.timezone).toLocaleString(DateTime.DATETIME_SHORT)}
 `
 );
+            }
+        );
+    });
+
+    //command set start time guardian
+    wrapBotMessage(bot, async (message) => {
+        commandsUtils.command(
+            message,
+            commands.SET_START_TIME_GUARDIAN,
+            async (time) => {
+                time = time.replace(" ✅", "");
+
+                const group = await groupSerivce.find(message.chat.id);
+
+                const checkFormatTime = /^(0[0-9]|1[0-9]|2[0-3]):00$/;
+
+                if (checkFormatTime.test(time)){
+                    if(time > group.end_time_guardian){
+                        await bot.sendMessage(message.chat.id, `The start time cannot be later than ${group.end_time_guardian}`, { reply_markup: { remove_keyboard: true } });
+                    }else{
+                        await groupSerivce.edit(message.chat.id, {
+                            start_time_guardian: time
+                        });
+
+                        await bot.sendMessage(message.chat.id, `Okay set to this time: "${time}"`, { reply_markup: { remove_keyboard: true } });
+                    }
+                } else if (time === "Cancel"){
+                    await bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
+                        reply_markup: {
+                            remove_keyboard: true
+                        }
+                    });
+                } else {
+                    await bot.sendMessage(message.chat.id, `Invalid format time "${time}", I only accept hours from 00 to 23.\nExample: HH:00`, { reply_markup: { remove_keyboard: true } });
+                }
+            },
+            async () => {
+                const group = await groupSerivce.find(message.chat.id);
+                await bot.sendMessage(message.chat.id, "Set the start time for weather checks", {
+                    reply_markup: {
+                        one_time_keyboard: true,
+                        keyboard: timeCommand(group.start_time_guardian)
+                    }
+                });
+            }
+        );
+    });
+
+    //command set end time guardian
+    wrapBotMessage(bot, async (message) => {
+        commandsUtils.command(
+            message,
+            commands.SET_END_TIME_GUARDIAN,
+            async (time) => {
+                time = time.replace(" ✅", "");
+
+                const group = await groupSerivce.find(message.chat.id);
+
+                const checkFormatTime = /^(0[0-9]|1[0-9]|2[0-3]):00$/;
+
+                if (checkFormatTime.test(time)){
+                    if(time < group.start_time_guardian){
+                        await bot.sendMessage(message.chat.id, `The end time cannot be earlier than ${group.start_time_guardian}`, { reply_markup: { remove_keyboard: true } });
+                    }else{
+                        await groupSerivce.edit(message.chat.id, {
+                            end_time_guardian: time
+                        });
+
+                        await bot.sendMessage(message.chat.id, `Okay set to this time: "${time}"`, { reply_markup: { remove_keyboard: true } });
+                    }
+                } else if (time === "Cancel"){
+                    await bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
+                        reply_markup: {
+                            remove_keyboard: true
+                        }
+                    });
+                } else {
+                    await bot.sendMessage(message.chat.id, `Invalid format time "${time}", I only accept hours from 00 to 23.\nExample: HH:00`, { reply_markup: { remove_keyboard: true } });
+                }
+            },
+            async () => {
+                const group = await groupSerivce.find(message.chat.id);
+                await bot.sendMessage(message.chat.id, "Set the end time for weather checks", {
+                    reply_markup: {
+                        one_time_keyboard: true,
+                        keyboard: timeCommand(group.end_time_guardian)
+                    }
+                });
             }
         );
     });

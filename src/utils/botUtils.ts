@@ -13,7 +13,9 @@ export enum commands {
     SET_DAYS = "set_days",
     SET_ENABLE = "set_enable",
     SET_TIME = "set_time",
-    SHOW_SETTINGS = "show_settings"
+    SHOW_SETTINGS = "show_settings",
+    SET_START_TIME_GUARDIAN = "set_start_time_guardian",
+    SET_END_TIME_GUARDIAN = "set_end_time_guardian",
 }
 
 export function onlyPermissionGroup(message: TelegramBot.Message){
@@ -67,4 +69,46 @@ export async function exceptionsHandler(bot: TelegramBot, chatId: number, generi
             logger.error("Error generic, details:", err);
         }
     }
+}
+
+export function timeCommand(time: string): Array<{text: string}>[]{
+    return [
+        [
+            {text: `00:00 ${time == "00:00"? "✅" : "" }`},
+            {text: `01:00 ${time == "01:00"? "✅" : "" }`},
+            {text: `02:00 ${time == "02:00"? "✅" : "" }`},
+            {text: `03:00 ${time == "03:00"? "✅" : "" }`}
+        ],
+        [
+            {text: `04:00 ${time == "04:00"? "✅" : "" }`},
+            {text: `05:00 ${time == "05:00"? "✅" : "" }`},
+            {text: `06:00 ${time == "06:00"? "✅" : "" }`},
+            {text: `07:00 ${time == "07:00"? "✅" : "" }`}
+        ],
+        [
+            {text: `08:00 ${time == "09:00"? "✅" : "" }`},
+            {text: `09:00 ${time == "09:00"? "✅" : "" }`},
+            {text: `10:00 ${time == "10:00"? "✅" : "" }`},
+            {text: `11:00 ${time == "11:00"? "✅" : "" }`}
+        ],
+        [
+            {text: `12:00 ${time == "12:00"? "✅" : "" }`},
+            {text: `13:00 ${time == "13:00"? "✅" : "" }`},
+            {text: `14:00 ${time == "14:00"? "✅" : "" }`},
+            {text: `15:00 ${time == "15:00"? "✅" : "" }`}
+        ],
+        [
+            {text: `16:00 ${time == "16:00"? "✅" : "" }`},
+            {text: `17:00 ${time == "17:00"? "✅" : "" }`},
+            {text: `18:00 ${time == "18:00"? "✅" : "" }`},
+            {text: `19:00 ${time == "19:00"? "✅" : "" }`}
+        ],
+        [
+            {text: `20:00 ${time == "20:00"? "✅" : "" }`},
+            {text: `21:00 ${time == "21:00"? "✅" : "" }`},
+            {text: `22:00 ${time == "22:00"? "✅" : "" }`},
+            {text: `23:00 ${time == "23:00"? "✅" : "" }`}
+        ],
+        [{text: "Cancel"}]
+    ]
 }

@@ -44,8 +44,19 @@ export default (bot: TelegramBot) => {
                             //create message
                             let message = "Hello bikers! Let's see what the weather has to offer today!\n\n";
 
+                            let onlyTime: string;
                             for (let i = 0; i < weather.hourly.time.length; i++){
-                                message += `${DateTime.fromISO(weather.hourly.time[i]).toFormat("HH:mm")} - ${weather.hourly.temperature_2m[i].toPrecision(3)}°C ${weather.hourly.rain[i] > 0? "🌧️" : weather.hourly.precipitation_probability[i] > 0? `💧 ${weather.hourly.precipitation_probability[i]}%` : "☀️"}\n`;
+
+                                onlyTime = DateTime.fromISO(weather.hourly.time[i]).toFormat("HH:mm");
+
+                                if(onlyTime >= group.start_time_guardian && onlyTime <= group.end_time_guardian){
+                                    message += `${onlyTime} - ${weather.hourly.temperature_2m[i].toPrecision(3)}°C ${weather.hourly.rain[i] > 0? "🌧️" : weather.hourly.precipitation_probability[i] > 0? `💧 ${weather.hourly.precipitation_probability[i]}%` : "☀️"}\n`;
+                                }else{
+                                    _.remove(weather.hourly.time, (_, index) => index === i);
+                                    _.remove(weather.hourly.precipitation_probability, (_, index) => index === i);
+                                    _.remove(weather.hourly.rain, (_, index) => index === i);
+                                    _.remove(weather.hourly.temperature_2m, (_, index) => index === i);
+                                }
                             }
             
                             await bot.sendMessage(group.id, message);
