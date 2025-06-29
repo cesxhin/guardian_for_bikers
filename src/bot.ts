@@ -403,7 +403,7 @@ Enough with the explanations now, have fun bikers!🏍️💨
                 await bot.sendMessage(message.chat.id,
 `
 Your current settings:
-🤖 Bot is ${group.enabled? 'activaed' : "suspended"}
+🤖 Bot is ${group.enabled? 'activated' : "suspended"}
 📍 Location: ${group.location}
 🕑 Time zone: ${group.timezone}
 ⏰ Weather time check: ${group.time_trigger}
