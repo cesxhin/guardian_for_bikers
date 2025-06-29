@@ -38,6 +38,10 @@ export class PollService {
         return poll;
     }
 
+    async deleteByChatId(chatId: number): Promise<void> {
+        await this.pollRepository.deleteByChatId(chatId);
+    }
+
     async deleteByIds(ids: string[]): Promise<void>{
         await this.pollRepository.deleteByIds(ids);
 

@@ -12,7 +12,8 @@ export enum commands {
     SET_LOCATION = "set_location",
     SET_DAYS = "set_days",
     SET_ENABLE = "set_enable",
-    SET_TIME = "set_time"
+    SET_TIME = "set_time",
+    SHOW_SETTINGS = "show_settings"
 }
 
 export function onlyPermissionGroup(message: TelegramBot.Message){

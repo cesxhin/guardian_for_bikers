@@ -45,10 +45,8 @@ export default (bot: TelegramBot) => {
                             let message = "Hello bikers! Let's see what the weather has to offer today!\n\n";
 
                             for (let i = 0; i < weather.hourly.time.length; i++){
-                                message += `${DateTime.fromISO(weather.hourly.time[i]).toFormat("HH:mm")} - ${weather.hourly.temperature_2m[i]}°C ${weather.hourly.rain[i] > 0? "🌧️" : weather.hourly.precipitation_probability[i] > 0? `💧 ${weather.hourly.precipitation_probability[i]}%` : "☀️"}\n`;
+                                message += `${DateTime.fromISO(weather.hourly.time[i]).toFormat("HH:mm")} - ${weather.hourly.temperature_2m[i].toPrecision(3)}°C ${weather.hourly.rain[i] > 0? "🌧️" : weather.hourly.precipitation_probability[i] > 0? `💧 ${weather.hourly.precipitation_probability[i]}%` : "☀️"}\n`;
                             }
-
-                            message += `\n\nYour settings:\nCurrent Location: ${group.location}\nCurrent timezone: ${group.timezone}\nCurrent time: ${group.time_trigger}`;
             
                             await bot.sendMessage(group.id, message);
 
@@ -61,10 +59,10 @@ export default (bot: TelegramBot) => {
                                 let typePoll: "question" | "out";
                                 
                                 if (!_.isNil(findPercentageRain)){
-                                    messagePoll = await bot.sendPoll(group.id, "is there any chance of rain, are you sure you want to go out anyway?", ["Yes!", "No"], { is_anonymous: false });
+                                    messagePoll = await bot.sendPoll(group.id, "There is a chance it might rain, do you still want to go out at your own risk?", ["Yes!", "No"], { is_anonymous: false });
                                     typePoll = "question";
                                 } else {
-                                    messagePoll = await bot.sendPoll(group.id, "Great news!\nThe weather is nice today, who's out?", ["I'm here", "No"], { is_anonymous: false });
+                                    messagePoll = await bot.sendPoll(group.id, "Great news!\nThe weather is nice today, who's out?", ["I went out", "No"], { is_anonymous: false });
                                     typePoll = "out";
                                 }
 
@@ -76,7 +74,7 @@ export default (bot: TelegramBot) => {
                                     expire: DateTime.now().plus({seconds: typePoll === "question"? POLLS_EXPIRE_QUESTION_SECONDS : POLLS_EXPIRE_ACTION_SECONDS}).toJSDate()
                                 });
                             } else {
-                                await bot.sendMessage(group.id, "Sorry guys!\nYou can't go out today because it's going to rain for sure!");
+                                await bot.sendMessage(group.id, "Sorry bikers, but the weather doesn't look good, stay home!🏠");
                             }
                         }
                     );

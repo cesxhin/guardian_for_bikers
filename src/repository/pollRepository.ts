@@ -14,7 +14,7 @@ export class PollRepository {
         try {
             user = await modelPoll.findOne({ id }).lean();
         } catch (err){
-            logger.error("Error find, details:", err);
+            logger.error("Error findById, details:", err);
             throw new PollErrorGeneric(err);
         }
             
@@ -29,7 +29,7 @@ export class PollRepository {
         try {
             return (await modelPoll.insertOne(data)).toObject();
         } catch (err){
-            logger.error("Error find, details:", err);
+            logger.error("Error create, details:", err);
             throw new PollErrorGeneric(err);
         }
     }
@@ -38,7 +38,7 @@ export class PollRepository {
         try {
             return await modelPoll.find({expire: { $lte: new Date() }, stop: false}).lean();
         } catch (err){
-            logger.error("Error find, details:", err);
+            logger.error("Error listExpired, details:", err);
             throw new PollErrorGeneric(err);
         }
     }
@@ -48,7 +48,7 @@ export class PollRepository {
         try {
             count = (await modelPoll.deleteMany({ id: ids })).deletedCount;
         } catch (err){
-            logger.error("Error create, details:", err);
+            logger.error("Error deleteByIds, details:", err);
             throw new PollErrorGeneric(err);
         }
 
@@ -77,7 +77,16 @@ export class PollRepository {
         try {
             return await modelPoll.findOneAndUpdate({ id }, { $push: { answered: userId } }).lean();
         } catch (err){
-            logger.error("Error edit, details:", err);
+            logger.error("Error answered, details:", err);
+            throw new PollErrorGeneric(err);
+        }
+    }
+
+    async deleteByChatId(chatId: number): Promise<void>{
+        try {
+            await modelPoll.deleteMany({ group_id: chatId });
+        } catch (err){
+            logger.error("Error deleteByChatId, details:", err);
             throw new PollErrorGeneric(err);
         }
     }

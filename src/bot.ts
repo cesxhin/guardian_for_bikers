@@ -14,6 +14,7 @@ import { GroupService } from "./services/groupService";
 import { UserNotFound } from "./utils/exceptionsUtils";
 import { LocationSerivce } from "./services/locationService";
 import {commands, exceptionsHandler, wrapBotMessage } from "./utils/botUtils";
+import { DateTime } from "luxon";
 
 const logger = Logger("bot");
 
@@ -24,14 +25,31 @@ const pollService = new PollService();
 
 const lockPollCache = new AsyncLock();
 
-export default function (bot: TelegramBot){
-    //init command
+export default async function (bot: TelegramBot){
+    //const
+    const arrayDays = [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday"
+    ];
+
+    //set commands
+    logger.debug("settings commands")
     bot.setMyCommands([
-        { command: commands.SET_LOCATION, description: "Set the desired location to monitor the weather" },
-        { command: commands.SET_DAYS, description: "Activate or deactivate the day you want to be monitored" },
-        { command: commands.SET_ENABLE, description: "Activate or deactivate bot" },
-        { command: commands.SET_TIME, description: "Set time for show information of the weather" }
-    ]);
+        { command: commands.SET_LOCATION, description: "Set a location where you want to receive weather updates" },
+        { command: commands.SET_DAYS, description: "Manage the days of the week to receive weather updates" },
+        { command: commands.SET_ENABLE, description: "Manage whether to suspend the bot" },
+        { command: commands.SET_TIME, description: "Set the time to receive weather updates" },
+        { command: commands.SHOW_SETTINGS, description: "Show current settings" }
+    ], {
+        scope: {
+            type: "all_chat_administrators"
+        }
+    });
 
     //debug
     wrapBotMessage(bot, async (message) => {
@@ -41,7 +59,7 @@ export default function (bot: TelegramBot){
     //permission only group
     wrapBotMessage(bot, () => null, async (message) => {
         if (message.text.startsWith("/start")){
-            await bot.sendMessage(message.chat.id, "I can only use in groups!");
+            await bot.sendMessage(message.chat.id, "This bot can only be used in groups!");
         }
     });
 
@@ -58,34 +76,24 @@ export default function (bot: TelegramBot){
                         longitude: findLocation.longitude,
                         location
                     });
-                    await bot.sendMessage(message.chat.id, `Updated location current: ${location}`);
+                    await bot.sendMessage(message.chat.id, `Successfully updated the position "${location}" 📍`);
                 } else {
-                    await bot.sendMessage(message.chat.id, `Location not recognized "${location}"`);
+                    await bot.sendMessage(message.chat.id, `I couldn't find the position "${location}"`);
                 }
             },
             async () => {
-                await bot.sendMessage(message.chat.id, "Tell me the location");
+                await bot.sendMessage(message.chat.id, "Enter the name of the city whose weather you want to monitor.\nExample: roma or Roma");
             }
         );
     });
     
     //command set days
     wrapBotMessage(bot, async (message) => {
-        const arrayDays = [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"
-        ];
-
         commandsUtils.command(
             message,
             commands.SET_DAYS,
             async (day) => {
-                day = day.replace(" ✅", "").replace(" ❌", "");
+                day = day.replace(" ✅", "").replace(" ❌", "").toLowerCase();
 
                 if (arrayDays.includes(day)){
                     //get data group
@@ -103,8 +111,7 @@ export default function (bot: TelegramBot){
                         days_trigger: currentDaysTrigger
                     });
                     
-
-                    await bot.sendMessage(message.chat.id, `${group.days_trigger[currentIndex]? "Actived" : "Deactivated" } ${day}`, {
+                    await bot.sendMessage(message.chat.id, `The ${day} is  ${group.days_trigger[currentIndex]? "enabled" : "disabled" } for weather monitoring.`, {
                         reply_markup: {
                             remove_keyboard: true
                         }
@@ -116,7 +123,7 @@ export default function (bot: TelegramBot){
                         }
                     });
                 } else {
-                    await bot.sendMessage(message.chat.id, `I can't recognize this "${day}" as the day of the week`, {
+                    await bot.sendMessage(message.chat.id, `The word ${day} is not recognized as one of the days of the week. Please use the commands or write one of these: ${arrayDays.join(", ")}.`, {
                         reply_markup: {
                             remove_keyboard: true
                         }
@@ -126,7 +133,7 @@ export default function (bot: TelegramBot){
             },
             async () => {
                 const group = await groupSerivce.find(message.chat.id);
-                await bot.sendMessage(message.chat.id, "Active/Deactivated Days for Weather Control", {
+                await bot.sendMessage(message.chat.id, "You can decide which days you want to receive weather updates.", {
                     reply_markup: {
                         one_time_keyboard: true,
                         keyboard: [
@@ -179,7 +186,7 @@ export default function (bot: TelegramBot){
             },
             async () => {
                 const group = await groupSerivce.find(message.chat.id);
-                await bot.sendMessage(message.chat.id, "Active/Deactivated Days for Weather Control", {
+                await bot.sendMessage(message.chat.id, "You can choose what time you want to receive the updates", {
                     reply_markup: {
                         one_time_keyboard: true,
                         keyboard: [
@@ -233,10 +240,12 @@ export default function (bot: TelegramBot){
             message,
             commands.SET_ENABLE,
             async (enable) => {
+                enable = enable.toLocaleLowerCase();
+
                 if (enable === "✅" || enable === "❌"){
                     await groupSerivce.edit(message.chat.id, { enabled: enable === "✅" });
 
-                    await bot.sendMessage(message.chat.id, `${enable === "✅"? "Actived" : "Deactivated" } bot`, {
+                    await bot.sendMessage(message.chat.id, `The bot has been ${enable === "✅"? "actived" : "suspended" }.`, {
                         reply_markup: {
                             remove_keyboard: true
                         }
@@ -248,7 +257,7 @@ export default function (bot: TelegramBot){
                         }
                     });
                 } else {
-                    await bot.sendMessage(message.chat.id, `I can't recognize this "${enable}" for Active/Deactive bot`, {
+                    await bot.sendMessage(message.chat.id, `The word "${enable}" is not recognized to suspend or reactivate the bot. Please use the commands or write one of these: actived, suspended`, {
                         reply_markup: {
                             remove_keyboard: true
                         }
@@ -258,7 +267,7 @@ export default function (bot: TelegramBot){
             },
             async () => {
                 const group = await groupSerivce.find(message.chat.id);
-                await bot.sendMessage(message.chat.id, "Active/Deactivate bot", {
+                await bot.sendMessage(message.chat.id, "You can decide whether to temporarily suspend the bot.", {
                     reply_markup: {
                         one_time_keyboard: true,
                         keyboard: [
@@ -279,10 +288,11 @@ export default function (bot: TelegramBot){
                     await groupSerivce.delete(message.chat.id);
                     const listIds = await userService.getIdsByChatId(message.chat.id);
                     await userService.deleteManyByChatId(message.chat.id);
+                    await pollService.deleteByChatId(message.chat.id);
 
                     userCacheUtils.userCache.del(userCacheUtils.getMultiplePrimaryKeyCompose(message.chat.id, listIds));
 
-                    logger.info(`Someone kicked out of the group id "${message.chat.id}"`);
+                    logger.info(`Someone kicked me out of the group id "${message.chat.id}"`);
                 }
             } else {
                 try {
@@ -301,12 +311,6 @@ export default function (bot: TelegramBot){
         }
     });
 
-    //check exist group to db
-    wrapBotMessage(bot, async (message) => {
-        if (!_.isNil(message.new_chat_members) && message.new_chat_members.length > 0){
-        }
-    });
-
     //entry someone
     wrapBotMessage(bot, async (message) => {
         if (!_.isNil(message.new_chat_members)){
@@ -319,7 +323,32 @@ export default function (bot: TelegramBot){
                             await groupSerivce.create(message.chat.id, message.chat.title || "unknwon");
                             logger.info(`Someone added me to the group id "${message.chat.id}"`);
                             
-                            await bot.sendMessage(message.chat.id, "Hello bikers! 🏍️\n\nFrom now on I will be your guardian for bad weather.\n\nWhat can this bot do?\n\nOnce you have set the area you want to monitor, if there is bad weather I'm sorry bikers it's better for you to stay home but if the weather is good it's time to go out!\n\nThere is a ranking of who goes out the most, go bikers! 🏍️🏍️🏍️");
+                            await bot.sendMessage(message.chat.id,
+`
+Hello bikers! 🏍️💨
+
+From now on, I will be here to protect you from bad weather.
+
+What can this bot do?
+- It is possible to configure this bot to adapt your outings.
+- There is a mini-game where each player who goes out will earn points, and at the end of the year the winner will be announced.
+
+And more new features will come in the future!💡
+
+Explanation for the mini-game🎮:
+When the weather monitoring starts, the mini-game will also automatically begin, where each player who goes out can earn points and at the end of the year an official ranking will be released announcing the top three winners.
+
+There will be three cases:
+1. If the weather forecast shows sun all day, a poll will appear that will give you one point if you went out.
+2. If the weather forecast shows more than 25% chance of rain, a poll will appear asking if you still want to go out despite the risk. To pass this question, at least 2 people must vote. If passed, another poll will appear that will give you double points if you didn't get wet, and if you did get wet, you will lose the double points!
+3. If the weather forecast shows 100% rain, no poll will appear.
+
+
+Enough with the explanations now, have fun bikers!🏍️💨
+
+⚠️⚠️ WARNING ⚠️⚠️: If you remove the bot from the group, all data will be deleted!
+`
+                            );
                         }
                     }
                 } else {
@@ -397,6 +426,29 @@ export default function (bot: TelegramBot){
                 await pollService.answered(pollAnswer.poll_id, user.id);
             });
         });
+    });
+
+    //command show settings
+    wrapBotMessage(bot, async (message) => {
+        commandsUtils.command(
+            message,
+            commands.SHOW_SETTINGS,
+            null,
+            async () => {
+                const group = await groupSerivce.find(message.chat.id);
+                await bot.sendMessage(message.chat.id,
+`
+Your current settings:
+    🤖 Bot is ${group.enabled? 'activaed' : "suspended"}
+    📍 Location: ${group.location}
+    🕑 Time zone: ${group.timezone}
+    ⏰ Time for weather monitoring: ${group.time_trigger}
+    📅 Days for weather monitoring: ${arrayDays.filter((_, index) => group.days_trigger[index]).join(", ")}
+    📝 Last date of settings update: ${DateTime.fromJSDate(group.updated).setZone(group.timezone).toLocaleString(DateTime.DATETIME_SHORT)}
+`
+);
+            }
+        );
     });
     
     logger.info("Started!");

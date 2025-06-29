@@ -39,11 +39,11 @@ export default (bot: TelegramBot) => {
                             if (resultPoll.options[0].voter_count > 1){
                                 const newPoll = await bot.sendPoll(
                                     poll.group_id,
-                                    "Do you really want to take the risk?\nThen the truly brave will deserve double points!\nDid you finally get out?",
+                                    "At your own risk, it might rain, how did it go in the end?",
                                     [
                                         "I went out without getting wet",
-                                        "I went out but I took a lot of water",
-                                        "No"
+                                        "I went out but got wet",
+                                        "I didn't go out"
                                     ],
                                     { is_anonymous: false }
                                 );
@@ -56,7 +56,7 @@ export default (bot: TelegramBot) => {
                                     expire: DateTime.now().plus({ seconds: POLLS_EXPIRE_ACTION_SECONDS }).toJSDate()
                                 });
                             } else {
-                                await bot.sendMessage(poll.group_id, "Great bikers, great choice stay home! It will be better next time");
+                                await bot.sendMessage(poll.group_id, "Better this way bikers, go out by car or stay home and relax");
                             }
                         } else {
                             await pollService.edit(poll.id, { stop: true });
