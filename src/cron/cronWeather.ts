@@ -10,6 +10,7 @@ import { IGroup } from "../domains/interfaces/IGroup";
 import { PollService } from "../services/pollService";
 import { GroupService } from "../services/groupService";
 import { WeatherService } from "../services/weatherService";
+import graphUtils from "../utils/graphUtils";
 
 const logger = Logger("cron-weather");
 
@@ -42,34 +43,47 @@ export default (bot: TelegramBot) => {
                             const weather = await weatherService.get(group.latitude, group.longitude);
 
                             //create message
-                            let message = "Hello bikers! Let's see what the weather has to offer today!\n\n";
-
                             let onlyTime: string;
+                            const dataTypeWeather: string[] = [];
+
                             for (let i = 0; i < weather.hourly.time.length; i++){
 
                                 onlyTime = DateTime.fromISO(weather.hourly.time[i]).toFormat("HH:mm");
 
-                                if(onlyTime >= group.start_time_guardian && onlyTime <= group.end_time_guardian){
-                                    message += `${onlyTime} - ${weather.hourly.temperature_2m[i].toPrecision(3)}°C ${weather.hourly.rain[i] > 0? "🌧️" : weather.hourly.precipitation_probability[i] > 0? `💧 ${weather.hourly.precipitation_probability[i]}%` : "☀️"}\n`;
-                                }else{
+                                if (onlyTime >= group.start_time_guardian && onlyTime <= group.end_time_guardian){
+                                    if (weather.hourly.rain[i] > 0){
+                                        dataTypeWeather.push("2");
+                                    } else if (weather.hourly.precipitation_probability[i] > 0){
+                                        dataTypeWeather.push(`1 - ${weather.hourly.precipitation_probability[i]}`);
+                                    } else {
+                                        dataTypeWeather.push("0");
+                                    }
+                                } else {
                                     _.remove(weather.hourly.time, (_, index) => index === i);
                                     _.remove(weather.hourly.precipitation_probability, (_, index) => index === i);
                                     _.remove(weather.hourly.rain, (_, index) => index === i);
                                     _.remove(weather.hourly.temperature_2m, (_, index) => index === i);
                                 }
                             }
+
+                            const result = await graphUtils.render(600, 250, weather.hourly.time.map((time) => DateTime.fromFormat(time, "yyyy-MM-dd'T'HH:mm").setLocale(group.timezone).toISO()), weather.hourly.temperature_2m, dataTypeWeather);
             
-                            await bot.sendMessage(group.id, message);
+                            await bot.sendPhoto(group.id, result, {
+                                caption: "Hello bikers! Let's see what the weather has to offer today!"
+                            }, {
+                                filename: `${group.name}-${DateTime.now().toISO()}.png`,
+                                contentType: "image/png"
+                            });
 
                             //send question if zero rain or percentage rain
                             const findRain = _.find(weather.hourly.rain, (val) => val > 0);
                             const findPercentageRain = _.find(weather.hourly.precipitation_probability, (val) => val > 25);
 
-                            if (_.isNil(findRain)){
+                            if (!_.isNil(findRain)){ //todo da invertire
                                 let messagePoll: TelegramBot.Message;
                                 let typePoll: "question" | "out";
                                 
-                                if (!_.isNil(findPercentageRain)){
+                                if (_.isNil(findPercentageRain)){ //todo da invertire
                                     messagePoll = await bot.sendPoll(group.id, "There is a chance it might rain, do you still want to go out at your own risk?", ["Yes!", "No"], { is_anonymous: false });
                                     typePoll = "question";
                                 } else {

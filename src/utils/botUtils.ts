@@ -15,7 +15,7 @@ export enum commands {
     SET_TIME = "set_time",
     SHOW_SETTINGS = "show_settings",
     SET_START_TIME_GUARDIAN = "set_start_time_guardian",
-    SET_END_TIME_GUARDIAN = "set_end_time_guardian",
+    SET_END_TIME_GUARDIAN = "set_end_time_guardian"
 }
 
 export function onlyPermissionGroup(message: TelegramBot.Message){
@@ -71,7 +71,7 @@ export async function exceptionsHandler(bot: TelegramBot, chatId: number, generi
     }
 }
 
-export function timeCommand(time: string): Array<{text: string}>[]{
+export function timeCommand(time: string): { text: string }[][]{
     return [
         [
             {text: `00:00 ${time == "00:00"? "✅" : "" }`},
@@ -110,5 +110,5 @@ export function timeCommand(time: string): Array<{text: string}>[]{
             {text: `23:00 ${time == "23:00"? "✅" : "" }`}
         ],
         [{text: "Cancel"}]
-    ]
+    ];
 }

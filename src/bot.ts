@@ -38,7 +38,7 @@ export default async function (bot: TelegramBot){
     ];
 
     //set commands
-    logger.debug("settings commands")
+    logger.debug("settings commands");
     bot.setMyCommands([
         { command: commands.SET_LOCATION, description: "Set a location where you want to receive weather updates." },
         { command: commands.SET_DAYS, description: "Manage the days of the week to receive weather updates." },
@@ -46,7 +46,7 @@ export default async function (bot: TelegramBot){
         { command: commands.SET_TIME, description: "Set the time to receive weather updates." },
         { command: commands.SET_START_TIME_GUARDIAN, description: "Check the weather only from the time you set onward." },
         { command: commands.SET_END_TIME_GUARDIAN, description: "Check the weather up to the time that was set." },
-        { command: commands.SHOW_SETTINGS, description: "Show current settings." },
+        { command: commands.SHOW_SETTINGS, description: "Show current settings." }
     ], {
         scope: {
             type: "all_chat_administrators"
@@ -288,7 +288,7 @@ export default async function (bot: TelegramBot){
                             logger.info(`Someone added me to the group id "${message.chat.id}"`);
                             
                             await bot.sendMessage(message.chat.id,
-`
+                                `
 Hello bikers! 🏍️💨
 
 From now on, I will be here to protect you from bad weather.
@@ -401,9 +401,9 @@ Enough with the explanations now, have fun bikers!🏍️💨
             async () => {
                 const group = await groupSerivce.find(message.chat.id);
                 await bot.sendMessage(message.chat.id,
-`
+                    `
 Your current settings:
-🤖 Bot is ${group.enabled? 'activated' : "suspended"}
+🤖 Bot is ${group.enabled? "activated" : "suspended"}
 📍 Location: ${group.location}
 🕑 Time zone: ${group.timezone}
 ⏰ Weather time check: ${group.time_trigger}
@@ -411,7 +411,7 @@ Your current settings:
 💂 Time guardian: ${group.start_time_guardian} - ${group.end_time_guardian}
 📝 Last update: ${DateTime.fromJSDate(group.updated).setZone(group.timezone).toLocaleString(DateTime.DATETIME_SHORT)}
 `
-);
+                );
             }
         );
     });
@@ -429,9 +429,9 @@ Your current settings:
                 const checkFormatTime = /^(0[0-9]|1[0-9]|2[0-3]):00$/;
 
                 if (checkFormatTime.test(time)){
-                    if(time > group.end_time_guardian){
+                    if (time > group.end_time_guardian){
                         await bot.sendMessage(message.chat.id, `The start time cannot be later than ${group.end_time_guardian}`, { reply_markup: { remove_keyboard: true } });
-                    }else{
+                    } else {
                         await groupSerivce.edit(message.chat.id, {
                             start_time_guardian: time
                         });
@@ -473,9 +473,9 @@ Your current settings:
                 const checkFormatTime = /^(0[0-9]|1[0-9]|2[0-3]):00$/;
 
                 if (checkFormatTime.test(time)){
-                    if(time < group.start_time_guardian){
+                    if (time < group.start_time_guardian){
                         await bot.sendMessage(message.chat.id, `The end time cannot be earlier than ${group.start_time_guardian}`, { reply_markup: { remove_keyboard: true } });
-                    }else{
+                    } else {
                         await groupSerivce.edit(message.chat.id, {
                             end_time_guardian: time
                         });

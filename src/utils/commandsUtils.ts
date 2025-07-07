@@ -10,7 +10,7 @@ async function command(message: TelegramBot.Message, command: commands, function
     if (!_.isNil(message.from) && !message.from.is_bot){
 
         let findCommandFromUser: commands | null = null;
-        if(!_.isNil(functionExecuteCommand)){
+        if (!_.isNil(functionExecuteCommand)){
             findCommandFromUser = historyCommand.get(userCacheUtils.getPrimaryKeyCompose(message.chat.id, message.from.id));
         }
         

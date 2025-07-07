@@ -1,6 +1,8 @@
 import path from "path";
 import {fileURLToPath} from "url";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default {
     entry: "./index.ts",
     mode: "production",
@@ -14,6 +16,16 @@ export default {
                 test: /\.ts?$/,
                 use: "ts-loader",
                 exclude: /node_modules/
+            },
+            {
+                test: /\.(m?js|node)$/,
+                parser: { amd: false },
+                use: {
+                    loader: "@vercel/webpack-asset-relocator-loader",
+                    options: {
+                        existingAssetNames: []
+                    }
+                }
             }
         ]
     },
@@ -22,8 +34,7 @@ export default {
     },
     output: {
         module: true,
-        libraryTarget: "module",
-        path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "dist"),
+        path: path.resolve(__dirname, "dist"),
         clean: true
     },
     experiments: {

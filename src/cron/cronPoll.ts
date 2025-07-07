@@ -66,11 +66,12 @@ export default (bot: TelegramBot) => {
                             let message = "The poll has been closed!\nLet's see the ranking right now!\n";
 
                             let rank = 1;
-                            for (const user of users.sort((userA, userB) => userA.points - userB.points)) {
-                                message += `${rank}${rank === 1? '🥇' : rank === 2? '🥈' : rank === 3? '🥉' : ''} -> ${user.username}: ${user.points} PT`
+                            for (const user of users.sort((userA, userB) => userB.points - userA.points)) {
+                                message += `${rank === 1? "🥇" : rank === 2? "🥈" : rank === 3? "🥉" : rank.toString().padStart(3, " ")} -> ${user.username}: ${user.points} PT\n`;
+                                rank++;
                             }
 
-                            await bot.sendMessage(poll.group_id, message)
+                            await bot.sendMessage(poll.group_id, message);
                         }
                     }
                 );
