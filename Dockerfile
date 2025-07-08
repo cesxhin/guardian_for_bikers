@@ -1,7 +1,9 @@
-FROM node:24-alpine
+FROM node:24-slim
 
 WORKDIR /app
 
 COPY ./src/dist .
+
+RUN apt-get update && apt-get install -y libpixman-1-0
 
 CMD ["node", "./main.mjs"]
