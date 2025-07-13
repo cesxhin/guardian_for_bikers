@@ -1,8 +1,10 @@
+import _ from "lodash";
 import path from "path";
 import { readFileSync } from "fs";
 import { loadImage, createCanvas } from "canvas";
 import { Chart, Filler, LinearScale, LineController, LineElement, Plugin, PointElement, TimeScale } from "chart.js";
 import "chartjs-adapter-luxon"; //after chartjs
+import Logger from "../lib/logger";
 
 Chart.register(TimeScale, LinearScale, LineController, PointElement, LineElement, Filler);
       
@@ -15,9 +17,11 @@ const emojiRain = await loadImage(readFileSync(path.join(path.resolve(), "assets
 Chart.defaults.animation = false;
 Chart.defaults.responsive = false;
 
+const logger = Logger("graph-utils");
+
 const emojiPlugin: Plugin = {
     id: "emojiPlugin",
-    afterDraw(chart, _, options) {
+    afterDraw(chart, args, options) {
         const ctx = chart.ctx;
         const xAxis = chart.scales["xEmoji"];
 
@@ -26,19 +30,22 @@ const emojiPlugin: Plugin = {
         ctx.textBaseline = "bottom";
 
         for (const index in xAxis.ticks) {
-            //@ts-expect-error index is number
-            const x = xAxis.getPixelForTick(index);
+            const x = xAxis.getPixelForTick(Number(index));
         
             const actualWeather = options.dataWeather[index];
 
-            ctx.drawImage((actualWeather.startsWith("0")? emojiSun : actualWeather.startsWith("1")? emojiDroplet : emojiRain) as any, x - (SIZE_EMOJI / 2), xAxis.top - 25, SIZE_EMOJI, SIZE_EMOJI);
+            if(!_.isNil(actualWeather)){
+                ctx.drawImage((actualWeather.startsWith("0")? emojiSun : actualWeather.startsWith("1")? emojiDroplet : emojiRain) as any, x - (SIZE_EMOJI / 2), xAxis.top - 25, SIZE_EMOJI, SIZE_EMOJI);
 
-            if (actualWeather.startsWith("1")){
+                if (actualWeather.startsWith("1")){
 
-                const poin = chart.getDatasetMeta(0).data[index];
+                    const poin = chart.getDatasetMeta(0).data[index];
 
-                const percentage = actualWeather.split("1 - ")[1];
-                ctx.fillText(`${percentage}%`, poin.x, poin.y + 19);
+                    const percentage = actualWeather.split("1 - ")[1];
+                    ctx.fillText(`${percentage}%`, poin.x, poin.y + 19);
+                }
+            }else{
+                logger.error("Cannot draw on chart");
             }
         }
 

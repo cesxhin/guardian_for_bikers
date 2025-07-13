@@ -6,7 +6,7 @@ import { LOG_LEVEL } from "../env";
 export default (nameService: string) => winston.createLogger({
     level: LOG_LEVEL,
     format: winston.format.combine(
-        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
         winston.format.printf(({ level, message, timestamp, service, ...args }) => {
             const meta = [];
             const symbols = Object.getOwnPropertySymbols(args);
