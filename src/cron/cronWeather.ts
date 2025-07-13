@@ -79,11 +79,11 @@ export default (bot: TelegramBot) => {
                             const findRain = _.find(weather.hourly.rain, (val) => val > 0);
                             const findPercentageRain = _.find(weather.hourly.precipitation_probability, (val) => val > 25);
 
-                            if (!_.isNil(findRain)){ //todo da invertire
+                            if (_.isNil(findRain)){
                                 let messagePoll: TelegramBot.Message;
                                 let typePoll: "question" | "out";
                                 
-                                if (_.isNil(findPercentageRain)){ //todo da invertire
+                                if (!_.isNil(findPercentageRain)){
                                     messagePoll = await bot.sendPoll(group.id, "There is a chance it might rain, do you still want to go out at your own risk?", ["Yes!", "No"], { is_anonymous: false });
                                     typePoll = "question";
                                 } else {

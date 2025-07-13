@@ -34,7 +34,7 @@ const emojiPlugin: Plugin = {
         
             const actualWeather = options.dataWeather[index];
 
-            if(!_.isNil(actualWeather)){
+            if (!_.isNil(actualWeather)){
                 ctx.drawImage((actualWeather.startsWith("0")? emojiSun : actualWeather.startsWith("1")? emojiDroplet : emojiRain) as any, x - (SIZE_EMOJI / 2), xAxis.top - 25, SIZE_EMOJI, SIZE_EMOJI);
 
                 if (actualWeather.startsWith("1")){
@@ -44,7 +44,7 @@ const emojiPlugin: Plugin = {
                     const percentage = actualWeather.split("1 - ")[1];
                     ctx.fillText(`${percentage}%`, poin.x, poin.y + 19);
                 }
-            }else{
+            } else {
                 logger.error("Cannot draw on chart");
             }
         }
