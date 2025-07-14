@@ -45,6 +45,7 @@ export default (bot: TelegramBot) => {
                             //create message
                             let onlyTime: string;
                             const dataTypeWeather: string[] = [];
+                            const listTimeBlacklist: number[] = [];
 
                             for (let i = 0; i < weather.hourly.time.length; i++){
 
@@ -59,12 +60,15 @@ export default (bot: TelegramBot) => {
                                         dataTypeWeather.push("0");
                                     }
                                 } else {
-                                    _.remove(weather.hourly.time, (_, index) => index === i);
-                                    _.remove(weather.hourly.precipitation_probability, (_, index) => index === i);
-                                    _.remove(weather.hourly.rain, (_, index) => index === i);
-                                    _.remove(weather.hourly.temperature_2m, (_, index) => index === i);
+                                    listTimeBlacklist.push(i);
                                 }
                             }
+
+                            //if user has set range custom for check weather
+                            _.remove(weather.hourly.time, (_, index) => listTimeBlacklist.includes(index));
+                            _.remove(weather.hourly.precipitation_probability, (_, index) => listTimeBlacklist.includes(index));
+                            _.remove(weather.hourly.rain, (_, index) => listTimeBlacklist.includes(index));
+                            _.remove(weather.hourly.temperature_2m, (_, index) => listTimeBlacklist.includes(index));
 
                             const result = await graphUtils.render(600, 250, weather.hourly.time.map((time) => DateTime.fromFormat(time, "yyyy-MM-dd'T'HH:mm").setLocale(group.timezone).toISO()), weather.hourly.temperature_2m, dataTypeWeather);
             
