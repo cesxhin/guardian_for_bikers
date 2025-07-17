@@ -8,7 +8,8 @@ import Logger from "../lib/logger";
 
 Chart.register(TimeScale, LinearScale, LineController, PointElement, LineElement, Filler);
       
-const SIZE_EMOJI = 24;
+const SIZE_EMOJI = 72;
+const SIZE_FONT = 50;
 
 const emojiSun = await loadImage(readFileSync(path.join(path.resolve(), "assets/sunny.png")));
 const emojiDroplet = await loadImage(readFileSync(path.join(path.resolve(), "assets/droplet.png")));
@@ -35,14 +36,14 @@ const emojiPlugin: Plugin = {
             const actualWeather = options.dataWeather[index];
 
             if (!_.isNil(actualWeather)){
-                ctx.drawImage((actualWeather.startsWith("0")? emojiSun : actualWeather.startsWith("1")? emojiDroplet : emojiRain) as any, x - (SIZE_EMOJI / 2), xAxis.top - 25, SIZE_EMOJI, SIZE_EMOJI);
+                ctx.drawImage((actualWeather.startsWith("0")? emojiSun : actualWeather.startsWith("1")? emojiDroplet : emojiRain) as any, x - (SIZE_EMOJI / 2), xAxis.top - 50, SIZE_EMOJI, SIZE_EMOJI);
 
                 if (actualWeather.startsWith("1")){
 
                     const poin = chart.getDatasetMeta(0).data[index];
 
                     const percentage = actualWeather.split("1 - ")[1];
-                    ctx.fillText(`${percentage}%`, poin.x, poin.y + 19);
+                    ctx.fillText(`${percentage}%`, poin.x, poin.y + 70);
                 }
             } else {
                 logger.error("Cannot draw on chart");
@@ -68,6 +69,9 @@ async function render(width: number, height: number, headers: (number | string)[
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext("2d");
     ctx.fillStyle = "red";
+    ctx.imageSmoothingEnabled = true;
+    ctx.quality = "best";
+    ctx.font = '60px';
     ctx.fillRect(0, 0, 200, 200);
     
     const chart = new Chart(
@@ -80,6 +84,7 @@ async function render(width: number, height: number, headers: (number | string)[
                         data: data.map((_, index) => { return {x: headers[index], y: data[index]}; }),
                         borderColor: "#FF6500",
                         backgroundColor: "rgba(255, 101, 0, 0.25)",
+                        borderWidth: 10,
                         fill: true
                     }, {
                         data: data.map((_, index) => { return {x: headers[index], y: data[index]}; }),
@@ -94,14 +99,14 @@ async function render(width: number, height: number, headers: (number | string)[
                         hoverRadius: 0
                     },
                     line: {
-                        tension: 0.4
+                        tension: 0.4,
+                        
                     }
                 },
                 layout: {
                     padding: {
-                        top: 30,
-                        left: 15,
-                        right: 5
+                        top: 60,
+                        left: 60
                     }
                 },
                 plugins: {
@@ -124,6 +129,11 @@ async function render(width: number, height: number, headers: (number | string)[
                             displayFormats: {
                                 hour: "HH"
                             }
+                        },
+                        ticks: {
+                            font: {
+                                size: SIZE_FONT
+                            }
                         }
                     },
                     xEmoji: {
@@ -139,10 +149,19 @@ async function render(width: number, height: number, headers: (number | string)[
                             displayFormats: {
                                 hour: "HH"
                             }
+                        },
+                        ticks: {
+                            font: {
+                                size: SIZE_FONT
+                            }
                         }
                     },
                     y: {
                         ticks: {
+                            padding: 30,
+                            font: {
+                                size: SIZE_FONT
+                            },
                             callback: (val) => val.toString().padStart(2, "0") + " °C"
                         },
                         grid: {

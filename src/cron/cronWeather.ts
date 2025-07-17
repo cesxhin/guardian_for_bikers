@@ -70,7 +70,7 @@ export default (bot: TelegramBot) => {
                             _.remove(weather.hourly.rain, (_, index) => listTimeBlacklist.includes(index));
                             _.remove(weather.hourly.temperature_2m, (_, index) => listTimeBlacklist.includes(index));
 
-                            const result = await graphUtils.render(600, 250, weather.hourly.time.map((time) => DateTime.fromFormat(time, "yyyy-MM-dd'T'HH:mm").setLocale(group.timezone).toISO()), weather.hourly.temperature_2m, dataTypeWeather);
+                            const result = await graphUtils.render(600 * 4, 250 * 4, weather.hourly.time.map((time) => DateTime.fromFormat(time, "yyyy-MM-dd'T'HH:mm").setLocale(group.timezone).toISO()), weather.hourly.temperature_2m, dataTypeWeather);
             
                             await bot.sendPhoto(group.id, result, {
                                 caption: "Hello bikers! Let's see what the weather has to offer today!"
