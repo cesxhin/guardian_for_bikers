@@ -7,7 +7,6 @@
       "allowJs": true,
       "moduleResolution": "bundler",
       "allowSyntheticDefaultImports": true,
-      "declaration": true,
       "sourceMap": true,
        "skipLibCheck": true
     },
