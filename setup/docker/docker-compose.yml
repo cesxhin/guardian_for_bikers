@@ -1,0 +1,15 @@
+services:
+  mongo:
+    image: mongo:8
+    restart: always
+    volumes:
+      - /mongo/gfb:/data/db
+    env_file:
+      - envs/mongo.env
+  gfb:
+    image: kju7pwd2/guards_for_bikers:1.0.0_dev
+    restart: always
+    env_file:
+      - envs/gfb.env
+    depends_on:
+      - mongo
