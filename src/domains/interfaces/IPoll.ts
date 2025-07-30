@@ -5,5 +5,7 @@ export interface IPoll {
     type: "out" | "out_x2" | "question",
     expire: Date,
     answered: string[],
-    stop: boolean
+    stop: boolean,
+    created: Date,
+    updated: Date
 }

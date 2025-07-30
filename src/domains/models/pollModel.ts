@@ -9,7 +9,9 @@ const schemaGroup = new mongoose.Schema<IPoll>({
     expire: Date,
     type: String,
     answered: Array<string>,
-    stop: { type: Boolean, default: false }
+    stop: { type: Boolean, default: false },
+    created: { type: Date, default: () => new Date() },
+    updated: { type: Date, default: null }
 });
 
 export const modelPoll = mongoose.model("poll", schemaGroup, "polls");

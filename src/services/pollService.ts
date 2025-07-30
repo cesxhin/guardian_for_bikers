@@ -4,7 +4,7 @@ import { StrictOmit } from "../lib/types";
 import { IPoll } from "../domains/interfaces/IPoll";
 import pollCacheUtils from "../utils/pollCacheUtils";
 import { PollRepository } from "../repository/pollRepository";
-import { PollConflict, PollNotFound } from "../utils/exceptionsUtils";
+import { PollConflict, PollIsClosed, PollIsExpired, PollNotFound } from "../utils/exceptionsUtils";
 
 export class PollService {
     private pollRepository = new PollRepository();
@@ -13,11 +13,29 @@ export class PollService {
         return await this.pollRepository.listExpired();
     }
 
+    async listValidWithTypeOutById(id: string): Promise<IPoll>{
+        return await this.pollRepository.listValidWithTypeOutById(id);
+    }
+
     async findById(id: string): Promise<IPoll>{
         return await this.pollRepository.findById(id);
     }
 
-    async create(data: StrictOmit<IPoll, "answered" | "stop">): Promise<IPoll>{
+    async findValidByGroupId(id: number): Promise<IPoll>{
+        const poll = await this.pollRepository.findByGroupId(id);
+
+        if(new Date() > poll.expire){
+            throw new PollIsExpired(`Poll id "${poll.id}" is expired`)
+        }
+
+        if(poll.stop){
+            throw new PollIsClosed(`Poll id "${poll.id}" is closed`);
+        }
+
+        return poll;
+    }
+
+    async create(data: StrictOmit<IPoll, "answered" | "stop" | "created" | "updated">): Promise<IPoll>{
         let find: IPoll | null = null;
         try {
             find = await this.pollRepository.findById(data.id);
@@ -54,8 +72,11 @@ export class PollService {
         return this.pollRepository.answered(id, userId);
     }
 
-    async edit(id: string, data: Partial<StrictOmit<IPoll, "id" | "group_id" | "message_id" | "type">>): Promise<IPoll> {
-        const poll = await this.pollRepository.edit(id, data);
+    async edit(id: string, data: Partial<StrictOmit<IPoll, "id" | "group_id" | "message_id" | "type" | "updated" | "created">>): Promise<IPoll> {
+        const poll = await this.pollRepository.edit(id, {
+            ...data,
+            updated: new Date()
+        });
 
         pollCacheUtils.pollCache.set(id, poll);
 

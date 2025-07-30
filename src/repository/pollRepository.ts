@@ -3,7 +3,7 @@ import { IPoll } from "../domains/interfaces/IPoll";
 import { modelPoll } from "../domains/models/pollModel";
 import Logger from "../lib/logger";
 import { StrictOmit } from "../lib/types";
-import { PollErrorGeneric, PollNotFound } from "../utils/exceptionsUtils";
+import { PollErrorGeneric, PollIsClosed, PollNotFound } from "../utils/exceptionsUtils";
 
 const logger = Logger("poll-repository");
 
@@ -25,7 +25,23 @@ export class PollRepository {
         return user;
     }
 
-    async create(data: StrictOmit<IPoll, "expire" | "answered" | "stop">): Promise<IPoll>{
+    async findByGroupId(group_id: number): Promise<IPoll>{
+        let poll: IPoll | null;
+        try {
+            poll = await modelPoll.findOne({ group_id }).sort({ created: -1 }).lean();
+        } catch (err){
+            logger.error("Error findByGroupId, details:", err);
+            throw new PollErrorGeneric(err);
+        }
+
+        if (_.isNil(poll)){
+            throw new PollNotFound(`Not found poll valid with group id "${group_id}"`);
+        }
+        
+        return poll;
+    }
+
+    async create(data: StrictOmit<IPoll, "expire" | "answered" | "stop" | "created" | "updated">): Promise<IPoll>{
         try {
             return (await modelPoll.insertOne(data)).toObject();
         } catch (err){
@@ -39,6 +55,15 @@ export class PollRepository {
             return await modelPoll.find({expire: { $lte: new Date() }, stop: false}).lean();
         } catch (err){
             logger.error("Error listExpired, details:", err);
+            throw new PollErrorGeneric(err);
+        }
+    }
+
+    async listValidWithTypeOutById(id: string): Promise<IPoll>{
+        try {
+            return await modelPoll.findOne({id, stop: false, type: { $ne: "question" }}).lean();
+        } catch (err){
+            logger.error("Error listValidWithTypeOut, details:", err);
             throw new PollErrorGeneric(err);
         }
     }

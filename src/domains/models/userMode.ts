@@ -10,7 +10,7 @@ const schemaUser = new mongoose.Schema<IUser>({
     username: String,
     points: Number,
     updated: { type: Date, default: null },
-    created: { type: Date, default: new Date() }
+    created: { type: Date, default: () => new Date() }
 });
 
 export const modelUser = mongoose.model("user", schemaUser, "users");

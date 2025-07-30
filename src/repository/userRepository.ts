@@ -43,7 +43,7 @@ export class UserRepository {
         }
     }
     
-    async edit(chat_id: number, id: number, data: Omit<Partial<IUser>, "id">): Promise<IUser>{
+    async edit(chat_id: number, id: number, data: StrictOmit<Partial<IUser>, "id">): Promise<IUser>{
         let user: IUser | null;
         try {
             user = await modelUser.findOneAndUpdate({ id, chat_id }, data, { new: true }).lean();

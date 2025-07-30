@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { DateTime } from "luxon";
 import AsyncLock from "async-lock";
 import TelegramBot from "node-telegram-bot-api";
 
@@ -11,10 +12,10 @@ import pollCacheUtils from "./utils/pollCacheUtils";
 import { UserService } from "./services/userService";
 import { PollService } from "./services/pollService";
 import { GroupService } from "./services/groupService";
-import { UserNotFound } from "./utils/exceptionsUtils";
+import { TrackService } from "./services/trackService";
 import { LocationSerivce } from "./services/locationService";
-import {commands, exceptionsHandler, timeCommand, wrapBotMessage } from "./utils/botUtils";
-import { DateTime } from "luxon";
+import { PollIsClosed, PollIsExpired, UserNotFound } from "./utils/exceptionsUtils";
+import { commands, createMention, exceptionsHandler, timeCommand, wrapBotMessage } from "./utils/botUtils";
 
 const logger = Logger("bot");
 
@@ -22,6 +23,7 @@ const groupSerivce = new GroupService();
 const locationService = new LocationSerivce();
 const userService = new UserService();
 const pollService = new PollService();
+const trackService = new TrackService();
 
 const lockPollCache = new AsyncLock();
 
@@ -502,6 +504,45 @@ Your current settings:
                 });
             }
         );
+    });
+    
+    bot.on("edited_message", async (message) => {
+        logger.debug(JSON.stringify(message));
+
+        await lockPollCache.acquire(message.chat.id.toString(), async () => {
+
+            let poll: IPoll;
+            try {
+                poll = await pollCacheUtils.getPollCacheByGroupId(message.chat.id);
+            } catch (err){
+                if(!(err instanceof PollIsClosed || err instanceof PollIsExpired)){
+                    logger.error("Failed get data poll from cache, details:", err);
+                }else{
+                    logger.warn(`The user id "${message.from.id}" is trying to send the positions, but the poll is already closed`);
+
+                    try{
+                        await bot.deleteMessage(message.chat.id, message.message_id);
+                    }catch(err){
+                        logger.error(`Failed delete message from group id "${message.chat.id}", details:`, err);
+                        return;
+                    }
+
+                    try{
+                        await bot.sendMessage(message.chat.id, createMention({first_name: message.from.first_name, user_id: message.from.id}, "At the moment, you can't share your location. There is no active poll right now."), { parse_mode: "MarkdownV2" })
+                    }catch(err){
+                        logger.error(`Failed send message  from group id "${message.chat.id}", details:`, err);
+                    }
+                    
+                }
+                return;
+            }
+            
+            await exceptionsHandler(bot, message.chat.id, async () => {
+                if(poll.stop === false && new Date() < poll.expire && !_.isNil(message.location) && poll.type !== "question"){
+                    await trackService.addPositions(message.from.id, message.chat.id, poll.id, {positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date(message.edit_date * 1000) }]});
+                }
+            });
+        });
     });
     
     logger.info("Started!");

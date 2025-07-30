@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { IForecast } from "../domains/interfaces/IForecast";
+import { IForecast } from "../domains/interfaces/api/IForecast";
 
 export class WeatherRepository {
     private URL_API = "https://api.open-meteo.com/v1/forecast";

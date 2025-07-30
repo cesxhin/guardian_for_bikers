@@ -1,4 +1,4 @@
-export interface ILocation {
+export interface IWeatherLocation {
     name: string,
     latitude: number,
     longitude: number

@@ -1,17 +1,22 @@
+import _ from "lodash";
+import geolib from "geolib";
 import { CronJob } from "cron";
 import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "../lib/logger";
+import { IUser } from "../domains/interfaces/IUser";
 import { PollService } from "../services/pollService";
 import { exceptionsHandler } from "../utils/botUtils";
-import { CRON_POLL, POLLS_EXPIRE_ACTION_SECONDS } from "../env";
 import { UserService } from "../services/userService";
+import { TrackService } from "../services/trackService";
+import { CRON_POLL, POLLS_EXPIRE_ACTION_SECONDS } from "../env";
 
 const logger = Logger("cron-poll");
 
 const pollService = new PollService();
 const userService = new UserService();
+const trackService = new TrackService();
 
 export default (bot: TelegramBot) => {
     new CronJob(
@@ -53,21 +58,79 @@ export default (bot: TelegramBot) => {
                                     message_id: newPoll.message_id,
                                     group_id: poll.group_id,
                                     type: "out_x2",
-                                    expire: DateTime.now().plus({ seconds: POLLS_EXPIRE_ACTION_SECONDS }).toJSDate()
+                                    expire: DateTime.now().plus({ seconds: POLLS_EXPIRE_ACTION_SECONDS }).set({millisecond: 0, second: 0}).toJSDate()
                                 });
                             } else {
                                 await bot.sendMessage(poll.group_id, "Better this way bikers, go out by car or stay home and relax");
                             }
                         } else {
+                            //close poll
                             await pollService.edit(poll.id, { stop: true });
 
+                            //get all list users from groups
                             const users = await userService.findManyByGroupId(poll.group_id);
+
+                            //close all tracks
+                            await trackService.terminateAllFromPollId(poll.id);
+
+                            //get all tracks closed
+                            const listTracks = await trackService.findAllTermintedFromPollId(poll.id);
+
+                            logger.debug("Found total tracks: ", listTracks.length);
+
+                            //calculate distance
+                            let distanceTotal: number;
+                            let calculatedKm: number;
+                            let messageDistanceToday: string = "";
+                            let findUser: IUser | null;
+                            for (const track of listTracks) {
+                                distanceTotal = 0;
+
+                                track.positions.forEach((value, index) => {
+                                    if((index + 1) === track.positions.length){
+                                        return;
+                                    }
+
+                                    distanceTotal += geolib.getPreciseDistance({lat: value.lat, lon: value.long}, {lat: track.positions[index + 1].lat, lon: track.positions[index + 1].long});
+                                });
+
+                                if(distanceTotal > 0){
+                                    calculatedKm = parseFloat((distanceTotal / 1000).toFixed(2));
+
+                                    logger.debug(`This track "${track.user_id}, ${track.group_id}, ${track.poll_id}" covered these kilometers ${calculatedKm}`);
+                                    
+                                    await trackService.edit(track.user_id, track.group_id, track.poll_id, { totalKm: calculatedKm });
+
+                                    findUser = _.find(users, {id: track.user_id});
+
+                                    if(!_.isNil(findUser)){
+                                        messageDistanceToday += `${findUser.username}: ${calculatedKm}km\n`;
+                                    }else{
+                                        logger.error(`not found user id "${track.user_id}" from group id "${track.group_id}"`);
+                                    }
+                                }else{
+                                    logger.warn(`This user "${track.user_id}" not have more 1 position or the distance is equal zero. Therefore, the track will be cancelled.`);
+                                    await trackService.deleteByIds(track.user_id, track.group_id, track.poll_id);
+                                }
+                            }
+
+                            //find users unknown distances
+                            const listUserIdDistance = listTracks.map((track) => track.user_id);
+                            const unknownDistanceUsers = _.filter(users, (user) => !listUserIdDistance.includes(user.id));
+                            for (const user of unknownDistanceUsers) {
+                                messageDistanceToday += `${user.username}: Location not shared\n`;
+                            }
+
+                            //print message distance
+                            if(!_.isEmpty(messageDistanceToday)){
+                                await bot.sendMessage(poll.group_id, "Summary of kilometers traveled today!\n\n" + messageDistanceToday);
+                            }
 
                             let message = "The poll has been closed!\nLet's see the ranking right now!\n";
 
                             let rank = 1;
                             for (const user of users.sort((userA, userB) => userB.points - userA.points)) {
-                                message += `${rank === 1? "🥇" : rank === 2? "🥈" : rank === 3? "🥉" : rank.toString().padStart(3, " ")} -> ${user.username}: ${user.points} PT\n`;
+                                message += `${rank === 1? "🥇" : rank === 2? "🥈" : rank === 3? "🥉" : rank.toString().padStart(3, " ") + "  "} ➜ ${user.username}: ${user.points} PT\n`;
                                 rank++;
                             }
 

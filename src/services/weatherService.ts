@@ -1,4 +1,4 @@
-import { IForecast } from "../domains/interfaces/IForecast";
+import { IForecast } from "../domains/interfaces/api/IForecast";
 import { WeatherRepository } from "../repository/weatherRepository";
 
 export class WeatherService {
