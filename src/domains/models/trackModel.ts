@@ -6,7 +6,7 @@ const schemaTrack = new mongoose.Schema<ITrack>({
     user_id: Number,
     group_id: Number,
     poll_id: String,
-    positions: Array<{lat: Number, long: Number, date: Date}>,
+    positions: Array<{ lat: number, long: number, date: Date }>,
     totalKm: { type: Number, default: 0},
     totalTime: { type: Number, default: 0},
     terminate: { type: Boolean, default: false },

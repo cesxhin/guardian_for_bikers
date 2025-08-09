@@ -1,5 +1,6 @@
 export interface IWeatherLocation {
     name: string,
     latitude: number,
-    longitude: number
+    longitude: number,
+    timezone: string
 }

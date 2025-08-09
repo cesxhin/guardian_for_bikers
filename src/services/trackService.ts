@@ -7,19 +7,19 @@ export class TrackService {
     trackRepository = new TrackRepository();
 
     async addPositions(user_id: number, group_id: number, poll_id: string, data: Pick<ITrack, "positions">): Promise<ITrack>{
-        try{
+        try {
             await this.trackRepository.findByIds(user_id, group_id, poll_id);
-        }catch(err){
-            if(!(err instanceof TrackNotFound)){
+        } catch (err){
+            if (!(err instanceof TrackNotFound)){
                 throw err;
-            }else{
+            } else {
                 //not found
                 return await this.trackRepository.create({
                     group_id,
                     poll_id,
                     user_id,
                     positions: data.positions
-                })
+                });
             }
         }
 
@@ -35,7 +35,7 @@ export class TrackService {
     }
     
     async deleteByIds(user_id: number, group_id: number, poll_id: string): Promise<void>{
-        return await this.trackRepository.deleteByIds(user_id, group_id, poll_id)
+        return await this.trackRepository.deleteByIds(user_id, group_id, poll_id);
     }
     
     async edit(user_id: number, group_id: number, poll_id: string, data: StrictOmit<Partial<ITrack>, "group_id" | "poll_id" | "created" | "user_id" | "updated">): Promise<ITrack>{

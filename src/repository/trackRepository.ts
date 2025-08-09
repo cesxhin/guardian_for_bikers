@@ -87,7 +87,7 @@ export class TrackRepository {
     }
 
     async deleteByIds(user_id: number, group_id: number, poll_id: string): Promise<void>{
-        let count: number = 0;
+        let count = 0;
         try {
             count = (await modelTrack.deleteOne({ user_id, group_id, poll_id })).deletedCount;
         } catch (err){

@@ -113,6 +113,6 @@ export function timeCommand(time: string): { text: string }[][]{
     ];
 }
 
-export function createMention(message: {first_name: string, user_id: number}, text: string){
-    return `[${message.first_name}](tg://user?id=${message.user_id}) ${text.replace(/([_*\[\]()~`>#+=|{}.!-])/g, '\\$1')}`
+export function createMention(message: { first_name: string, user_id: number }, text: string){
+    return `[${message.first_name}](tg://user?id=${message.user_id}) ${text.replace(/([_*\[\]()~`>#+=|{}.!-])/g, "\\$1")}`;
 }

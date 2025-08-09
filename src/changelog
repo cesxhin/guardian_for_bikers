@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Not generate correctly new date when create one model
+- Missing update timezone when change location
+- Time zone not handled correctly
+
+### Changed
+- Replace "Time trigger" with "Time start"
 
 ### Added
 - If you share your location and when the poll closes, you'll receive a summary of your movements.

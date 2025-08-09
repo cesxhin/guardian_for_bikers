@@ -3,7 +3,7 @@ import { IPoll } from "../domains/interfaces/IPoll";
 import { modelPoll } from "../domains/models/pollModel";
 import Logger from "../lib/logger";
 import { StrictOmit } from "../lib/types";
-import { PollErrorGeneric, PollIsClosed, PollNotFound } from "../utils/exceptionsUtils";
+import { PollErrorGeneric, PollNotFound } from "../utils/exceptionsUtils";
 
 const logger = Logger("poll-repository");
 

@@ -71,7 +71,7 @@ async function render(width: number, height: number, headers: (number | string)[
     ctx.fillStyle = "red";
     ctx.imageSmoothingEnabled = true;
     ctx.quality = "best";
-    ctx.font = '60px';
+    ctx.font = "60px";
     ctx.fillRect(0, 0, 200, 200);
     
     const chart = new Chart(
@@ -99,7 +99,7 @@ async function render(width: number, height: number, headers: (number | string)[
                         hoverRadius: 0
                     },
                     line: {
-                        tension: 0.4,
+                        tension: 0.4
                         
                     }
                 },

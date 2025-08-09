@@ -81,20 +81,20 @@ export default (bot: TelegramBot) => {
                             //calculate distance
                             let distanceTotal: number;
                             let calculatedKm: number;
-                            let messageDistanceToday: string = "";
+                            let messageDistanceToday = "";
                             let findUser: IUser | null;
                             for (const track of listTracks) {
                                 distanceTotal = 0;
 
                                 track.positions.forEach((value, index) => {
-                                    if((index + 1) === track.positions.length){
+                                    if ((index + 1) === track.positions.length){
                                         return;
                                     }
 
                                     distanceTotal += geolib.getPreciseDistance({lat: value.lat, lon: value.long}, {lat: track.positions[index + 1].lat, lon: track.positions[index + 1].long});
                                 });
 
-                                if(distanceTotal > 0){
+                                if (distanceTotal > 0){
                                     calculatedKm = parseFloat((distanceTotal / 1000).toFixed(2));
 
                                     logger.debug(`This track "${track.user_id}, ${track.group_id}, ${track.poll_id}" covered these kilometers ${calculatedKm}`);
@@ -103,12 +103,12 @@ export default (bot: TelegramBot) => {
 
                                     findUser = _.find(users, {id: track.user_id});
 
-                                    if(!_.isNil(findUser)){
+                                    if (!_.isNil(findUser)){
                                         messageDistanceToday += `${findUser.username}: ${calculatedKm}km\n`;
-                                    }else{
+                                    } else {
                                         logger.error(`not found user id "${track.user_id}" from group id "${track.group_id}"`);
                                     }
-                                }else{
+                                } else {
                                     logger.warn(`This user "${track.user_id}" not have more 1 position or the distance is equal zero. Therefore, the track will be cancelled.`);
                                     await trackService.deleteByIds(track.user_id, track.group_id, track.poll_id);
                                 }
@@ -122,7 +122,7 @@ export default (bot: TelegramBot) => {
                             }
 
                             //print message distance
-                            if(!_.isEmpty(messageDistanceToday)){
+                            if (!_.isEmpty(messageDistanceToday)){
                                 await bot.sendMessage(poll.group_id, "Summary of kilometers traveled today!\n\n" + messageDistanceToday);
                             }
 

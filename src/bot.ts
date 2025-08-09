@@ -78,7 +78,8 @@ export default async function (bot: TelegramBot){
                     await groupSerivce.edit(message.chat.id, {
                         latitude: findLocation.latitude,
                         longitude: findLocation.longitude,
-                        location
+                        location,
+                        timezone: findLocation.timezone
                     });
                     await bot.sendMessage(message.chat.id, `Successfully updated the position "${location}" 📍`);
                 } else {
@@ -156,44 +157,6 @@ export default async function (bot: TelegramBot){
                                 {text: "Cancel"}
                             ]
                         ]
-                    }
-                });
-            }
-        );
-    });
-    
-    //command set time
-    wrapBotMessage(bot, async (message) => {
-        commandsUtils.command(
-            message,
-            commands.SET_TIME,
-            async (time) => {
-                time = time.replace(" ✅", "");
-
-                const checkFormatTime = /^(0[0-9]|1[0-9]|2[0-3]):00$/;
-
-                if (checkFormatTime.test(time)){
-                    await groupSerivce.edit(message.chat.id, {
-                        time_trigger: time
-                    });
-
-                    await bot.sendMessage(message.chat.id, `Okay set to this time: "${time}"`, { reply_markup: { remove_keyboard: true } });
-                } else if (time === "Cancel"){
-                    await bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
-                        reply_markup: {
-                            remove_keyboard: true
-                        }
-                    });
-                } else {
-                    await bot.sendMessage(message.chat.id, `Invalid format time "${time}", I only accept hours from 00 to 23.\nExample: HH:00`, { reply_markup: { remove_keyboard: true } });
-                }
-            },
-            async () => {
-                const group = await groupSerivce.find(message.chat.id);
-                await bot.sendMessage(message.chat.id, "You can choose what time you want to receive the updates", {
-                    reply_markup: {
-                        one_time_keyboard: true,
-                        keyboard: timeCommand(group.time_trigger)
                     }
                 });
             }
@@ -408,7 +371,6 @@ Your current settings:
 🤖 Bot is ${group.enabled? "activated" : "suspended"}
 📍 Location: ${group.location}
 🕑 Time zone: ${group.timezone}
-⏰ Weather time check: ${group.time_trigger}
 📅 Weather days check: ${arrayDays.filter((_, index) => group.days_trigger[index]).join(", ")}
 💂 Time guardian: ${group.start_time_guardian} - ${group.end_time_guardian}
 📝 Last update: ${DateTime.fromJSDate(group.updated).setZone(group.timezone).toLocaleString(DateTime.DATETIME_SHORT)}
@@ -515,21 +477,21 @@ Your current settings:
             try {
                 poll = await pollCacheUtils.getPollCacheByGroupId(message.chat.id);
             } catch (err){
-                if(!(err instanceof PollIsClosed || err instanceof PollIsExpired)){
+                if (!(err instanceof PollIsClosed || err instanceof PollIsExpired)){
                     logger.error("Failed get data poll from cache, details:", err);
-                }else{
+                } else {
                     logger.warn(`The user id "${message.from.id}" is trying to send the positions, but the poll is already closed`);
 
-                    try{
+                    try {
                         await bot.deleteMessage(message.chat.id, message.message_id);
-                    }catch(err){
+                    } catch (err){
                         logger.error(`Failed delete message from group id "${message.chat.id}", details:`, err);
                         return;
                     }
 
-                    try{
-                        await bot.sendMessage(message.chat.id, createMention({first_name: message.from.first_name, user_id: message.from.id}, "At the moment, you can't share your location. There is no active poll right now."), { parse_mode: "MarkdownV2" })
-                    }catch(err){
+                    try {
+                        await bot.sendMessage(message.chat.id, createMention({first_name: message.from.first_name, user_id: message.from.id}, "At the moment, you can't share your location. There is no active poll right now."), { parse_mode: "MarkdownV2" });
+                    } catch (err){
                         logger.error(`Failed send message  from group id "${message.chat.id}", details:`, err);
                     }
                     
@@ -538,7 +500,7 @@ Your current settings:
             }
             
             await exceptionsHandler(bot, message.chat.id, async () => {
-                if(poll.stop === false && new Date() < poll.expire && !_.isNil(message.location) && poll.type !== "question"){
+                if (poll.stop === false && new Date() < poll.expire && !_.isNil(message.location) && poll.type !== "question"){
                     await trackService.addPositions(message.from.id, message.chat.id, poll.id, {positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date(message.edit_date * 1000) }]});
                 }
             });

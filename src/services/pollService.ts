@@ -24,11 +24,11 @@ export class PollService {
     async findValidByGroupId(id: number): Promise<IPoll>{
         const poll = await this.pollRepository.findByGroupId(id);
 
-        if(new Date() > poll.expire){
-            throw new PollIsExpired(`Poll id "${poll.id}" is expired`)
+        if (new Date() > poll.expire){
+            throw new PollIsExpired(`Poll id "${poll.id}" is expired`);
         }
 
-        if(poll.stop){
+        if (poll.stop){
             throw new PollIsClosed(`Poll id "${poll.id}" is closed`);
         }
 

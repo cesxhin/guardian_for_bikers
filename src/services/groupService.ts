@@ -31,7 +31,6 @@ export class GroupService {
             longitude: 12.5113,
             location: "rome",
             timezone: "Europe/Rome",
-            time_trigger: "07:00",
             days_trigger: [true, true, true, true, true, true, true],
             start_time_guardian: "00:00",
             end_time_guardian: "23:00"
