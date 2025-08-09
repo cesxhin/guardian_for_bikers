@@ -1,7 +1,7 @@
 import _ from "lodash";
 import geolib from "geolib";
 import { CronJob } from "cron";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "../lib/logger";
@@ -94,17 +94,25 @@ export default (bot: TelegramBot) => {
                                     distanceTotal += geolib.getPreciseDistance({lat: value.lat, lon: value.long}, {lat: track.positions[index + 1].lat, lon: track.positions[index + 1].long});
                                 });
 
+                                let totalTime = 0;
+                                if (track.positions.length > 0){
+                                    const minTime = _.minBy(track.positions, (position) => position.date);
+                                    const maxTime = _.maxBy(track.positions, (position) => position.date);
+
+                                    totalTime = DateTime.fromJSDate(maxTime.date).diff(DateTime.fromJSDate(minTime.date)).toMillis();
+                                }
+
                                 if (distanceTotal > 0){
                                     calculatedKm = parseFloat((distanceTotal / 1000).toFixed(2));
 
                                     logger.debug(`This track "${track.user_id}, ${track.group_id}, ${track.poll_id}" covered these kilometers ${calculatedKm}`);
                                     
-                                    await trackService.edit(track.user_id, track.group_id, track.poll_id, { totalKm: calculatedKm });
+                                    await trackService.edit(track.user_id, track.group_id, track.poll_id, { totalKm: calculatedKm, totalTime });
 
                                     findUser = _.find(users, {id: track.user_id});
 
                                     if (!_.isNil(findUser)){
-                                        messageDistanceToday += `${findUser.username}: ${calculatedKm}km\n`;
+                                        messageDistanceToday += `${findUser.username}: ${calculatedKm} km - ${Duration.fromMillis(totalTime).toISOTime({ suppressMilliseconds: true })} \n`;
                                     } else {
                                         logger.error(`not found user id "${track.user_id}" from group id "${track.group_id}"`);
                                     }
@@ -135,6 +143,7 @@ export default (bot: TelegramBot) => {
                             }
 
                             await bot.sendMessage(poll.group_id, message);
+                            await trackService.removeAllPositionsByPollId(poll.id);
                         }
                     }
                 );

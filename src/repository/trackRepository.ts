@@ -50,9 +50,18 @@ export class TrackRepository {
         return track;
     }
 
+    async removeAllPositionsByPollId(poll_id: string): Promise<void>{
+        try {
+            await modelTrack.updateMany({ poll_id }, { positions: [] });
+        } catch (err){
+            logger.error("Error edit, details:", err);
+            throw new TrackErrorGeneric(err);
+        }
+    }
+
     async terminateAllFromPollId(poll_id: string): Promise<void>{
         try {
-            await modelTrack.updateMany({ poll_id }, { $set: { terminate: true, updated: new Date() } }, { new: true });
+            await modelTrack.updateMany({ poll_id }, { $set: { terminate: true, updated: new Date() } });
         } catch (err){
             logger.error("Error terminateAllFromPollId, details:", err);
             throw new TrackErrorGeneric(err);
@@ -97,6 +106,15 @@ export class TrackRepository {
             
         if (count === 0){
             throw new TrackNotFound(`Not found track from ids "${user_id}" "${group_id}" "${poll_id}" for delete`);
+        }
+    }
+
+    async deleteByChatId(group_id: number): Promise<void>{
+        try {
+            await modelTrack.deleteMany({ group_id });
+        } catch (err){
+            logger.error("Error deleteByIds, details:", err);
+            throw new TrackErrorGeneric(err);
         }
     }
 

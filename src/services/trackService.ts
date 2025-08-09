@@ -38,10 +38,18 @@ export class TrackService {
         return await this.trackRepository.deleteByIds(user_id, group_id, poll_id);
     }
     
+    async deleteByChatId(group_id: number): Promise<void>{
+        return await this.trackRepository.deleteByChatId(group_id);
+    }
+    
     async edit(user_id: number, group_id: number, poll_id: string, data: StrictOmit<Partial<ITrack>, "group_id" | "poll_id" | "created" | "user_id" | "updated">): Promise<ITrack>{
         return await this.trackRepository.edit(user_id, group_id, poll_id, {
             ...data,
             updated: new Date()
         });
+    }
+
+    async removeAllPositionsByPollId(poll_id: string): Promise<void>{
+        return await this.trackRepository.removeAllPositionsByPollId(poll_id);
     }
 }
