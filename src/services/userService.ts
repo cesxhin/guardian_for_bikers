@@ -42,7 +42,10 @@ export class UserService {
             updated: new Date()
         });
 
-        userCacheUtils.userCache.set(userCacheUtils.getPrimaryKeyCompose(user.chat_id, user.id), user);
+        const primaryKeyCache = userCacheUtils.getPrimaryKeyCompose(user.chat_id, user.id);
+        if (userCacheUtils.userCache.has(primaryKeyCache)){
+            userCacheUtils.userCache.set(primaryKeyCache, user);
+        }
 
         return user;
     }
@@ -67,5 +70,13 @@ export class UserService {
 
     async getIdsByChatId(chatId: number): Promise<number[]>{
         return await this.userRepository.getIdsByChatId(chatId);
+    }
+
+    async resetScoreMultiplerNotAnswered(chatId: number, users: number[]): Promise<void>{
+        const listUsers = await this.userRepository.findMissingFromList(chatId, users);
+
+        for (const user of listUsers) {
+            await this.edit(user.chat_id, user.id, { scoreMultiplier: 0 });
+        };
     }
 }

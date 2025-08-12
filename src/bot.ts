@@ -328,7 +328,7 @@ Enough with the explanations now, have fun bikers!🏍️💨
                 switch (poll.type){
                 case "out":
                     if (pollAnswer.option_ids[0] === 0){
-                        points++;
+                        points = 1;
                     } else {
                         skipOut = true;
                     }
@@ -347,8 +347,15 @@ Enough with the explanations now, have fun bikers!🏍️💨
                     return;
                 }
 
+                if (points > 0){
+                    points *= user.scoreMultiplier + 1;
+                } else if (points < 0){
+                    points *= (user.scoreMultiplier || 1);
+                }
+
                 await userService.edit(user.chat_id, user.id, {
-                    points: user.points + points,
+                    points: skipOut? user.points : user.points + points,
+                    scoreMultiplier: points > 0? user.scoreMultiplier + 1 : 0,
                     outWithBike: user.outWithBike + (skipOut? 0 : 1),
                     skipOutWithBike: user.skipOutWithBike + (skipOut? 1 : 0)
                 });

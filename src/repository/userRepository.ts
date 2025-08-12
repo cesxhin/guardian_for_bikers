@@ -57,7 +57,7 @@ export class UserRepository {
         return user;
     }
 
-    async create(data: StrictOmit<IUser, "created" | "updated">): Promise<IUser> {
+    async create(data: StrictOmit<IUser, "created" | "updated" | "scoreMultiplier">): Promise<IUser> {
         try {
             return (await modelUser.create(data)).toObject();
         } catch (err){
@@ -85,6 +85,20 @@ export class UserRepository {
             await modelUser.deleteMany({ chat_id: chatId });
         } catch (err){
             logger.error("Error create, details:", err);
+            throw new UserErrorGeneric(err);
+        }
+    }
+
+    async findMissingFromList(chatId: number, whiteList: number[]): Promise<IUser[]>{
+        try {
+            return modelUser.find({
+                chat_id: chatId,
+                id: {
+                    $nin: whiteList
+                }
+            }).lean();
+        } catch (err){
+            logger.error("Error findMissingFromList, details:", err);
             throw new UserErrorGeneric(err);
         }
     }

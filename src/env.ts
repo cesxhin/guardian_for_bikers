@@ -12,7 +12,7 @@ export const URL_MONGO = process.env.URL_MONGO || "mongodb://127.0.0.1:27017/gua
 export const LOG_LEVEL = process.env.LOG_LEVEL || "info";
 
 // -- VERSION DB --
-export const VERSION_CURRENT_DB = 1;
+export const VERSION_CURRENT_DB = 2;
 
 // -- CRON --
 export const CRON_WEATHER = process.env.CRON_WEATHER || "0 * * * *"; //every hour;

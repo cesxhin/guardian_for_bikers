@@ -4,7 +4,7 @@ export interface IPoll {
     group_id: number,
     type: "out" | "out_x2" | "question",
     expire: Date,
-    answered: string[],
+    answered: number[],
     stop: boolean,
     created: Date,
     updated: Date

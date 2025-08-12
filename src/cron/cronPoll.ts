@@ -67,6 +67,9 @@ export default (bot: TelegramBot) => {
                             //close poll
                             await pollService.edit(poll.id, { stop: true });
 
+                            //reset score multiplicator who didn't answer poll
+                            await userService.resetScoreMultiplerNotAnswered(poll.group_id, poll.answered);
+
                             //get all list users from groups
                             const users = await userService.findManyByGroupId(poll.group_id);
 
@@ -138,7 +141,7 @@ export default (bot: TelegramBot) => {
 
                             let rank = 1;
                             for (const user of users.sort((userA, userB) => userB.points - userA.points)) {
-                                message += `${rank === 1? "🥇" : rank === 2? "🥈" : rank === 3? "🥉" : rank.toString().padStart(3, " ") + "  "} ➜ ${user.username}: ${user.points} PT\n`;
+                                message += `${rank === 1? "🥇" : rank === 2? "🥈" : rank === 3? "🥉" : rank.toString().padStart(3, " ") + "  "} ➜ ${user.username}: ${user.points} PT (${user.scoreMultiplier}x)\n`;
                                 rank++;
                             }
 
