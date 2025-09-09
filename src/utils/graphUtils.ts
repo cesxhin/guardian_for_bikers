@@ -29,6 +29,7 @@ const emojiPlugin: Plugin = {
         ctx.save();
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
+        ctx.font = "30px"
 
         for (const index in xAxis.ticks) {
             const x = xAxis.getPixelForTick(Number(index));
@@ -36,14 +37,12 @@ const emojiPlugin: Plugin = {
             const actualWeather = options.dataWeather[index];
 
             if (!_.isNil(actualWeather)){
-                ctx.drawImage((actualWeather.startsWith("0")? emojiSun : actualWeather.startsWith("1")? emojiDroplet : emojiRain) as any, x - (SIZE_EMOJI / 2), xAxis.top - 50, SIZE_EMOJI, SIZE_EMOJI);
+                ctx.drawImage((actualWeather.startsWith("0")? emojiSun : actualWeather.startsWith("1")? emojiDroplet : emojiRain) as any, x - (SIZE_EMOJI / 2), xAxis.top - 120, SIZE_EMOJI, SIZE_EMOJI);
 
                 if (actualWeather.startsWith("1")){
 
-                    const poin = chart.getDatasetMeta(0).data[index];
-
                     const percentage = actualWeather.split("1 - ")[1];
-                    ctx.fillText(`${percentage}%`, poin.x, poin.y + 70);
+                    ctx.fillText(`${percentage}%`, x + 2.5, xAxis.top - 10);
                 }
             } else {
                 logger.error("Cannot draw on chart");
@@ -105,7 +104,7 @@ async function render(width: number, height: number, headers: (number | string)[
                 },
                 layout: {
                     padding: {
-                        top: 60,
+                        top: 130,
                         left: 60
                     }
                 },
@@ -162,7 +161,7 @@ async function render(width: number, height: number, headers: (number | string)[
                             font: {
                                 size: SIZE_FONT
                             },
-                            callback: (val) => val.toString().padStart(2, "0") + " °C"
+                            callback: (val: number) => val.toFixed(2).padStart(5, "0") + " °C"
                         },
                         grid: {
                             display: false
