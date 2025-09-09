@@ -62,9 +62,7 @@ export default async function (bot: TelegramBot){
 
     //permission only group
     wrapBotMessage(bot, () => null, async (message) => {
-        if (message.text.startsWith("/start")){
-            await bot.sendMessage(message.chat.id, "This bot can only be used in groups!");
-        }
+        await bot.sendMessage(message.chat.id, "This bot can only be used in groups!");
     });
 
     //command location
