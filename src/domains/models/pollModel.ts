@@ -11,7 +11,8 @@ const schemaPoll = new mongoose.Schema<IPoll>({
     answered: [Number],
     stop: { type: Boolean, default: false },
     created: { type: Date, default: () => new Date() },
-    updated: { type: Date, default: null }
+    updated: { type: Date, default: null },
+    target_impostor: {type: Number, default: null}
 });
 
 export const modelPoll = mongoose.model("poll", schemaPoll, "polls");

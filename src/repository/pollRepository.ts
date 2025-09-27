@@ -24,6 +24,18 @@ export class PollRepository {
         
         return user;
     }
+    
+    async checkTargetImpostor(group_id: number, user_id: number): Promise<boolean>{
+        let user: IPoll | null;
+        try {
+            user = await modelPoll.findOne({ group_id, target_impostor: user_id, type: "impostor", stop: false }).lean();
+        } catch (err){
+            logger.error("Error findById, details:", err);
+            throw new PollErrorGeneric(err);
+        }
+        
+        return !_.isNil(user);
+    }
 
     async findByGroupId(group_id: number): Promise<IPoll>{
         let poll: IPoll | null;
@@ -100,7 +112,7 @@ export class PollRepository {
 
     async answered(id: string, userId: number): Promise<IPoll>{
         try {
-            return await modelPoll.findOneAndUpdate({ id }, { $push: { answered: userId } }).lean();
+            return await modelPoll.findOneAndUpdate({ id, stop: false }, { $push: { answered: userId } }).lean();
         } catch (err){
             logger.error("Error answered, details:", err);
             throw new PollErrorGeneric(err);

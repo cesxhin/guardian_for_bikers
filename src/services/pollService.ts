@@ -13,6 +13,10 @@ export class PollService {
         return await this.pollRepository.listExpired();
     }
 
+    async checkTargetImpostor(group_id: number, user_id: number): Promise<boolean>{
+        return await this.pollRepository.checkTargetImpostor(group_id, user_id);
+    }
+
     async listValidWithTypeOutById(id: string): Promise<IPoll>{
         return await this.pollRepository.listValidWithTypeOutById(id);
     }

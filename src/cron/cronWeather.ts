@@ -112,7 +112,8 @@ export default (bot: TelegramBot) => {
                                     message_id: messagePoll.message_id,
                                     group_id: group.id,
                                     type: typePoll,
-                                    expire: DateTime.now().plus({seconds: additionalSeconds }).set({millisecond: 0, second: 0}).toJSDate()
+                                    expire: DateTime.now().plus({seconds: additionalSeconds }).set({millisecond: 0, second: 0}).toJSDate(),
+                                    target_impostor: null
                                 });
                             } else {
                                 await bot.sendMessage(group.id, "Sorry bikers, but the weather doesn't look good, stay home!🏠");

@@ -24,6 +24,22 @@ export class UserRepository {
         
         return user;
     }
+
+    async findByUsername(chat_id: number, username: string): Promise<IUser>{
+        let user: IUser | null;
+        try {
+            user = await modelUser.findOne({ username, chat_id }).lean();
+        } catch (err){
+            logger.error("Error find by username, details:", err);
+            throw new UserErrorGeneric(err);
+        }
+            
+        if (_.isNil(user)){
+            throw new UserNotFound(`Not found user username "${username}"`);
+        }
+        
+        return user;
+    }
     
     async findManyByGroupId(chat_id: number): Promise<IUser[]> {
         try {

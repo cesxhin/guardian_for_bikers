@@ -44,7 +44,8 @@ async function main(){
                 },
                 {
                     updated: new Date(),
-                    created: new Date()
+                    created: new Date(),
+                    target_impostor: null
                 }
             )).modifiedCount;
             logger.info(`Updated poll (${countPoll})`);

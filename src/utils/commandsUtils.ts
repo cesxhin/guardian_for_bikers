@@ -6,7 +6,17 @@ import { checkMyCommand, commands } from "./botUtils";
 
 const historyCommand = new Map<string, commands>();
 
-async function command(message: TelegramBot.Message, command: commands, functionExecuteCommand: ((message: string) => Promise<void>) | null, functionReadCommand: () => Promise<void>){
+async function command({
+    message,
+    command,
+    functionExecuteCommand = null,
+    functionReadCommand
+}: {
+    message: TelegramBot.Message,
+    command: commands,
+    functionExecuteCommand?: ((text: string, message: TelegramBot.Message) => Promise<void>) | null,
+    functionReadCommand: () => Promise<void>
+}){
     if (!_.isNil(message.from) && !message.from.is_bot){
 
         let findCommandFromUser: commands | null = null;
@@ -17,7 +27,7 @@ async function command(message: TelegramBot.Message, command: commands, function
         if (!_.isNil(findCommandFromUser) && findCommandFromUser === command){
 
             if (!_.isNil(message.text)){
-                await functionExecuteCommand(message.text);
+                await functionExecuteCommand(message.text, message);
                 historyCommand.delete(userCacheUtils.getPrimaryKeyCompose(message.chat.id, message.from.id));
             }
         } else if (checkMyCommand(message.text, command)){

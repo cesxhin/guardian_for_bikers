@@ -28,3 +28,4 @@ export const POLLS_EXPIRE_SECONDS = parseInt(process.env.POLLS_EXPIRE_SECONDS) |
 // -- SETTINGS POLLS --
 export const POLLS_EXPIRE_QUESTION_SECONDS = parseInt(process.env.POLLS_EXPIRE_QUESTION_SECONDS) || 3600 * 2; //2 hour
 export const POLLS_EXPIRE_ACTION_SECONDS = parseInt(process.env.POLLS_EXPIRE_ACTION_SECONDS) || 3600 * 10; //10 hour
+export const POLLS_EXPIRE_IMPOSTOR_SECONDS = parseInt(process.env.POLLS_EXPIRE_ACTION_SECONDS) || 3600 * 10; //10 hour

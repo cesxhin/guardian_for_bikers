@@ -29,7 +29,7 @@ const emojiPlugin: Plugin = {
         ctx.save();
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
-        ctx.font = "30px"
+        ctx.font = "30px";
 
         for (const index in xAxis.ticks) {
             const x = xAxis.getPixelForTick(Number(index));

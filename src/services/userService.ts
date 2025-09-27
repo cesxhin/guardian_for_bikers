@@ -54,6 +54,10 @@ export class UserService {
         return await this.userRepository.findById(chatId, id);
     }
 
+    async findByUsername(chatId: number, username: string): Promise<IUser>{
+        return await this.userRepository.findByUsername(chatId, username);
+    }
+
     async findManyByGroupId(chatId: number): Promise<IUser[]>{
         return await this.userRepository.findManyByGroupId(chatId);
     }
