@@ -1,16 +1,16 @@
 import _ from "lodash";
 import { CronJob } from "cron";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "../lib/logger";
-import { CRON_WEATHER, POLLS_EXPIRE_ACTION_SECONDS, POLLS_EXPIRE_QUESTION_SECONDS } from "../env";
+import graphUtils from "../utils/graphUtils";
+import { CRON_WEATHER, POLLS_EXPIRE_QUESTION_SECONDS } from "../env";
 import { exceptionsHandler } from "../utils/botUtils";
 import { IGroup } from "../domains/interfaces/IGroup";
 import { PollService } from "../services/pollService";
 import { GroupService } from "../services/groupService";
 import { WeatherService } from "../services/weatherService";
-import graphUtils from "../utils/graphUtils";
 
 const logger = Logger("cron-weather");
 
@@ -33,8 +33,11 @@ export default (bot: TelegramBot) => {
 
             logger.debug("Find groups active, total count:"+groups.length);
 
+            let timeTrigger: string;
             for (const group of groups) {
-                if (DateTime.now().setZone(group.timezone).toFormat("HH:mm") === group.time_trigger && group.days_trigger[DateTime.now().weekday - 1] === true){
+                timeTrigger = DateTime.fromISO(`${DateTime.now().toISODate()}T${group.start_time_guardian}`, {zone: group.timezone}).toFormat("HH:mm");
+
+                if (DateTime.now().setZone(group.timezone).toFormat("HH:mm") === timeTrigger && group.days_trigger[DateTime.now().weekday - 1] === true){
                     await exceptionsHandler(
                         bot,
                         group.id,
@@ -95,12 +98,22 @@ export default (bot: TelegramBot) => {
                                     typePoll = "out";
                                 }
 
+                                //get additional value for expire
+                                let additionalSeconds = POLLS_EXPIRE_QUESTION_SECONDS;
+                                if ( typePoll !== "question"){
+                                    const endTime = Duration.fromISOTime(group.end_time_guardian).toMillis() / 1000;
+                                    const startTime = Duration.fromISOTime(group.start_time_guardian).toMillis() / 1000;
+
+                                    additionalSeconds = endTime - startTime;
+                                }
+
                                 await pollService.create({
                                     id: messagePoll.poll.id,
                                     message_id: messagePoll.message_id,
                                     group_id: group.id,
                                     type: typePoll,
-                                    expire: DateTime.now().plus({seconds: typePoll === "question"? POLLS_EXPIRE_QUESTION_SECONDS : POLLS_EXPIRE_ACTION_SECONDS}).toJSDate()
+                                    expire: DateTime.now().plus({seconds: additionalSeconds }).set({millisecond: 0, second: 0}).toJSDate(),
+                                    target_impostor: null
                                 });
                             } else {
                                 await bot.sendMessage(group.id, "Sorry bikers, but the weather doesn't look good, stay home!🏠");

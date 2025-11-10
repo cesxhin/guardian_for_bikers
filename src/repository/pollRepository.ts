@@ -24,8 +24,36 @@ export class PollRepository {
         
         return user;
     }
+    
+    async checkTargetImpostor(group_id: number, user_id: number): Promise<boolean>{
+        let user: IPoll | null;
+        try {
+            user = await modelPoll.findOne({ group_id, target_impostor: user_id, type: "impostor", stop: false }).lean();
+        } catch (err){
+            logger.error("Error findById, details:", err);
+            throw new PollErrorGeneric(err);
+        }
+        
+        return !_.isNil(user);
+    }
 
-    async create(data: StrictOmit<IPoll, "expire" | "answered" | "stop">): Promise<IPoll>{
+    async findByGroupId(group_id: number): Promise<IPoll>{
+        let poll: IPoll | null;
+        try {
+            poll = await modelPoll.findOne({ group_id }).sort({ created: -1 }).lean();
+        } catch (err){
+            logger.error("Error findByGroupId, details:", err);
+            throw new PollErrorGeneric(err);
+        }
+
+        if (_.isNil(poll)){
+            throw new PollNotFound(`Not found poll valid with group id "${group_id}"`);
+        }
+        
+        return poll;
+    }
+
+    async create(data: StrictOmit<IPoll, "expire" | "answered" | "stop" | "created" | "updated">): Promise<IPoll>{
         try {
             return (await modelPoll.insertOne(data)).toObject();
         } catch (err){
@@ -39,6 +67,15 @@ export class PollRepository {
             return await modelPoll.find({expire: { $lte: new Date() }, stop: false}).lean();
         } catch (err){
             logger.error("Error listExpired, details:", err);
+            throw new PollErrorGeneric(err);
+        }
+    }
+
+    async listValidWithTypeOutById(id: string): Promise<IPoll>{
+        try {
+            return await modelPoll.findOne({id, stop: false, type: { $ne: "question" }}).lean();
+        } catch (err){
+            logger.error("Error listValidWithTypeOut, details:", err);
             throw new PollErrorGeneric(err);
         }
     }
@@ -75,7 +112,7 @@ export class PollRepository {
 
     async answered(id: string, userId: number): Promise<IPoll>{
         try {
-            return await modelPoll.findOneAndUpdate({ id }, { $push: { answered: userId } }).lean();
+            return await modelPoll.findOneAndUpdate({ id, stop: false }, { $push: { answered: userId } }).lean();
         } catch (err){
             logger.error("Error answered, details:", err);
             throw new PollErrorGeneric(err);

@@ -15,7 +15,8 @@ export enum commands {
     SET_TIME = "set_time",
     SHOW_SETTINGS = "show_settings",
     SET_START_TIME_GUARDIAN = "set_start_time_guardian",
-    SET_END_TIME_GUARDIAN = "set_end_time_guardian"
+    SET_END_TIME_GUARDIAN = "set_end_time_guardian",
+    IMPOSTOR = "impostor"
 }
 
 export function onlyPermissionGroup(message: TelegramBot.Message){
@@ -111,4 +112,8 @@ export function timeCommand(time: string): { text: string }[][]{
         ],
         [{text: "Cancel"}]
     ];
+}
+
+export function createMention(message: { first_name: string, user_id: number }, text: string){
+    return `[${message.first_name}](tg://user?id=${message.user_id}) ${text.replace(/([_*\[\]()~`>#+=|{}.!-])/g, "\\$1")}`;
 }

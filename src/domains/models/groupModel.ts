@@ -11,9 +11,8 @@ const schemaGroup = new mongoose.Schema<IGroup>({
     timezone: String,
     start_time_guardian: String,
     end_time_guardian: String,
-    time_trigger: String,
     days_trigger: Array<boolean>,
-    created: { type: Date, default: new Date() },
+    created: { type: Date, default: () => new Date() },
     updated: { type: Date, default: null }
 });
 

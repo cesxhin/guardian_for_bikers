@@ -6,9 +6,13 @@ import { IUser } from "../domains/interfaces/IUser";
 import userCacheUtils from "../utils/userCacheUtils";
 import { UserRepository } from "../repository/userRepository";
 import { UserConflict, UserNotFound } from "../utils/exceptionsUtils";
+import { PollRepository } from "../repository/pollRepository";
+import { TrackRepository } from "../repository/trackRepository";
 
 export class UserService {
     private userRepository = new UserRepository();
+    private pollRepository = new PollRepository();
+    private trackRepository = new TrackRepository();
 
 
     async create(chat_id: number, id: number, username: string): Promise<IUser>{
@@ -32,7 +36,9 @@ export class UserService {
             outWithBike: 0,
             skipOutWithBike: 0,
             username,
-            points: 0
+            points: 0,
+            totalImpostor: 0,
+            totalKm: 0
         });
     }
     
@@ -42,13 +48,20 @@ export class UserService {
             updated: new Date()
         });
 
-        userCacheUtils.userCache.set(userCacheUtils.getPrimaryKeyCompose(user.chat_id, user.id), user);
+        const primaryKeyCache = userCacheUtils.getPrimaryKeyCompose(user.chat_id, user.id);
+        if (userCacheUtils.userCache.has(primaryKeyCache)){
+            userCacheUtils.userCache.set(primaryKeyCache, user);
+        }
 
         return user;
     }
 
     async findById(chatId: number, id: number): Promise<IUser>{
         return await this.userRepository.findById(chatId, id);
+    }
+
+    async findByUsername(chatId: number, username: string): Promise<IUser>{
+        return await this.userRepository.findByUsername(chatId, username);
     }
 
     async findManyByGroupId(chatId: number): Promise<IUser[]>{
@@ -67,5 +80,19 @@ export class UserService {
 
     async getIdsByChatId(chatId: number): Promise<number[]>{
         return await this.userRepository.getIdsByChatId(chatId);
+    }
+
+    async resetScoreMultiplerNotAnswered(chatId: number, users: number[]): Promise<void>{
+        const listUsers = await this.userRepository.findMissingFromList(chatId, users);
+
+        for (const user of listUsers) {
+            await this.edit(user.chat_id, user.id, { scoreMultiplier: 0 });
+        };
+    }
+
+    async resetAll(chatId: number): Promise<void>{
+        await this.userRepository.resetAll(chatId);
+        await this.pollRepository.deleteByChatId(chatId);
+        await this.trackRepository.deleteByChatId(chatId);
     }
 }

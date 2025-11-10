@@ -24,6 +24,22 @@ export class UserRepository {
         
         return user;
     }
+
+    async findByUsername(chat_id: number, username: string): Promise<IUser>{
+        let user: IUser | null;
+        try {
+            user = await modelUser.findOne({ username, chat_id }).lean();
+        } catch (err){
+            logger.error("Error find by username, details:", err);
+            throw new UserErrorGeneric(err);
+        }
+            
+        if (_.isNil(user)){
+            throw new UserNotFound(`Not found user username "${username}"`);
+        }
+        
+        return user;
+    }
     
     async findManyByGroupId(chat_id: number): Promise<IUser[]> {
         try {
@@ -43,7 +59,7 @@ export class UserRepository {
         }
     }
     
-    async edit(chat_id: number, id: number, data: Omit<Partial<IUser>, "id">): Promise<IUser>{
+    async edit(chat_id: number, id: number, data: StrictOmit<Partial<IUser>, "id">): Promise<IUser>{
         let user: IUser | null;
         try {
             user = await modelUser.findOneAndUpdate({ id, chat_id }, data, { new: true }).lean();
@@ -57,7 +73,7 @@ export class UserRepository {
         return user;
     }
 
-    async create(data: StrictOmit<IUser, "created" | "updated">): Promise<IUser> {
+    async create(data: StrictOmit<IUser, "created" | "updated" | "scoreMultiplier">): Promise<IUser> {
         try {
             return (await modelUser.create(data)).toObject();
         } catch (err){
@@ -85,6 +101,38 @@ export class UserRepository {
             await modelUser.deleteMany({ chat_id: chatId });
         } catch (err){
             logger.error("Error create, details:", err);
+            throw new UserErrorGeneric(err);
+        }
+    }
+
+    async findMissingFromList(chatId: number, whiteList: number[]): Promise<IUser[]>{
+        try {
+            return await modelUser.find({
+                chat_id: chatId,
+                id: {
+                    $nin: whiteList
+                }
+            }).lean();
+        } catch (err){
+            logger.error("Error findMissingFromList, details:", err);
+            throw new UserErrorGeneric(err);
+        }
+    }
+
+    async resetAll(chatId: number): Promise<void>{
+        try {
+            await modelUser.updateMany({
+                chat_id: chatId
+            }, {
+                outWithBike: 0,
+                points: 0,
+                scoreMultiplier: 0,
+                skipOutWithBike: 0,
+                totalImpostor: 0,
+                totalKm: 0
+            }).lean();
+        } catch (err){
+            logger.error("Error resetAll, details:", err);
             throw new UserErrorGeneric(err);
         }
     }

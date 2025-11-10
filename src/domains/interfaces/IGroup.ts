@@ -6,7 +6,6 @@ export interface IGroup {
     longitude: number,
     location: string,
     timezone: string,
-    time_trigger: string,
     start_time_guardian: string,
     end_time_guardian: string,
     days_trigger: [boolean, boolean, boolean, boolean, boolean, boolean, boolean],

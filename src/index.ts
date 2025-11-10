@@ -6,9 +6,10 @@ import TelegramBot from "node-telegram-bot-api";
 import Logger from "./lib/logger";
 import listenersBot from "./bot";
 import cronPoll from "./cron/cronPoll";
+import cronEndOfYear from "./cron/cronEndOfYear";
 import cronWeather from "./cron/cronWeather";
-import { modelVersion } from "./domains/models/versionModel";
-import { TOKEN_BOT, URL_MONGO, USERNAME_BOT, VERSION_CURRENT_DB } from "./env";
+import versionUtils from "./utils/versionUtils";
+import { TOKEN_BOT, URL_MONGO, USERNAME_BOT } from "./env";
 
 export let bot: TelegramBot;
 
@@ -38,14 +39,8 @@ async function main(){
     }
     logger.info("Mongo connected!");
 
-    //check version
-    const find = await modelVersion.findOne({name: "gfb"});
-    if (_.isNil(find)){
-        logger.debug("Not found document for track version for services");
-        modelVersion.insertOne({name: "gfb", version: VERSION_CURRENT_DB});
-        logger.info("Created track version for services");
-    }
-    //! altrimenti sará uno switch con le versioni opportune con le modifiche opportune dei dati
+    //versioning management
+    await versionUtils.main();
 
     //telegram
     try {
@@ -65,6 +60,7 @@ async function main(){
     listenersBot(bot);
     cronWeather(bot);
     cronPoll(bot);
+    cronEndOfYear(bot);
 }
 
 try {

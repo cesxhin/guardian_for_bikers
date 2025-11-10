@@ -1,3 +1,4 @@
+import _ from "lodash";
 import NodeCache from "node-cache";
 
 import Logger from "../lib/logger";
@@ -33,7 +34,21 @@ async function getPollCache(id: string): Promise<IPoll>{
     }
 }
 
+async function getPollCacheByGroupId(group_id: number): Promise<IPoll>{
+    const find: IPoll | null = _.find(Object.values(pollCache.mget(pollCache.keys())), { group_id, stop: false} satisfies Pick<IPoll, "group_id" | "stop">) as any;
+
+    if (!_.isNil(find) && new Date() < find.expire){
+        return find;
+    } else {
+        const poll = await pollService.findValidByGroupId(group_id);
+        pollCache.set(poll.id, poll);
+
+        return poll;
+    }
+}
+
 export default {
     getPollCache,
+    getPollCacheByGroupId,
     pollCache
 };
