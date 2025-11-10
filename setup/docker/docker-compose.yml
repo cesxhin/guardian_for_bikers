@@ -7,7 +7,7 @@ services:
     env_file:
       - envs/mongo.env
   gfb:
-    image: kju7pwd2/guards_for_bikers:1.0.0_dev
+    image: kju7pwd2/guardian_for_bikers:latest
     restart: always
     env_file:
       - envs/gfb.env
