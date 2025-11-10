@@ -4,7 +4,6 @@ import Logger from "../lib/logger";
 import { VERSION_CURRENT_DB } from "../env";
 import { modelUser } from "../domains/models/userMode";
 import { modelPoll } from "../domains/models/pollModel";
-import { modelGroup } from "../domains/models/groupModel";
 import { IVersion } from "../domains/interfaces/IVersion";
 import { modelVersion } from "../domains/models/versionModel";
 
@@ -22,33 +21,24 @@ async function main(){
         switch (find.version){
         case 1:
             logger.info("Start migration v1 to v2...");
-            for (const group of await modelGroup.find().lean()) {
-                const countUsers = (await modelUser.updateMany(
-                    {
-                        chat_id: group.id,
-                        scoreMultiplier: {
-                            $exists: false
-                        }
-                    },
-                    {
-                        scoreMultiplier: 0,
-                        updated: new Date()
-                    }
-                )).modifiedCount;
-                logger.info(`Updated users (${countUsers}) of group ${group.id}`);
-            }
 
-            const countPoll = (await modelPoll.updateMany(
+            const countUsers = (await modelUser.updateMany({},
                 {
-                    id: (await modelPoll.find({created: { $exists: false }}).lean()).map((poll) => poll.id)
-                },
+                    scoreMultiplier: 0,
+                    updated: new Date(),
+                    totalKm: 0
+                }
+            )).modifiedCount;
+            logger.info(`Updated total users (${countUsers})`);
+
+            const countPoll = (await modelPoll.updateMany({},
                 {
                     updated: new Date(),
                     created: new Date(),
-                    target_impostor: null
+                    target_impostor: null,
                 }
             )).modifiedCount;
-            logger.info(`Updated poll (${countPoll})`);
+            logger.info(`Updated total polls (${countPoll})`);
 
             find = await updateVersion(2);
             logger.info("Complete migration v2");

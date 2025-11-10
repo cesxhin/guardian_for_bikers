@@ -11,7 +11,9 @@ const schemaUser = new mongoose.Schema<IUser>({
     points: Number,
     updated: { type: Date, default: null },
     created: { type: Date, default: () => new Date() },
-    scoreMultiplier: { type: Number, default: 0 }
+    scoreMultiplier: { type: Number, default: 0 },
+    totalKm: Number,
+    totalImpostor: Number
 });
 
 export const modelUser = mongoose.model("user", schemaUser, "users");

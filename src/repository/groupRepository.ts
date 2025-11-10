@@ -25,6 +25,15 @@ export class GroupRepository {
         return group;
     }
 
+    async findAll(): Promise<IGroup[]>{
+        try {
+            return await modelGroup.find().lean();
+        } catch (err){
+            logger.error("Error findAll, details:", err);
+            throw new GroupErrorGeneric(err);
+        }
+    }
+
     async edit(id: number, data: Omit<Partial<IGroup>, "id">): Promise<IGroup>{
         let group: IGroup | null;
         try {

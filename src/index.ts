@@ -6,6 +6,7 @@ import TelegramBot from "node-telegram-bot-api";
 import Logger from "./lib/logger";
 import listenersBot from "./bot";
 import cronPoll from "./cron/cronPoll";
+import cronEndOfYear from "./cron/cronEndOfYear";
 import cronWeather from "./cron/cronWeather";
 import versionUtils from "./utils/versionUtils";
 import { TOKEN_BOT, URL_MONGO, USERNAME_BOT } from "./env";
@@ -59,6 +60,7 @@ async function main(){
     listenersBot(bot);
     cronWeather(bot);
     cronPoll(bot);
+    cronEndOfYear(bot);
 }
 
 try {

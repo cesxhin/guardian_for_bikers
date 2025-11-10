@@ -107,7 +107,7 @@ export class UserRepository {
 
     async findMissingFromList(chatId: number, whiteList: number[]): Promise<IUser[]>{
         try {
-            return modelUser.find({
+            return await modelUser.find({
                 chat_id: chatId,
                 id: {
                     $nin: whiteList
@@ -115,6 +115,24 @@ export class UserRepository {
             }).lean();
         } catch (err){
             logger.error("Error findMissingFromList, details:", err);
+            throw new UserErrorGeneric(err);
+        }
+    }
+
+    async resetAll(chatId: number): Promise<void>{
+        try {
+            await modelUser.updateMany({
+                chat_id: chatId
+            }, {
+                outWithBike: 0,
+                points: 0,
+                scoreMultiplier: 0,
+                skipOutWithBike: 0,
+                totalImpostor: 0,
+                totalKm: 0
+            }).lean();
+        } catch (err){
+            logger.error("Error resetAll, details:", err);
             throw new UserErrorGeneric(err);
         }
     }

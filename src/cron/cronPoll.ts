@@ -115,8 +115,10 @@ export default (bot: TelegramBot) => {
 
                                     findUser = _.find(users, {id: track.user_id});
 
-                                    if (!_.isNil(findUser)){
+                                    if (!_.isNil(findUser) && calculatedKm > 0){
                                         messageDistanceToday += `${findUser.username}: ${calculatedKm} km - ${Duration.fromMillis(totalTime).toISOTime({ suppressMilliseconds: true })} \n`;
+                                        
+                                        await userService.edit(findUser.chat_id, findUser.id, { totalKm: findUser.totalKm + calculatedKm });
                                     } else {
                                         logger.error(`not found user id "${track.user_id}" from group id "${track.group_id}"`);
                                     }
@@ -158,7 +160,7 @@ export default (bot: TelegramBot) => {
                                 await bot.sendMessage(poll.group_id, `You found the imposter! It's "${usernameImpostor}", therefore their points and point multipliers have been reset!`);
 
                                 if (!_.isNil(userImpostor)){
-                                    await userService.edit(poll.group_id, poll.target_impostor, {points: 0, scoreMultiplier: 0});
+                                    await userService.edit(poll.group_id, poll.target_impostor, {points: 0, scoreMultiplier: 0, totalImpostor: userImpostor.totalImpostor + 1});
                                 }
                             } else {
                                 await bot.sendMessage(poll.group_id, `The voting has been closed and did not meet the minimum requirements to report '${usernameImpostor}' as an impostor.`);

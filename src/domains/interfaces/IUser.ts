@@ -8,5 +8,7 @@ export interface IUser {
     created: Date,
     updated: Date | null,
     points: number
-    scoreMultiplier: number
+    scoreMultiplier: number,
+    totalKm: number,
+    totalImpostor: number
 }

@@ -55,4 +55,8 @@ export class GroupService {
     async listActive(): Promise<IGroup[]> {
         return await this.groupRepository.listActive();
     }
+
+    async findAll(): Promise<IGroup[]> {
+        return await this.groupRepository.findAll();
+    }
 }
