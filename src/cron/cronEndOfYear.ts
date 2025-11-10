@@ -1,9 +1,9 @@
-import { CronJob } from "cron"
+import { CronJob } from "cron";
 import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "../lib/logger";
-import { GroupService } from "../services/groupService"
+import { GroupService } from "../services/groupService";
 import { UserService } from "../services/userService";
 
 const logger = Logger("cron-end-of-year");
@@ -22,10 +22,10 @@ export default (bot: TelegramBot) => {
                 const currentTime = DateTime.now().setZone(group.timezone);
                 const yesterday = currentTime.plus({hours: -1});
 
-                if(currentTime.year !== yesterday.year){
+                if (currentTime.year !== yesterday.year){
                     const listUsers = await userService.findManyByGroupId(group.id);
 
-                    let message = `That moment has arrived now! Here is the annual report:\n`;
+                    let message = "That moment has arrived now! Here is the annual report:\n";
 
                     listUsers.sort((a, b) => b.points - a.points).forEach((user, index) => {
                         message += `
@@ -50,7 +50,7 @@ Total km: ${user.totalKm}
         },
         null,
         true
-    ),
+    );
     
     logger.info("Started!");
-}
+};

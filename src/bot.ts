@@ -40,9 +40,7 @@ export default async function (bot: TelegramBot) {
         "sunday"
     ];
 
-    const listCommandsBasic: TelegramBot.BotCommand[] = [
-        { command: commands.IMPOSTOR, description: "If someone has cheated to earn points even though they didn't go out on their motorcycle or didn't get caught in the rain, you can report it." }
-    ]
+    const listCommandsBasic: TelegramBot.BotCommand[] = [{ command: commands.IMPOSTOR, description: "If someone has cheated to earn points even though they didn't go out on their motorcycle or didn't get caught in the rain, you can report it." }];
 
     //set commands for administrators
     bot.setMyCommands([
@@ -53,7 +51,7 @@ export default async function (bot: TelegramBot) {
         { command: commands.SET_TIME, description: "Set the time to receive weather updates." },
         { command: commands.SET_START_TIME_GUARDIAN, description: "Check the weather only from the time you set onward." },
         { command: commands.SET_END_TIME_GUARDIAN, description: "Check the weather up to the time that was set." },
-        { command: commands.SHOW_SETTINGS, description: "Show current settings." },
+        { command: commands.SHOW_SETTINGS, description: "Show current settings." }
     ], {
         scope: {
             type: "all_chat_administrators"
