@@ -10,19 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Install packages
-      run: npm i
-      working-directory: "./src"
-    - name: Check typescript
-      run: npm run typecheck
-      working-directory: "./src"
-    - name: Build code
-      run: npm run build
-      working-directory: "./src"
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
     - name: Docker Login
       uses: docker/login-action@v2.1.0
       with:
@@ -44,7 +31,6 @@ jobs:
 
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "latest=$LATEST" >> $GITHUB_OUTPUT
-
     - name: Build the Docker image guardian_for_bikers
       uses: docker/build-push-action@v6
       with:
