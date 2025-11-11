@@ -1,4 +1,4 @@
-FROM node:24-slim AS builder
+FROM --platform=$BUILDPLATFORM node:24-slim AS builder
 
 WORKDIR /builder
 
@@ -6,7 +6,7 @@ COPY ./src .
 
 RUN npm i && npm run build
 
-FROM node:24-slim AS runner
+FROM --platform=$BUILDPLATFORM node:24-slim AS runner
 
 WORKDIR /app
 
