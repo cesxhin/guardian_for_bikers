@@ -6,7 +6,7 @@ COPY ./src .
 
 RUN npm i && npm run build
 
-FROM --platform=$BUILDPLATFORM node:24-slim AS runner
+FROM --platform=$TARGETPLATFORM node:24-slim AS runner
 
 WORKDIR /app
 
