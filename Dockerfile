@@ -4,7 +4,7 @@ WORKDIR /builder
 
 COPY ./src/ .
 
-RUN npm i && npm run build
+RUN npm i && npm rebuild canvas --build-from-source && npm run build
 
 FROM --platform=$TARGETPLATFORM node:24-slim AS runner
 
