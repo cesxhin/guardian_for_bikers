@@ -18,4 +18,4 @@ COPY --from=builder /builder/dist/ .
 
 RUN apt-get update && apt-get install -y libpixman-1-0 fonts-dejavu
 
-CMD ["node", "./main.mjs"]
+CMD ["node", "./index.js"]
