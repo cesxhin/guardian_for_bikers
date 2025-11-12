@@ -48,7 +48,7 @@ export class GroupService {
         await this.groupRepository.delete(id);
     }
 
-    async find(id: number): Promise<IGroup | null> {
+    async find(id: number): Promise<IGroup> {
         return await this.groupRepository.find(id);
     }
 

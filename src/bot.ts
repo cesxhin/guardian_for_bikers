@@ -48,7 +48,6 @@ export default async function (bot: TelegramBot) {
         { command: commands.SET_LOCATION, description: "Set a location where you want to receive weather updates." },
         { command: commands.SET_DAYS, description: "Manage the days of the week to receive weather updates." },
         { command: commands.SET_ENABLE, description: "Manage whether to suspend the bot." },
-        { command: commands.SET_TIME, description: "Set the time to receive weather updates." },
         { command: commands.SET_START_TIME_GUARDIAN, description: "Check the weather only from the time you set onward." },
         { command: commands.SET_END_TIME_GUARDIAN, description: "Check the weather up to the time that was set." },
         { command: commands.SHOW_SETTINGS, description: "Show current settings." }
@@ -71,7 +70,7 @@ export default async function (bot: TelegramBot) {
     });
 
     //permission only group
-    wrapBotMessage(bot, () => null, async (message) => {
+    wrapBotMessage(bot, async () => undefined, async (message) => {
         await bot.sendMessage(message.chat.id, "This bot can only be used in groups!");
     });
 
@@ -391,7 +390,7 @@ Your current settings:
 🕑 Time zone: ${group.timezone}
 📅 Weather days check: ${arrayDays.filter((_, index) => group.days_trigger[index]).join(", ")}
 💂 Time guardian: ${group.start_time_guardian} - ${group.end_time_guardian}
-📝 Last update: ${DateTime.fromJSDate(group.updated).setZone(group.timezone).toLocaleString(DateTime.DATETIME_SHORT)}
+📝 Last update: ${!_.isNil(group.updated)? DateTime.fromJSDate(group.updated).setZone(group.timezone).toLocaleString(DateTime.DATETIME_SHORT) : "Never"}
 `
                 );
             }
