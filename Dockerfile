@@ -6,6 +6,7 @@ COPY ./src/ .
 
 RUN apt-get update &&\
     apt-get install -y build-essential pkg-config librsvg2-dev libcairo2-dev libpango1.0-dev &&\
+    npm i &&\
     ./node_modules/.bin/node-gyp rebuild --release -C ./node_modules/canvas &&\
     npm run build
 
