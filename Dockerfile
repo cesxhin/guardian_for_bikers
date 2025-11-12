@@ -4,7 +4,7 @@ WORKDIR /builder
 
 COPY ./src/ .
 
-RUN npm i && npm run build
+RUN apt update && apt install -y build-essential pkg-config librsvg2-dev libcairo2-dev libpango1.0-dev && npm i --build-from-source && npm run build
 
 FROM node:24-slim AS runner
 
