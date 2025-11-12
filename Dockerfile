@@ -1,19 +1,12 @@
-FROM --platform=$BUILDPLATFORM node:24-slim AS setup
-
-WORKDIR /setup
-
-COPY ./src/ .
-
-RUN npm i
-
 FROM node:24-slim AS builder
 
 WORKDIR /builder
 
-COPY --from=setup /setup/ .
+COPY ./src/ .
 
 RUN apt-get update &&\
     apt-get install -y build-essential pkg-config librsvg2-dev libcairo2-dev libpango1.0-dev &&\
+    npm i &&\
     ./node_modules/.bin/node-gyp rebuild --release -C ./node_modules/canvas &&\
     npm run build
 
