@@ -4,9 +4,9 @@ WORKDIR /builder
 
 COPY ./src/ .
 
-RUN apt update &&\
-    apt install -y build-essential pkg-config librsvg2-dev libcairo2-dev libpango1.0-dev &&\
-    node_modules/.bin/node-gyp rebuild --release -C ./node_modules/canvas &&\
+RUN apt-get update &&\
+    apt-get install -y build-essential pkg-config librsvg2-dev libcairo2-dev libpango1.0-dev &&\
+    ./node_modules/.bin/node-gyp rebuild --release -C ./node_modules/canvas &&\
     npm run build
 
 FROM node:24-slim AS runner
