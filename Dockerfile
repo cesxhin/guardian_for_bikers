@@ -4,9 +4,7 @@ WORKDIR /builder
 
 COPY ./src/ .
 
-RUN apt-get update &&\
-    apt-get install -y libpixman-1-0 fonts-dejavu &&\
-    npm i &&\
+RUN npm i &&\
     npm run build &&\
     cd dist &&\
     npm i canvas
@@ -17,16 +15,22 @@ WORKDIR /rebuilder
 
 COPY --from=builder /builder/dist/ .
 
-RUN [ "$TARGETPLATFORM" = "linux/arm64" ] &&\
-    apt-get update &&\
-    apt-get install -y build-essential pkg-config librsvg2-dev libcairo2-dev libpango1.0-dev &&\
-    npm i node-gyp &&\
-    ./node_modules/.bin/node-gyp rebuild --release -C ./node_modules/canvas &&\
-    npm uni node-gyp
+RUN echo "$TARGETPLATFORM"
+
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then\
+        apt-get update &&\
+        apt-get install -y build-essential pkg-config librsvg2-dev libcairo2-dev libpango1.0-dev &&\
+        npm i node-gyp &&\
+        ./node_modules/.bin/node-gyp rebuild --release -C ./node_modules/canvas &&\
+        npm uni node-gyp \
+    fi
 
 FROM node:24-slim AS runner
 
 WORKDIR /app
+
+RUN apt-get update &&\
+    apt-get install -y libpixman-1-0 fonts-dejavu
 
 COPY --from=rebuilder /rebuilder/ .
 
