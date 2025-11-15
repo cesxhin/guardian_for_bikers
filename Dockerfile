@@ -6,8 +6,8 @@ COPY ./src/ .
 
 RUN npm i &&\
     npm run build &&\
-    cd dist &&\
-    npm i canvas
+    cd dist/ &&\
+    npm i --prefix . --no-package-lock --ignore-scripts canvas
 
 FROM  node:24-slim AS rebuilder
 
@@ -17,7 +17,7 @@ COPY --from=builder /builder/dist/ .
 
 RUN echo "$TARGETPLATFORM"
 
-RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then\
+RUN ARCH=$(dpkg --print-architecture) && if [ "$ARCH" = "arm64" ]; then\
         apt-get update &&\
         apt-get install -y build-essential pkg-config librsvg2-dev libcairo2-dev libpango1.0-dev &&\
         npm i node-gyp &&\
