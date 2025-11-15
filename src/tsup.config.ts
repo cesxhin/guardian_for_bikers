@@ -1,5 +1,9 @@
+import fs from "node:fs";
 import pkg from "./package.json";
 import { defineConfig } from "tsup";
+import path from "node:path";
+
+const PATH_OUT = "dist";
 
 export default defineConfig({
     entry: {
@@ -8,7 +12,7 @@ export default defineConfig({
     splitting: true,
     sourcemap: false,
     clean: true,
-    outDir: "dist",
+    outDir: PATH_OUT,
     format: ["esm"],
     platform: "node",
     env: {
@@ -20,5 +24,8 @@ export default defineConfig({
     minify: true,
     treeshake: true,
     shims: true,
-    inject: ['cjs-shim.ts']
+    inject: ['cjs-shim.ts'],
+    onSuccess: async () => {
+        fs.cpSync("assets", path.join(PATH_OUT, "assets"), {recursive: true});
+    }
 });
