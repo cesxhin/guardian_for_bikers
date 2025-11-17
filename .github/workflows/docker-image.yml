@@ -41,6 +41,6 @@ jobs:
         context: .
         file: Dockerfile
         push: true
-        build-provenance: false
+        provenance: false
         platforms: linux/amd64,linux/arm64/v8
         tags: ${{ secrets.DOCKER_USER }}/guardian_for_bikers:${{ steps.get_version.outputs.version }}, ${{ secrets.DOCKER_USER }}/guardian_for_bikers:${{ steps.get_version.outputs.latest }}
