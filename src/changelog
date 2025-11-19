@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2025-xx-xx
 
+## [1.1.1] - 2025-11-10
+
+### Fixed
+- Image also compatible with the arm64 architecture
+- If the command "show settings" is executed without ever having been modified, it generates an error.
+
+### Changed
+- build code
+- improvment dockerfile
+
+### Removed
+- old command "set_time"
+
+
 ## [1.1.0] - 2025-11-10
 
 ### Fixed

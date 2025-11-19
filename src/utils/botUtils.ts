@@ -12,7 +12,6 @@ export enum commands {
     SET_LOCATION = "set_location",
     SET_DAYS = "set_days",
     SET_ENABLE = "set_enable",
-    SET_TIME = "set_time",
     SHOW_SETTINGS = "show_settings",
     SET_START_TIME_GUARDIAN = "set_start_time_guardian",
     SET_END_TIME_GUARDIAN = "set_end_time_guardian",
