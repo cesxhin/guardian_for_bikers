@@ -19,8 +19,7 @@ export default defineConfig({
         NODE_ENV: "production"
     },
     target: ["node24"],
-    external: ["canvas"],
-    noExternal: Object.keys(pkg.dependencies).filter((lib) => lib !== "canvas"),
+    noExternal: Object.keys(pkg.dependencies),
     minify: true,
     treeshake: true,
     shims: true,
