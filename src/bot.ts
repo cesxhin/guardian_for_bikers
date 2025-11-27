@@ -364,7 +364,7 @@ Enough with the explanations now, have fun bikers!🏍️💨
                     await pollService.answered(pollAnswer.poll_id, user.id);
                 });
             } else if (poll.type === "impostor"){
-                if (poll.target_impostor === pollAnswer.user.id && pollAnswer.option_ids[0] === 0){
+                if (poll.target_impostor === pollAnswer.user.id){
                     await bot.sendMessage(poll.group_id, `Don't be cheeky "${pollAnswer.user.username}", your vote will not be counted.`);
                 } else {
                     await pollService.answered(pollAnswer.poll_id, pollAnswer.user.id);
