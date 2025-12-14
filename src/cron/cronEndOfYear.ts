@@ -31,7 +31,7 @@ export default (bot: TelegramBot) => {
                         message += `
 --- ${index === 0? "🥇" : index === 1? "🥈" : index === 2? "🥉" : index.toString().padStart(3, " ") + "  "} ---
 ${user.username}: ${user.points} PT
-outside with motorcyclist ${user.outWithBike}
+outside with biker ${user.outWithBike}
 Skipped answering the polls ${user.skipOutWithBike}
 Total times became Impostor ${user.totalImpostor}
 Total km: ${user.totalKm}

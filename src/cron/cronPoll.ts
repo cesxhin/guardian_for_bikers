@@ -41,7 +41,7 @@ export default (bot: TelegramBot) => {
 
                         if (poll.type == "question"){
 
-                            if (resultPoll.options[0].voter_count > 1){
+                            if (resultPoll.options[0].voter_count >= 1){
                                 const newPoll = await bot.sendPoll(
                                     poll.group_id,
                                     "At your own risk, it might rain, how did it go in the end?",
@@ -128,13 +128,6 @@ export default (bot: TelegramBot) => {
                                 }
                             }
 
-                            //find users unknown distances
-                            const listUserIdDistance = listTracks.map((track) => track.user_id);
-                            const unknownDistanceUsers = _.filter(users, (user) => !listUserIdDistance.includes(user.id));
-                            for (const user of unknownDistanceUsers) {
-                                messageDistanceToday += `${user.username}: Location not shared\n`;
-                            }
-
                             //print message distance
                             if (!_.isEmpty(messageDistanceToday)){
                                 await bot.sendMessage(poll.group_id, "Summary of kilometers traveled today!\n\n" + messageDistanceToday);
@@ -153,8 +146,8 @@ export default (bot: TelegramBot) => {
                         } else if (poll.type === "impostor"){
                             const users = await userService.findManyByGroupId(poll.group_id);
 
-                            const userImpostor: IUser | null = _.find(users, { id: poll.target_impostor });
-                            const usernameImpostor = userImpostor.username || "unkown (User does not exist, maybe they left the group)";
+                            const userImpostor: IUser | undefined = _.find(users, { id: poll.target_impostor });
+                            const usernameImpostor = userImpostor?.username || "unkown (User does not exist, maybe they left the group)";
 
                             if (poll.answered.length != 0 && (poll.answered.length + 1) === users.length){
                                 await bot.sendMessage(poll.group_id, `You found the imposter! It's "${usernameImpostor}", therefore their points and point multipliers have been reset!`);

@@ -40,7 +40,7 @@ export default async function (bot: TelegramBot) {
         "sunday"
     ];
 
-    const listCommandsBasic: TelegramBot.BotCommand[] = [{ command: commands.IMPOSTOR, description: "If someone has cheated to earn points even though they didn't go out on their motorcycle or didn't get caught in the rain, you can report it." }];
+    const listCommandsBasic: TelegramBot.BotCommand[] = [{ command: commands.IMPOSTOR, description: "If someone has cheated to earn points even though they didn't go out on their biker or didn't get caught in the rain, you can report it." }];
 
     //set commands for administrators
     bot.setMyCommands([
