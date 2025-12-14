@@ -81,7 +81,7 @@ export class PollRepository {
             throw new PollErrorGeneric(err);
         }
 
-        if(_.isNil(poll)){
+        if (_.isNil(poll)){
             throw new PollNotFound("Not found poll id "+ id);
         }
 
@@ -128,7 +128,7 @@ export class PollRepository {
             throw new PollErrorGeneric(err);
         }
 
-        if(_.isNil(poll)){
+        if (_.isNil(poll)){
             throw new PollNotFound("Not found poll id "+ id);
         }
 

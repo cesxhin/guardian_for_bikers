@@ -16,7 +16,7 @@ import { TrackService } from "./services/trackService";
 import { LocationSerivce } from "./services/locationService";
 import { POLLS_EXPIRE_IMPOSTOR_SECONDS, USERNAME_BOT } from "./env";
 import { PollIsClosed, PollIsExpired, UserNotFound } from "./utils/exceptionsUtils";
-import { commands, createMention, exceptionsHandler, timeCommand, wrapBotMessage } from "./utils/botUtils";
+import { commands, createMention, exceptionsHandler, timeCommand, wrapBotMessage, MESSAGE_WELCOME } from "./utils/botUtils";
 
 const logger = Logger("bot");
 
@@ -40,7 +40,10 @@ export default async function (bot: TelegramBot) {
         "sunday"
     ];
 
-    const listCommandsBasic: TelegramBot.BotCommand[] = [{ command: commands.IMPOSTOR, description: "If someone has cheated to earn points even though they didn't go out on their biker or didn't get caught in the rain, you can report it." }];
+    const listCommandsBasic: TelegramBot.BotCommand[] = [
+        { command: commands.IMPOSTOR, description: "If someone has cheated to earn points even though they didn't go out on their biker or didn't get caught in the rain, you can report it." },
+        { command: commands.ABOUT, description: "The bot information" }
+    ];
 
     //set commands for administrators
     bot.setMyCommands([
@@ -72,6 +75,17 @@ export default async function (bot: TelegramBot) {
     //permission only group
     wrapBotMessage(bot, async () => undefined, async (message) => {
         await bot.sendMessage(message.chat.id, "This bot can only be used in groups!");
+    });
+
+    //command about
+    wrapBotMessage(bot, async (message) => {
+        commandsUtils.command({
+            message,
+            command: commands.ABOUT,
+            functionReadCommand: async () => {
+                await bot.sendMessage(message.chat.id, MESSAGE_WELCOME);
+            }
+        });
     });
 
     //command location
@@ -261,34 +275,7 @@ export default async function (bot: TelegramBot) {
                             await groupSerivce.create(message.chat.id, message.chat.title || "unknwon");
                             logger.info(`Someone added me to the group id "${message.chat.id}"`);
 
-                            await bot.sendMessage(message.chat.id,
-                                `
-Hello bikers! 🏍️💨
-
-From now on, I will be here to protect you from bad weather.
-
-What can this bot do?
-- It is possible to configure this bot to adapt your outings.
-- There is a mini-game where each player who goes out will earn points, and at the end of the year the winner will be announced.
-
-And more new features will come in the future!💡
-
-Explanation for the mini-game🎮:
-When the weather monitoring starts, the mini-game will also automatically begin, where each player who goes out can earn points and at the end of the year an official ranking will be released announcing the top three winners.
-
-There will be three cases:
-1. If the weather forecast shows sun all day, a poll will appear that will give you one point if you went out.
-2. If the weather forecast shows more than 25% chance of rain, a poll will appear asking if you still want to go out despite the risk. To pass this question, at least 1 people must vote. If passed, another poll will appear that will give you double points if you didn't get wet, and if you did get wet, you will lose the double points!
-3. If the weather forecast shows 100% rain, no poll will appear.
-
-⚠️⚠️ PLEASE NOTE ⚠️⚠️:
-- Weather conditions cannot be predicted with 100% accuracy, and the APIs used to obtain weather data may be inaccurate. Therefore, incorrect data may be provided, and we assume no responsibility for any damage.
-- The collection of location data will be deleted at the end of the poll, and only the kilometers traveled will be taken into account.
-- If you remove the bot from the group, all data will be deleted!
-
-Enough with the explanations now, have fun bikers!🏍️💨
-`
-                            );
+                            await bot.sendMessage(message.chat.id, MESSAGE_WELCOME);
                         }
                     }
                 } else {
@@ -520,7 +507,7 @@ Your current settings:
                             }
                         );
 
-                        if(!_.isNil(messagePoll.poll)){
+                        if (!_.isNil(messagePoll.poll)){
                             await pollService.create({
                                 expire: DateTime.now().plus({seconds: POLLS_EXPIRE_IMPOSTOR_SECONDS}).toJSDate(),
                                 group_id: message.chat.id,
@@ -529,7 +516,7 @@ Your current settings:
                                 type: "impostor",
                                 target_impostor: find.id
                             });
-                        }else{
+                        } else {
                             throw new Error("Cannot create poll because is null");
                         }
                     } else {

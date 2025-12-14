@@ -58,7 +58,7 @@ const backgroundPlugin: Plugin = {
     beforeDraw: (chart) => {
         const ctx = chart.canvas.getContext("2d");
 
-        if(!_.isNil(ctx)){
+        if (!_.isNil(ctx)){
             ctx.save();
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, chart.width, chart.height);

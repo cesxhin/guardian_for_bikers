@@ -106,7 +106,7 @@ export default (bot: TelegramBot) => {
 
                                     additionalSeconds = endTime - startTime;
                                 }
-                                if(!_.isNil(messagePoll.poll)){
+                                if (!_.isNil(messagePoll.poll)){
                                     await pollService.create({
                                         id: messagePoll.poll.id,
                                         message_id: messagePoll.message_id,
@@ -115,7 +115,7 @@ export default (bot: TelegramBot) => {
                                         expire: DateTime.now().plus({seconds: additionalSeconds }).set({millisecond: 0, second: 0}).toJSDate(),
                                         target_impostor: null
                                     });
-                                }else{
+                                } else {
                                     throw new Error("Cannot create poll because is null");
                                 }
                             } else {

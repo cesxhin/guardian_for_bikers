@@ -53,7 +53,7 @@ export default (bot: TelegramBot) => {
                                     { is_anonymous: false }
                                 );
 
-                                if(!_.isNil(newPoll.poll)){
+                                if (!_.isNil(newPoll.poll)){
                                     pollService.create({
                                         id: newPoll.poll.id,
                                         message_id: newPoll.message_id,
@@ -62,7 +62,7 @@ export default (bot: TelegramBot) => {
                                         expire: DateTime.now().plus({ seconds: POLLS_EXPIRE_ACTION_SECONDS }).set({millisecond: 0, second: 0}).toJSDate(),
                                         target_impostor: null
                                     });
-                                }else{
+                                } else {
                                     throw new Error("Cannot create poll because is null");
                                 }
                             } else {
@@ -107,7 +107,7 @@ export default (bot: TelegramBot) => {
                                     const minTime = _.minBy(track.positions, (position) => position.date);
                                     const maxTime = _.maxBy(track.positions, (position) => position.date);
 
-                                    if(!_.isNil(minTime) && !_.isNil(maxTime)){
+                                    if (!_.isNil(minTime) && !_.isNil(maxTime)){
                                         totalTime = DateTime.fromJSDate(maxTime.date).diff(DateTime.fromJSDate(minTime.date)).toMillis();
                                     }
                                 }
