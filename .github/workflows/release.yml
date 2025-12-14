@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - main
-      - dev
+    paths:
+      - 'src/**'
+      - 'Dockerfile'
+      - 'setup/**'
 
 jobs:
   build-and-release:
@@ -47,6 +50,6 @@ jobs:
           files: |
             setup.tar.gz
             setup.zip
-          #latest: true
+          latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
