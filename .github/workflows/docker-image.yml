@@ -4,11 +4,13 @@ on:
     branches:
       - main
       - dev
+    paths:
+      - 'src/**'
+      - 'Dockerfile'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/dev' && (contains(github.event.head_commit.modified, 'src/') || contains(github.event.head_commit.modified, 'Dockerfile')))
     steps:
     - uses: actions/checkout@v4
     - name: Set up QEMU
