@@ -44,14 +44,9 @@ jobs:
           tag_name: V${{ env.VERSION }}
           name: V${{ env.VERSION }}
           body: "todo"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v2
-        with:
           files: |
             setup.tar.gz
             setup.zip
+          #latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
