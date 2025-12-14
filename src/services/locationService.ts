@@ -5,7 +5,7 @@ import { IWeatherLocation } from "../domains/interfaces/api/IWeatherLocation";
 export class LocationSerivce {
     private locationRepository = new LocationRepository();
 
-    async exist(location: string): Promise<IWeatherLocation | null> {
+    async exist(location: string): Promise<IWeatherLocation | undefined> {
         location = location.toLowerCase().trim();
         const locations = await this.locationRepository.findMany(location);
 

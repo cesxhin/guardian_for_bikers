@@ -25,7 +25,7 @@ pollCache.on("expired", (key) => {
 
 async function getPollCache(id: string): Promise<IPoll>{
     if (pollCache.has(id)){
-        return pollCache.get(id);
+        return pollCache.get(id) as IPoll;
     } else {
         const poll = await pollService.findById(id);
         pollCache.set(poll.id, poll);

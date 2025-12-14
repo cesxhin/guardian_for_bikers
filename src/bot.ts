@@ -16,7 +16,7 @@ import { TrackService } from "./services/trackService";
 import { LocationSerivce } from "./services/locationService";
 import { POLLS_EXPIRE_IMPOSTOR_SECONDS, USERNAME_BOT } from "./env";
 import { PollIsClosed, PollIsExpired, UserNotFound } from "./utils/exceptionsUtils";
-import { commands, createMention, exceptionsHandler, timeCommand, wrapBotMessage } from "./utils/botUtils";
+import { commands, createMention, exceptionsHandler, timeCommand, wrapBotMessage, MESSAGE_WELCOME } from "./utils/botUtils";
 
 const logger = Logger("bot");
 
@@ -40,7 +40,10 @@ export default async function (bot: TelegramBot) {
         "sunday"
     ];
 
-    const listCommandsBasic: TelegramBot.BotCommand[] = [{ command: commands.IMPOSTOR, description: "If someone has cheated to earn points even though they didn't go out on their motorcycle or didn't get caught in the rain, you can report it." }];
+    const listCommandsBasic: TelegramBot.BotCommand[] = [
+        { command: commands.IMPOSTOR, description: "If someone has cheated to earn points even though they didn't go out on their biker or didn't get caught in the rain, you can report it." },
+        { command: commands.ABOUT, description: "The bot information" }
+    ];
 
     //set commands for administrators
     bot.setMyCommands([
@@ -72,6 +75,17 @@ export default async function (bot: TelegramBot) {
     //permission only group
     wrapBotMessage(bot, async () => undefined, async (message) => {
         await bot.sendMessage(message.chat.id, "This bot can only be used in groups!");
+    });
+
+    //command about
+    wrapBotMessage(bot, async (message) => {
+        commandsUtils.command({
+            message,
+            command: commands.ABOUT,
+            functionReadCommand: async () => {
+                await bot.sendMessage(message.chat.id, MESSAGE_WELCOME);
+            }
+        });
     });
 
     //command location
@@ -261,32 +275,7 @@ export default async function (bot: TelegramBot) {
                             await groupSerivce.create(message.chat.id, message.chat.title || "unknwon");
                             logger.info(`Someone added me to the group id "${message.chat.id}"`);
 
-                            await bot.sendMessage(message.chat.id,
-                                `
-Hello bikers! 🏍️💨
-
-From now on, I will be here to protect you from bad weather.
-
-What can this bot do?
-- It is possible to configure this bot to adapt your outings.
-- There is a mini-game where each player who goes out will earn points, and at the end of the year the winner will be announced.
-
-And more new features will come in the future!💡
-
-Explanation for the mini-game🎮:
-When the weather monitoring starts, the mini-game will also automatically begin, where each player who goes out can earn points and at the end of the year an official ranking will be released announcing the top three winners.
-
-There will be three cases:
-1. If the weather forecast shows sun all day, a poll will appear that will give you one point if you went out.
-2. If the weather forecast shows more than 25% chance of rain, a poll will appear asking if you still want to go out despite the risk. To pass this question, at least 2 people must vote. If passed, another poll will appear that will give you double points if you didn't get wet, and if you did get wet, you will lose the double points!
-3. If the weather forecast shows 100% rain, no poll will appear.
-
-
-Enough with the explanations now, have fun bikers!🏍️💨
-
-⚠️⚠️ WARNING ⚠️⚠️: If you remove the bot from the group, all data will be deleted!
-`
-                            );
+                            await bot.sendMessage(message.chat.id, MESSAGE_WELCOME);
                         }
                     }
                 } else {
@@ -324,7 +313,7 @@ Enough with the explanations now, have fun bikers!🏍️💨
 
             if (poll.type === "out" || poll.type === "out_x2") {
                 await exceptionsHandler(bot, poll.group_id, async () => {
-                    const user = await userCacheUtils.getUserCache(poll.group_id, pollAnswer.user.id, pollAnswer.user.username);
+                    const user = await userCacheUtils.getUserCache(poll.group_id, pollAnswer.user.id, pollAnswer.user.username as string); //todo da pensare bene ma non e' urgente
 
                     let points = 0;
                     let skipOut = false;
@@ -364,7 +353,7 @@ Enough with the explanations now, have fun bikers!🏍️💨
                     await pollService.answered(pollAnswer.poll_id, user.id);
                 });
             } else if (poll.type === "impostor"){
-                if (poll.target_impostor === pollAnswer.user.id && pollAnswer.option_ids[0] === 0){
+                if (poll.target_impostor === pollAnswer.user.id){
                     await bot.sendMessage(poll.group_id, `Don't be cheeky "${pollAnswer.user.username}", your vote will not be counted.`);
                 } else {
                     await pollService.answered(pollAnswer.poll_id, pollAnswer.user.id);
@@ -518,14 +507,18 @@ Your current settings:
                             }
                         );
 
-                        await pollService.create({
-                            expire: DateTime.now().plus({seconds: POLLS_EXPIRE_IMPOSTOR_SECONDS}).toJSDate(),
-                            group_id: message.chat.id,
-                            id: messagePoll.poll.id,
-                            message_id: messagePoll.message_id,
-                            type: "impostor",
-                            target_impostor: find.id
-                        });
+                        if (!_.isNil(messagePoll.poll)){
+                            await pollService.create({
+                                expire: DateTime.now().plus({seconds: POLLS_EXPIRE_IMPOSTOR_SECONDS}).toJSDate(),
+                                group_id: message.chat.id,
+                                id: messagePoll.poll.id,
+                                message_id: messagePoll.message_id,
+                                type: "impostor",
+                                target_impostor: find.id
+                            });
+                        } else {
+                            throw new Error("Cannot create poll because is null");
+                        }
                     } else {
                         await bot.sendMessage(message.chat.id, `You have already started a pool with this impostor "${usernameImpostor}"`);
                     }
@@ -551,7 +544,7 @@ Your current settings:
                 if (!(err instanceof PollIsClosed || err instanceof PollIsExpired)) {
                     logger.error("Failed get data poll from cache, details:", err);
                 } else {
-                    logger.warn(`The user id "${message.from.id}" is trying to send the positions, but the poll is already closed`);
+                    logger.warn(`The user id "${message.from?.id}" is trying to send the positions, but the poll is already closed`);
 
                     try {
                         await bot.deleteMessage(message.chat.id, message.message_id);
@@ -561,7 +554,7 @@ Your current settings:
                     }
 
                     try {
-                        await bot.sendMessage(message.chat.id, createMention({ first_name: message.from.first_name, user_id: message.from.id }, "At the moment, you can't share your location. There is no active poll right now."), { parse_mode: "MarkdownV2" });
+                        await bot.sendMessage(message.chat.id, createMention({ first_name: message.from?.first_name || "unknown", user_id: message.from?.id || -1 }, "At the moment, you can't share your location. There is no active poll right now."), { parse_mode: "MarkdownV2" });
                     } catch (err) {
                         logger.error(`Failed send message  from group id "${message.chat.id}", details:`, err);
                     }
@@ -572,7 +565,7 @@ Your current settings:
 
             await exceptionsHandler(bot, message.chat.id, async () => {
                 if (poll.stop === false && new Date() < poll.expire && !_.isNil(message.location) && poll.type !== "question") {
-                    await trackService.addPositions(message.from.id, message.chat.id, poll.id, { positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date(message.edit_date * 1000) }] });
+                    await trackService.addPositions(message.from?.id || -1, message.chat.id, poll.id, { positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date((message?.edit_date || 0) * 1000) }] });
                 }
             });
         });

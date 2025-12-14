@@ -4,6 +4,9 @@ on:
     branches:
       - main
       - dev
+    paths:
+      - 'src/**'
+      - 'Dockerfile'
 
 jobs:
   build:

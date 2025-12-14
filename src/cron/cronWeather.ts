@@ -5,12 +5,12 @@ import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "../lib/logger";
 import graphUtils from "../utils/graphUtils";
-import { CRON_WEATHER, POLLS_EXPIRE_QUESTION_SECONDS } from "../env";
-import { exceptionsHandler } from "../utils/botUtils";
 import { IGroup } from "../domains/interfaces/IGroup";
 import { PollService } from "../services/pollService";
 import { GroupService } from "../services/groupService";
 import { WeatherService } from "../services/weatherService";
+import { CRON_WEATHER, POLLS_EXPIRE_QUESTION_SECONDS } from "../env";
+import { exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils";
 
 const logger = Logger("cron-weather");
 
@@ -73,7 +73,7 @@ export default (bot: TelegramBot) => {
                             _.remove(weather.hourly.rain, (_, index) => listTimeBlacklist.includes(index));
                             _.remove(weather.hourly.temperature_2m, (_, index) => listTimeBlacklist.includes(index));
 
-                            const result = await graphUtils.render(600 * 4, 250 * 4, weather.hourly.time.map((time) => DateTime.fromFormat(time, "yyyy-MM-dd'T'HH:mm").setLocale(group.timezone).toISO()), weather.hourly.temperature_2m, dataTypeWeather);
+                            const result = await graphUtils.render(600 * 4, 250 * 4, weather.hourly.time.map((time) => DateTime.fromFormat(time, "yyyy-MM-dd'T'HH:mm").setLocale(group.timezone).toISO()).filter((date) => !_.isNil(date)), weather.hourly.temperature_2m, dataTypeWeather);
             
                             await bot.sendPhoto(group.id, result, {
                                 caption: "Hello bikers! Let's see what the weather has to offer today!"
@@ -91,10 +91,10 @@ export default (bot: TelegramBot) => {
                                 let typePoll: "question" | "out";
                                 
                                 if (!_.isNil(findPercentageRain)){
-                                    messagePoll = await bot.sendPoll(group.id, "There is a chance it might rain, do you still want to go out at your own risk?", ["Yes!", "No"], { is_anonymous: false });
+                                    messagePoll = await bot.sendPoll(group.id, "There is a chance it might rain, do you still want to go out at your own risk?"+RESPONSIBILITY_POLICY, ["Yes!", "No"], { is_anonymous: false });
                                     typePoll = "question";
                                 } else {
-                                    messagePoll = await bot.sendPoll(group.id, "Great news!\nThe weather is nice today, who's out?", ["I went out", "No"], { is_anonymous: false });
+                                    messagePoll = await bot.sendPoll(group.id, "Great news!\nThe weather is nice today, who's out?"+RESPONSIBILITY_POLICY, ["I went out", "No"], { is_anonymous: false });
                                     typePoll = "out";
                                 }
 
@@ -106,15 +106,18 @@ export default (bot: TelegramBot) => {
 
                                     additionalSeconds = endTime - startTime;
                                 }
-
-                                await pollService.create({
-                                    id: messagePoll.poll.id,
-                                    message_id: messagePoll.message_id,
-                                    group_id: group.id,
-                                    type: typePoll,
-                                    expire: DateTime.now().plus({seconds: additionalSeconds }).set({millisecond: 0, second: 0}).toJSDate(),
-                                    target_impostor: null
-                                });
+                                if (!_.isNil(messagePoll.poll)){
+                                    await pollService.create({
+                                        id: messagePoll.poll.id,
+                                        message_id: messagePoll.message_id,
+                                        group_id: group.id,
+                                        type: typePoll,
+                                        expire: DateTime.now().plus({seconds: additionalSeconds }).set({millisecond: 0, second: 0}).toJSDate(),
+                                        target_impostor: null
+                                    });
+                                } else {
+                                    throw new Error("Cannot create poll because is null");
+                                }
                             } else {
                                 await bot.sendMessage(group.id, "Sorry bikers, but the weather doesn't look good, stay home!🏠");
                             }

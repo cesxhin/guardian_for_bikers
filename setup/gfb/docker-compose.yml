@@ -1,17 +1,19 @@
 services:
   mongo:
-    container_name: gfb_mongo
+    container_name: mongo
     image: mongo:8
     restart: always
     volumes:
       - /mongo/gfb:/data/db
     env_file:
       - envs/mongo.env
+      - envs/base.env
   gfb:
-    container_name: gfb_server
+    container_name: server
     image: kju7pwd2/guardian_for_bikers:latest
     restart: always
     env_file:
       - envs/gfb.env
+      - envs/base.env
     depends_on:
       - mongo

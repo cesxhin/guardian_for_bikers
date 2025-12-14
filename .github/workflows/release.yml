@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'Dockerfile'
+      - 'setup/**'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: cd src && npm install
+
+      - name: Build project
+        run: cd src && npm run build-panel-control
+
+      - name: Compress setup to tar
+        run: tar -czf setup.tar.gz -C setup .
+
+      - name: Compress setup to zip
+        run: zip -r setup.zip setup
+
+      - name: Get version from package.json
+        id: get_version
+        run: |
+            VERSION_TEMP=$(node -p "require('./src/package.json').version")
+            echo "VERSION=$VERSION_TEMP" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: V${{ env.VERSION }}
+          name: V${{ env.VERSION }}
+          body: "todo"
+          files: |
+            setup.tar.gz
+            setup.zip
+          latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

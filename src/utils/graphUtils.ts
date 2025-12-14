@@ -57,10 +57,13 @@ const backgroundPlugin: Plugin = {
     id: "custom_canvas_background_color",
     beforeDraw: (chart) => {
         const ctx = chart.canvas.getContext("2d");
-        ctx.save();
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, chart.width, chart.height);
-        ctx.restore();
+
+        if (!_.isNil(ctx)){
+            ctx.save();
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, chart.width, chart.height);
+            ctx.restore();
+        }
     }
 };
 

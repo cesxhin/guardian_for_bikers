@@ -1,4 +1,3 @@
-import _ from "lodash";
 import mongoose from "mongoose";
 import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
@@ -6,24 +5,12 @@ import TelegramBot from "node-telegram-bot-api";
 import Logger from "./lib/logger";
 import listenersBot from "./bot";
 import cronPoll from "./cron/cronPoll";
-import cronEndOfYear from "./cron/cronEndOfYear";
 import cronWeather from "./cron/cronWeather";
+import { URL_MONGO, TOKEN_BOT } from "./env";
 import versionUtils from "./utils/versionUtils";
-import { TOKEN_BOT, URL_MONGO, USERNAME_BOT } from "./env";
-
-export let bot: TelegramBot;
+import cronEndOfYear from "./cron/cronEndOfYear";
 
 const logger = Logger("main");
-
-if (_.isNil(TOKEN_BOT)){
-    logger.error("Missing token bot");
-    process.exit(1);
-}
-
-if (_.isNil(USERNAME_BOT)){
-    logger.error("Missing username bot");
-    process.exit(1);
-}
 
 async function main(){
 
@@ -41,8 +28,9 @@ async function main(){
 
     //versioning management
     await versionUtils.main();
-
+    
     //telegram
+    let bot: TelegramBot;
     try {
         bot = new TelegramBot(TOKEN_BOT, {
             polling: {
@@ -56,6 +44,7 @@ async function main(){
         logger.error("Error telegram bot, details:", err);
         process.exit(1);
     }
+    logger.info("Bot connected!");
 
     listenersBot(bot);
     cronWeather(bot);

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2025-xx-xx
 
+## [1.2.0] - 2025-12-14
+
+### Added
+- A tool ("panel-control") to send notifications to groups during bot maintenance
+- A note stating that we assume no responsibility for any damage
+- New command "About" for everyone
+
+### Fixed
+- Once an impostor was reported, they could vote 'no'
+- Improvment Dockerfile
+
+### Changed
+- When the poll asking if we still want to go out despite the bad weather appears, now require at least one vote
+- At the end of a biker outing poll, only those who shared their total kilometers are shown
+
 ## [1.1.1] - 2025-11-10
 
 ### Fixed

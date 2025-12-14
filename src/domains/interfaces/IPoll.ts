@@ -8,5 +8,5 @@ export interface IPoll {
     stop: boolean,
     created: Date,
     updated: Date,
-    target_impostor: number
+    target_impostor: number | null
 }
