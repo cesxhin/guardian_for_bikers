@@ -1,4 +1,3 @@
-import _ from "lodash";
 import mongoose from "mongoose";
 import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";

@@ -5,10 +5,10 @@ import Logger from "./lib/logger";
 const logger = Logger("env");
 
 //load env
-if(fs.existsSync(".env")){
-    try{
+if (fs.existsSync(".env")){
+    try {
         process.loadEnvFile();
-    }catch(err){
+    } catch(err){
         logger.error("Failed read .env, details:", err);
     }
 }

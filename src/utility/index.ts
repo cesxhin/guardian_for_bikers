@@ -22,37 +22,37 @@ const bot = await connectionsUtils.connectBot({
 
 outro("Completed successfully");
 
-do{
+do {
     intro("Panel Control");
 
     //menu
     const procedure = await select({
-        message: 'Choose the procedure',
+        message: "Choose the procedure",
         options: [
-            { value: 'update-notice', label: 'Send a pre-update notification' },
-            { value: 'finish-notice', label: 'Send after update notification' },
-            { value: 'exit', label: 'Exit' },
+            { value: "update-notice", label: "Send a pre-update notification" },
+            { value: "finish-notice", label: "Send after update notification" },
+            { value: "exit", label: "Exit" }
         ],
         initialValue: "update-notice"
     });
 
-    if(procedure === "exit" || isCancel(procedure)){
+    if (procedure === "exit" || isCancel(procedure)){
         log.message("Good bye!", {symbol: "👋"});
         outro();
         terminate = true;
-    }else{
+    } else {
         outro();
 
-        switch(procedure){
-            case "update-notice":
-                await updateNotice(bot);
-                break;
-            case "finish-notice":
-                await finishNotice(bot);
-                break;
+        switch (procedure){
+        case "update-notice":
+            await updateNotice(bot);
+            break;
+        case "finish-notice":
+            await finishNotice(bot);
+            break;
 
         }
     }
-}while(!terminate);
+} while (!terminate);
 
 process.exit(0);

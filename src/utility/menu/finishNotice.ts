@@ -1,4 +1,3 @@
-import _ from "lodash";
 import TelegramBot from "node-telegram-bot-api";
 import {log, confirm, intro, outro} from "@clack/prompts";
 
@@ -9,11 +8,11 @@ export default async (bot: TelegramBot) => {
 
     const acceptSendNotice = (await confirm({message: "Do you really want to notify everyone that you've finished the bot maintenance?"})) === true;
 
-    if(acceptSendNotice){
+    if (acceptSendNotice){
         await messageUtils.sendNotice(bot, "Thank you for your patience! The maintenance is over and the bot is back online 🏍️");
-    }else{
+    } else {
         log.info("Cancel the action");
     }
     
     outro();
-}
+};

@@ -19,12 +19,12 @@ async function command({
 }){
     if (!_.isNil(message.from) && !message.from.is_bot){
 
-        let findCommandFromUser: commands | null = null;
+        let findCommandFromUser: commands | undefined | null = null;
         if (!_.isNil(functionExecuteCommand)){
             findCommandFromUser = historyCommand.get(userCacheUtils.getPrimaryKeyCompose(message.chat.id, message.from.id));
         }
         
-        if (!_.isNil(findCommandFromUser) && findCommandFromUser === command){
+        if (!_.isNil(functionExecuteCommand) && !_.isNil(findCommandFromUser) && findCommandFromUser === command){
 
             if (!_.isNil(message.text)){
                 await functionExecuteCommand(message.text, message);

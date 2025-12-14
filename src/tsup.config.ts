@@ -7,7 +7,7 @@ const PATH_OUT = "dist";
 
 export default defineConfig({
     entry: {
-        index: "index.ts",
+        index: "index.ts"
     },
     splitting: true,
     sourcemap: false,
@@ -24,7 +24,7 @@ export default defineConfig({
     minify: true,
     treeshake: true,
     shims: true,
-    inject: ['cjs-shim.ts'],
+    inject: ["cjs-shim.ts"],
     onSuccess: async () => {
         fs.cpSync("assets", path.join(PATH_OUT, "assets"), {recursive: true});
     }

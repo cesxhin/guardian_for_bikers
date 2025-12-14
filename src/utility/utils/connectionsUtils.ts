@@ -4,7 +4,7 @@ import TelegramBot from "node-telegram-bot-api";
 import { URL_MONGO, TOKEN_BOT } from "../../env";
 import { spinner, log } from "@clack/prompts";
 
-const s = spinner()
+const s = spinner();
 
 async function connectDatabase(): Promise<void>{
     log.info("Try connect to mongo with this url:" + URL_MONGO);
@@ -40,4 +40,4 @@ async function connectBot(options: TelegramBot.ConstructorOptions = {}): Promise
 export default {
     connectBot,
     connectDatabase
-}
+};

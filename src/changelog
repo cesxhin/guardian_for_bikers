@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2025-xx-xx
 
 ### Added
-- Added a tool to send notifications to groups during bot maintenance
+- A tool to send notifications to groups during bot maintenance
+- A note stating that we assume no responsibility for any damage
 
 ### Fixed
 - Once an impostor was reported, they could vote 'no'

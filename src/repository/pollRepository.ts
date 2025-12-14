@@ -72,12 +72,20 @@ export class PollRepository {
     }
 
     async listValidWithTypeOutById(id: string): Promise<IPoll>{
+
+        let poll: IPoll | null;
         try {
-            return await modelPoll.findOne({id, stop: false, type: { $ne: "question" }}).lean();
+            poll = await modelPoll.findOne({id, stop: false, type: { $ne: "question" }}).lean();
         } catch (err){
             logger.error("Error listValidWithTypeOut, details:", err);
             throw new PollErrorGeneric(err);
         }
+
+        if(_.isNil(poll)){
+            throw new PollNotFound("Not found poll id "+ id);
+        }
+
+        return poll;
     }
         
     async deleteByIds(ids: string[]): Promise<void>{
@@ -111,12 +119,20 @@ export class PollRepository {
     }
 
     async answered(id: string, userId: number): Promise<IPoll>{
+
+        let poll: IPoll | null;
         try {
-            return await modelPoll.findOneAndUpdate({ id, stop: false }, { $push: { answered: userId } }).lean();
+            poll = await modelPoll.findOneAndUpdate({ id, stop: false }, { $push: { answered: userId } }, {new: true}).lean();
         } catch (err){
             logger.error("Error answered, details:", err);
             throw new PollErrorGeneric(err);
         }
+
+        if(_.isNil(poll)){
+            throw new PollNotFound("Not found poll id "+ id);
+        }
+
+        return poll;
     }
 
     async deleteByChatId(chatId: number): Promise<void>{

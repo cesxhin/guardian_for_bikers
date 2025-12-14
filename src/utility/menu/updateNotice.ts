@@ -19,17 +19,17 @@ export default async (bot: TelegramBot) => {
         validate: (value) => {
             const checkDate = DateTime.fromFormat(value || "", FORMAT_DATE);
 
-            if(!checkDate.isValid){
-                return "Date is not valid, check format " + FORMAT_DATE
+            if (!checkDate.isValid){
+                return "Date is not valid, check format " + FORMAT_DATE;
             }
 
-            if(checkDate.toJSDate() < new Date()){
+            if (checkDate.toJSDate() < new Date()){
                 return "Date must be present or future";
             }
         }
     });
 
-    if(!_.isString(dateString)){
+    if (!_.isString(dateString)){
         process.exit(1);
     }
 
@@ -38,4 +38,4 @@ export default async (bot: TelegramBot) => {
     await messageUtils.sendNotice(bot, (group) => `Hello bikers 🏍️,\nthe bot is scheduled to be updated on ${date.setZone(group.timezone).toLocaleString()} 📆\nDuring that time, the bot will be temporarily unavailable.`);
     
     outro();
-}
+};

@@ -7,9 +7,9 @@ import { modelGroup } from "../../domains/models/groupModel";
 
 async function sendNotice(bot: TelegramBot, message: ((group: IGroup) => string) | string){
     let list: IGroup[];
-    try{
+    try {
         list = await modelGroup.find().lean<IGroup[]>();
-    }catch(err){
+    } catch(err){
         log.error("Failed get list groups, details: " + err);
         process.exit(1);
     }
@@ -22,9 +22,9 @@ async function sendNotice(bot: TelegramBot, message: ((group: IGroup) => string)
 
     const failedSend: string[] = [];
     for (const group of list) {
-        try{
+        try {
             await bot.sendMessage(group.id, _.isFunction(message)? message(group) : message);
-        }catch(err){
+        } catch(err){
             failedSend.push("Report: failed send message this group id " + group.id + ", details: " + err);
         }
 
@@ -40,4 +40,4 @@ async function sendNotice(bot: TelegramBot, message: ((group: IGroup) => string)
 
 export default {
     sendNotice
-}
+};

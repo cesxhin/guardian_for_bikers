@@ -278,13 +278,15 @@ When the weather monitoring starts, the mini-game will also automatically begin,
 
 There will be three cases:
 1. If the weather forecast shows sun all day, a poll will appear that will give you one point if you went out.
-2. If the weather forecast shows more than 25% chance of rain, a poll will appear asking if you still want to go out despite the risk. To pass this question, at least 2 people must vote. If passed, another poll will appear that will give you double points if you didn't get wet, and if you did get wet, you will lose the double points!
+2. If the weather forecast shows more than 25% chance of rain, a poll will appear asking if you still want to go out despite the risk. To pass this question, at least 1 people must vote. If passed, another poll will appear that will give you double points if you didn't get wet, and if you did get wet, you will lose the double points!
 3. If the weather forecast shows 100% rain, no poll will appear.
 
+⚠️⚠️ PLEASE NOTE ⚠️⚠️:
+- Weather conditions cannot be predicted with 100% accuracy, and the APIs used to obtain weather data may be inaccurate. Therefore, incorrect data may be provided, and we assume no responsibility for any damage.
+- The collection of location data will be deleted at the end of the poll, and only the kilometers traveled will be taken into account.
+- If you remove the bot from the group, all data will be deleted!
 
 Enough with the explanations now, have fun bikers!🏍️💨
-
-⚠️⚠️ WARNING ⚠️⚠️: If you remove the bot from the group, all data will be deleted!
 `
                             );
                         }
@@ -324,7 +326,7 @@ Enough with the explanations now, have fun bikers!🏍️💨
 
             if (poll.type === "out" || poll.type === "out_x2") {
                 await exceptionsHandler(bot, poll.group_id, async () => {
-                    const user = await userCacheUtils.getUserCache(poll.group_id, pollAnswer.user.id, pollAnswer.user.username);
+                    const user = await userCacheUtils.getUserCache(poll.group_id, pollAnswer.user.id, pollAnswer.user.username as string); //todo da pensare bene ma non e' urgente
 
                     let points = 0;
                     let skipOut = false;
@@ -518,14 +520,18 @@ Your current settings:
                             }
                         );
 
-                        await pollService.create({
-                            expire: DateTime.now().plus({seconds: POLLS_EXPIRE_IMPOSTOR_SECONDS}).toJSDate(),
-                            group_id: message.chat.id,
-                            id: messagePoll.poll.id,
-                            message_id: messagePoll.message_id,
-                            type: "impostor",
-                            target_impostor: find.id
-                        });
+                        if(!_.isNil(messagePoll.poll)){
+                            await pollService.create({
+                                expire: DateTime.now().plus({seconds: POLLS_EXPIRE_IMPOSTOR_SECONDS}).toJSDate(),
+                                group_id: message.chat.id,
+                                id: messagePoll.poll.id,
+                                message_id: messagePoll.message_id,
+                                type: "impostor",
+                                target_impostor: find.id
+                            });
+                        }else{
+                            throw new Error("Cannot create poll because is null");
+                        }
                     } else {
                         await bot.sendMessage(message.chat.id, `You have already started a pool with this impostor "${usernameImpostor}"`);
                     }
@@ -551,7 +557,7 @@ Your current settings:
                 if (!(err instanceof PollIsClosed || err instanceof PollIsExpired)) {
                     logger.error("Failed get data poll from cache, details:", err);
                 } else {
-                    logger.warn(`The user id "${message.from.id}" is trying to send the positions, but the poll is already closed`);
+                    logger.warn(`The user id "${message.from?.id}" is trying to send the positions, but the poll is already closed`);
 
                     try {
                         await bot.deleteMessage(message.chat.id, message.message_id);
@@ -561,7 +567,7 @@ Your current settings:
                     }
 
                     try {
-                        await bot.sendMessage(message.chat.id, createMention({ first_name: message.from.first_name, user_id: message.from.id }, "At the moment, you can't share your location. There is no active poll right now."), { parse_mode: "MarkdownV2" });
+                        await bot.sendMessage(message.chat.id, createMention({ first_name: message.from?.first_name || "unknown", user_id: message.from?.id || -1 }, "At the moment, you can't share your location. There is no active poll right now."), { parse_mode: "MarkdownV2" });
                     } catch (err) {
                         logger.error(`Failed send message  from group id "${message.chat.id}", details:`, err);
                     }
@@ -572,7 +578,7 @@ Your current settings:
 
             await exceptionsHandler(bot, message.chat.id, async () => {
                 if (poll.stop === false && new Date() < poll.expire && !_.isNil(message.location) && poll.type !== "question") {
-                    await trackService.addPositions(message.from.id, message.chat.id, poll.id, { positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date(message.edit_date * 1000) }] });
+                    await trackService.addPositions(message.from?.id || -1, message.chat.id, poll.id, { positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date((message?.edit_date || 0) * 1000) }] });
                 }
             });
         });

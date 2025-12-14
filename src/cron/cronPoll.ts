@@ -7,7 +7,7 @@ import TelegramBot from "node-telegram-bot-api";
 import Logger from "../lib/logger";
 import { IUser } from "../domains/interfaces/IUser";
 import { PollService } from "../services/pollService";
-import { exceptionsHandler } from "../utils/botUtils";
+import { exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils";
 import { UserService } from "../services/userService";
 import { TrackService } from "../services/trackService";
 import { CRON_POLL, POLLS_EXPIRE_ACTION_SECONDS } from "../env";
@@ -44,7 +44,7 @@ export default (bot: TelegramBot) => {
                             if (resultPoll.options[0].voter_count >= 1){
                                 const newPoll = await bot.sendPoll(
                                     poll.group_id,
-                                    "At your own risk, it might rain, how did it go in the end?",
+                                    "At your own risk, it might rain, how did it go in the end?"+RESPONSIBILITY_POLICY,
                                     [
                                         "I went out without getting wet",
                                         "I went out but got wet",
@@ -53,14 +53,18 @@ export default (bot: TelegramBot) => {
                                     { is_anonymous: false }
                                 );
 
-                                pollService.create({
-                                    id: newPoll.poll.id,
-                                    message_id: newPoll.message_id,
-                                    group_id: poll.group_id,
-                                    type: "out_x2",
-                                    expire: DateTime.now().plus({ seconds: POLLS_EXPIRE_ACTION_SECONDS }).set({millisecond: 0, second: 0}).toJSDate(),
-                                    target_impostor: null
-                                });
+                                if(!_.isNil(newPoll.poll)){
+                                    pollService.create({
+                                        id: newPoll.poll.id,
+                                        message_id: newPoll.message_id,
+                                        group_id: poll.group_id,
+                                        type: "out_x2",
+                                        expire: DateTime.now().plus({ seconds: POLLS_EXPIRE_ACTION_SECONDS }).set({millisecond: 0, second: 0}).toJSDate(),
+                                        target_impostor: null
+                                    });
+                                }else{
+                                    throw new Error("Cannot create poll because is null");
+                                }
                             } else {
                                 await bot.sendMessage(poll.group_id, "Better this way bikers, go out by car or stay home and relax");
                             }
@@ -86,7 +90,7 @@ export default (bot: TelegramBot) => {
                             let distanceTotal: number;
                             let calculatedKm: number;
                             let messageDistanceToday = "";
-                            let findUser: IUser | null;
+                            let findUser: IUser | undefined;
                             for (const track of listTracks) {
                                 distanceTotal = 0;
 
@@ -103,7 +107,9 @@ export default (bot: TelegramBot) => {
                                     const minTime = _.minBy(track.positions, (position) => position.date);
                                     const maxTime = _.maxBy(track.positions, (position) => position.date);
 
-                                    totalTime = DateTime.fromJSDate(maxTime.date).diff(DateTime.fromJSDate(minTime.date)).toMillis();
+                                    if(!_.isNil(minTime) && !_.isNil(maxTime)){
+                                        totalTime = DateTime.fromJSDate(maxTime.date).diff(DateTime.fromJSDate(minTime.date)).toMillis();
+                                    }
                                 }
 
                                 if (distanceTotal > 0){
@@ -143,7 +149,7 @@ export default (bot: TelegramBot) => {
 
                             await bot.sendMessage(poll.group_id, message);
                             await trackService.removeAllPositionsByPollId(poll.id);
-                        } else if (poll.type === "impostor"){
+                        } else if (poll.type === "impostor" && !_.isNil(poll.target_impostor)){
                             const users = await userService.findManyByGroupId(poll.group_id);
 
                             const userImpostor: IUser | undefined = _.find(users, { id: poll.target_impostor });

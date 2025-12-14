@@ -8,6 +8,8 @@ import { GroupErrorGeneric, GroupNotFound, PollErrorGeneric, PollNotFound, UserE
 
 const logger = Logger("bot-utils");
 
+export const RESPONSIBILITY_POLICY = "\n\n ⚠️⚠️ PLEASE NOTE ⚠️⚠️: That the data may be inaccurate, and we assume no responsibility for any damage";
+
 export enum commands {
     SET_LOCATION = "set_location",
     SET_DAYS = "set_days",
@@ -41,7 +43,7 @@ export function wrapBotMessage(bot: TelegramBot, main: (message: TelegramBot.Mes
         await exceptionsHandler(bot, message.chat.id, async () => {
             //check cache user
             if (!_.isNil(message.from) && !message.from.is_bot){
-                await userCacheUtils.getUserCache(message.chat.id, message.from.id, message.from.username);
+                await userCacheUtils.getUserCache(message.chat.id, message.from.id, message.from.username as string); //todo controllare username
             }
 
             if (onlyPermissionGroup(message)){

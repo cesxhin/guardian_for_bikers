@@ -11,7 +11,7 @@ const logger = Logger("version-utils");
 const NAME_VERSION = "gfb";
 
 async function main(){
-    let find: IVersion = await modelVersion.findOne({name: NAME_VERSION}).lean();
+    let find: IVersion | null = await modelVersion.findOne({name: NAME_VERSION}).lean();
 
     if (_.isNil(find)){
         logger.debug(`Not found version for ${NAME_VERSION}`);
@@ -47,7 +47,7 @@ async function main(){
     }
 }
 
-async function updateVersion(currentVersion: number): Promise<IVersion> {
+async function updateVersion(currentVersion: number): Promise<IVersion | null> {
     return await modelVersion.findOneAndUpdate({name: NAME_VERSION }, { version: currentVersion }, {new: true}).lean();
 }
 
