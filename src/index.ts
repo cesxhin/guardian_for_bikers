@@ -46,6 +46,26 @@ async function main(){
     }
     logger.info("Bot connected!");
 
+    bot.on('polling_error', async (error) => {
+        logger.error("Failed polling, details:", error);
+
+        await bot.stopPolling();
+
+        logger.warn("Stop polling and wait for 5 seconds before retry reconntect");
+
+        await new Promise<void>(resolve => setTimeout(resolve, 5000));
+
+        await bot.startPolling();
+
+        try{
+            await bot.getMe();
+
+            logger.info("Bot reconnected!");
+        }catch{
+            //ignore
+        }
+    });
+
     listenersBot(bot);
     cronWeather(bot);
     cronPoll(bot);

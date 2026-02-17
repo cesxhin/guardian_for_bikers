@@ -7,10 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2025-xx-xx
 
-## [1.2.1] - 2026-xx-xx
+## [1.2.1] - 2026-02-17
 
 ### Fixed
 - Missing time when send pre notice for bot maintance
+- It was not handled properly when polling failed and did not reconnect correctly.
+- Update lib
 
 ## [1.2.0] - 2025-12-14
 
