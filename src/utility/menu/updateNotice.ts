@@ -35,7 +35,7 @@ export default async (bot: TelegramBot) => {
 
     const date = DateTime.fromFormat(dateString, FORMAT_DATE);
 
-    await messageUtils.sendNotice(bot, (group) => `Hello bikers 🏍️,\nthe bot is scheduled to be updated on ${date.setZone(group.timezone).toLocaleString()} 📆\nDuring that time, the bot will be temporarily unavailable.`);
+    await messageUtils.sendNotice(bot, (group) => `Hello bikers 🏍️,\nthe bot is scheduled to be updated on ${date.setZone(group.timezone).toLocaleString(DateTime.DATETIME_SHORT)} 📆\nDuring that time, the bot will be temporarily unavailable.`);
     
     outro();
 };
