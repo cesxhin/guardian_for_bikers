@@ -3,14 +3,14 @@ import { CronJob } from "cron";
 import { DateTime, Duration } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
-import Logger from "../lib/logger";
-import graphUtils from "../utils/graphUtils";
-import { IGroup } from "../domains/interfaces/IGroup";
-import { PollService } from "../services/pollService";
-import { GroupService } from "../services/groupService";
-import { WeatherService } from "../services/weatherService";
-import { CRON_WEATHER, POLLS_EXPIRE_QUESTION_SECONDS } from "../env";
-import { exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils";
+import Logger from "../lib/logger.ts";
+import graphUtils from "../utils/graphUtils.ts";
+import { IGroup } from "../domains/interfaces/IGroup.ts";
+import { PollService } from "../services/pollService.ts";
+import { GroupService } from "../services/groupService.ts";
+import { WeatherService } from "../services/weatherService.ts";
+import { CRON_WEATHER, POLLS_EXPIRE_QUESTION_SECONDS } from "../env.ts";
+import { exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils.ts";
 
 const logger = Logger("cron-weather");
 
@@ -50,14 +50,23 @@ export default (bot: TelegramBot) => {
                             const dataTypeWeather: string[] = [];
                             const listTimeBlacklist: number[] = [];
 
+                            let time: string | undefined, prec: number | undefined, rain: number | undefined;
                             for (let i = 0; i < weather.hourly.time.length; i++){
 
-                                onlyTime = DateTime.fromISO(weather.hourly.time[i]).toFormat("HH:mm");
+                                time = weather.hourly.time[i];
+                                rain = weather.hourly.rain[i];
+                                prec = weather.hourly.precipitation_probability[i];
+
+                                if(_.isNil(time) || _.isNil(rain) || _.isNil(prec)){
+                                    continue;
+                                }
+
+                                onlyTime = DateTime.fromISO(time).toFormat("HH:mm");
 
                                 if (onlyTime >= group.start_time_guardian && onlyTime <= group.end_time_guardian){
-                                    if (weather.hourly.rain[i] > 0){
+                                    if (rain > 0){
                                         dataTypeWeather.push("2");
-                                    } else if (weather.hourly.precipitation_probability[i] > 0){
+                                    } else if (prec > 0){
                                         dataTypeWeather.push(`1 - ${weather.hourly.precipitation_probability[i]}`);
                                     } else {
                                         dataTypeWeather.push("0");

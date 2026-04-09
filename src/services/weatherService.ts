@@ -1,5 +1,5 @@
-import { IForecast } from "../domains/interfaces/api/IForecast";
-import { WeatherRepository } from "../repository/weatherRepository";
+import { IForecast } from "../domains/interfaces/api/IForecast.ts";
+import { WeatherRepository } from "../repository/weatherRepository.ts";
 
 export class WeatherService {
     private weatherRepository = new WeatherRepository();

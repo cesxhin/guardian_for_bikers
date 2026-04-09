@@ -1,6 +1,6 @@
 import fs from "fs";
 import _ from "lodash";
-import Logger from "./lib/logger";
+import Logger from "./lib/logger.ts";
 
 const logger = Logger("env");
 

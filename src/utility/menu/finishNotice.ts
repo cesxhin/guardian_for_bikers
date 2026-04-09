@@ -1,7 +1,7 @@
 import TelegramBot from "node-telegram-bot-api";
 import {log, confirm, intro, outro} from "@clack/prompts";
 
-import messageUtils from "../utils/messageUtils";
+import messageUtils from "../utils/messageUtils.ts";
 
 export default async (bot: TelegramBot) => {
     intro("Finish Notice");

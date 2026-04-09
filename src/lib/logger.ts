@@ -11,7 +11,7 @@ export default (nameService: string) => winston.createLogger({
             const meta: string[] = [];
             const symbols = Object.getOwnPropertySymbols(args);
             if (symbols.length == 2) {
-                if (_.isArray(args[symbols[1]])){
+                if (!_.isNil(symbols[1]) && _.isArray(args[symbols[1]])){
                     for (const arg of (args[symbols[1]] as any[])) {
                         if (_.isObject(arg)){
                             meta.push(JSON.stringify(arg));

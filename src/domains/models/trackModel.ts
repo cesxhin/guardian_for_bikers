@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import { ITrack } from "../interfaces/ITrack";
+import { ITrack } from "../interfaces/ITrack.ts";
 
 const schemaTrack = new mongoose.Schema<ITrack>({
     user_id: Number,

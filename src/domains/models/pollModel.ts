@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import { IPoll } from "../interfaces/IPoll";
+import { IPoll } from "../interfaces/IPoll.ts";
 
 const schemaPoll = new mongoose.Schema<IPoll>({
     id: String,

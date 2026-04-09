@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { IVersion } from "../interfaces/IVersion";
+
+import { IVersion } from "../interfaces/IVersion.ts";
 
 const schemaVersion = new mongoose.Schema<IVersion>({
     name: String,

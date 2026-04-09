@@ -1,11 +1,11 @@
 import _ from "lodash";
 
-import Logger from "../lib/logger";
-import { VERSION_CURRENT_DB } from "../env";
-import { modelUser } from "../domains/models/userMode";
-import { modelPoll } from "../domains/models/pollModel";
-import { IVersion } from "../domains/interfaces/IVersion";
-import { modelVersion } from "../domains/models/versionModel";
+import Logger from "../lib/logger.ts";
+import { VERSION_CURRENT_DB } from "../env.ts";
+import { modelUser } from "../domains/models/userMode.ts";
+import { modelPoll } from "../domains/models/pollModel.ts";
+import { IVersion } from "../domains/interfaces/IVersion.ts";
+import { modelVersion } from "../domains/models/versionModel.ts";
 
 const logger = Logger("version-utils");
 const NAME_VERSION = "gfb";

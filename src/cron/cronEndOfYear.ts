@@ -2,9 +2,9 @@ import { CronJob } from "cron";
 import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
-import Logger from "../lib/logger";
-import { GroupService } from "../services/groupService";
-import { UserService } from "../services/userService";
+import Logger from "../lib/logger.ts";
+import { UserService } from "../services/userService.ts";
+import { GroupService } from "../services/groupService.ts";
 
 const logger = Logger("cron-end-of-year");
 

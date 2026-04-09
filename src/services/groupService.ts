@@ -1,8 +1,9 @@
-import { IGroup } from "../domains/interfaces/IGroup";
-import { GroupConflict, GroupNotFound } from "../utils/exceptionsUtils";
-import { GroupRepository } from "../repository/groupRepository";
 import _ from "lodash";
-import { StrictOmit } from "../lib/types";
+
+import { StrictOmit } from "../lib/types.ts";
+import { IGroup } from "../domains/interfaces/IGroup.ts";
+import { GroupRepository } from "../repository/groupRepository.ts";
+import { GroupConflict, GroupNotFound } from "../utils/exceptionsUtils.ts";
 
 
 export class GroupService {

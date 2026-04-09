@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { IWeatherLocation } from "../domains/interfaces/api/IWeatherLocation";
+import { IWeatherLocation } from "../domains/interfaces/api/IWeatherLocation.ts";
 
 export class LocationRepository {
     private URL_API = "https://geocoding-api.open-meteo.com/v1/search";

@@ -1,7 +1,7 @@
-import { ITrack } from "../domains/interfaces/ITrack";
-import { StrictOmit } from "../lib/types";
-import { TrackRepository } from "../repository/trackRepository";
-import { TrackNotFound } from "../utils/exceptionsUtils";
+import { StrictOmit } from "../lib/types.ts";
+import { ITrack } from "../domains/interfaces/ITrack.ts";
+import { TrackNotFound } from "../utils/exceptionsUtils.ts";
+import { TrackRepository } from "../repository/trackRepository.ts";
 
 export class TrackService {
     trackRepository = new TrackRepository();

@@ -4,13 +4,13 @@ import { CronJob } from "cron";
 import { DateTime, Duration } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
-import Logger from "../lib/logger";
-import { IUser } from "../domains/interfaces/IUser";
-import { PollService } from "../services/pollService";
-import { exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils";
-import { UserService } from "../services/userService";
-import { TrackService } from "../services/trackService";
-import { CRON_POLL, POLLS_EXPIRE_ACTION_SECONDS } from "../env";
+import Logger from "../lib/logger.ts";
+import { IUser } from "../domains/interfaces/IUser.ts";
+import { PollService } from "../services/pollService.ts";
+import { UserService } from "../services/userService.ts";
+import { TrackService } from "../services/trackService.ts";
+import { CRON_POLL, POLLS_EXPIRE_ACTION_SECONDS } from "../env.ts";
+import { exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils.ts";
 
 const logger = Logger("cron-poll");
 
@@ -41,7 +41,7 @@ export default (bot: TelegramBot) => {
 
                         if (poll.type == "question"){
 
-                            if (resultPoll.options[0].voter_count >= 1){
+                            if (!_.isNil(resultPoll.options[0]) && resultPoll.options[0].voter_count >= 1){
                                 const newPoll = await bot.sendPoll(
                                     poll.group_id,
                                     "At your own risk, it might rain, how did it go in the end?"+RESPONSIBILITY_POLICY,
@@ -95,11 +95,13 @@ export default (bot: TelegramBot) => {
                                 distanceTotal = 0;
 
                                 track.positions.forEach((value, index) => {
-                                    if ((index + 1) === track.positions.length){
+                                    const position = track.positions[index + 1];
+                                    
+                                    if ((index + 1) === track.positions.length || _.isNil(position)){
                                         return;
                                     }
 
-                                    distanceTotal += geolib.getPreciseDistance({lat: value.lat, lon: value.long}, {lat: track.positions[index + 1].lat, lon: track.positions[index + 1].long});
+                                    distanceTotal += geolib.getPreciseDistance({lat: value.lat, lon: value.long}, {lat: position.lat, lon: position.long});
                                 });
 
                                 let totalTime = 0;

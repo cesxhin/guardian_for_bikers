@@ -1,10 +1,10 @@
 import _ from "lodash";
 import TelegramBot from "node-telegram-bot-api";
 
-import Logger from "../lib/logger";
-import { USERNAME_BOT } from "../env";
-import userCacheUtils from "./userCacheUtils";
-import { GroupErrorGeneric, GroupNotFound, PollErrorGeneric, PollNotFound, UserErrorGeneric, UserNotFound } from "./exceptionsUtils";
+import Logger from "../lib/logger.ts";
+import { USERNAME_BOT } from "../env.ts";
+import userCacheUtils from "./userCacheUtils.ts";
+import { GroupErrorGeneric, GroupNotFound, PollErrorGeneric, PollNotFound, UserErrorGeneric, UserNotFound } from "./exceptionsUtils.ts";
 
 const logger = Logger("bot-utils");
 

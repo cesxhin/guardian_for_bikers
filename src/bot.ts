@@ -3,20 +3,20 @@ import { DateTime } from "luxon";
 import AsyncLock from "async-lock";
 import TelegramBot from "node-telegram-bot-api";
 
-import Logger from "./lib/logger";
-import commandsUtils from "./utils/commandsUtils";
-import { IPoll } from "./domains/interfaces/IPoll";
-import { IUser } from "./domains/interfaces/IUser";
-import userCacheUtils from "./utils/userCacheUtils";
-import pollCacheUtils from "./utils/pollCacheUtils";
-import { UserService } from "./services/userService";
-import { PollService } from "./services/pollService";
-import { GroupService } from "./services/groupService";
-import { TrackService } from "./services/trackService";
-import { LocationSerivce } from "./services/locationService";
-import { POLLS_EXPIRE_IMPOSTOR_SECONDS, USERNAME_BOT } from "./env";
-import { PollIsClosed, PollIsExpired, UserNotFound } from "./utils/exceptionsUtils";
-import { commands, createMention, exceptionsHandler, timeCommand, wrapBotMessage, MESSAGE_WELCOME } from "./utils/botUtils";
+import Logger from "./lib/logger.ts";
+import commandsUtils from "./utils/commandsUtils.ts";
+import { IPoll } from "./domains/interfaces/IPoll.ts";
+import { IUser } from "./domains/interfaces/IUser.ts";
+import userCacheUtils from "./utils/userCacheUtils.ts";
+import pollCacheUtils from "./utils/pollCacheUtils.ts";
+import { UserService } from "./services/userService.ts";
+import { PollService } from "./services/pollService.ts";
+import { GroupService } from "./services/groupService.ts";
+import { TrackService } from "./services/trackService.ts";
+import { LocationSerivce } from "./services/locationService.ts";
+import { POLLS_EXPIRE_IMPOSTOR_SECONDS, USERNAME_BOT } from "./env.ts";
+import { PollIsClosed, PollIsExpired, UserNotFound } from "./utils/exceptionsUtils.ts";
+import { commands, createMention, exceptionsHandler, timeCommand, wrapBotMessage, MESSAGE_WELCOME } from "./utils/botUtils.ts";
 
 const logger = Logger("bot");
 
@@ -480,7 +480,7 @@ Your current settings:
             message,
             command: commands.IMPOSTOR,
             functionExecuteCommand: async (mention, messageReceived) => {
-                if (_.isArray(messageReceived.entities) && messageReceived.entities.length > 0 && messageReceived.entities[0].type === "mention"){
+                if (_.isArray(messageReceived.entities) && messageReceived.entities.length > 0 && !_.isNil(messageReceived.entities[0]) && messageReceived.entities[0].type === "mention"){
                     const usernameImpostor = mention.replace("@", "");
 
                     let find: IUser | null = null;

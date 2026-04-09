@@ -2,13 +2,13 @@ import mongoose from "mongoose";
 import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
-import Logger from "./lib/logger";
-import listenersBot from "./bot";
-import cronPoll from "./cron/cronPoll";
-import cronWeather from "./cron/cronWeather";
-import { URL_MONGO, TOKEN_BOT } from "./env";
-import versionUtils from "./utils/versionUtils";
-import cronEndOfYear from "./cron/cronEndOfYear";
+import Logger from "./lib/logger.ts";
+import listenersBot from "./bot.ts";
+import cronPoll from "./cron/cronPoll.ts";
+import cronWeather from "./cron/cronWeather.ts";
+import { URL_MONGO, TOKEN_BOT } from "./env.ts";
+import versionUtils from "./utils/versionUtils.ts";
+import cronEndOfYear from "./cron/cronEndOfYear.ts";
 
 const logger = Logger("main");
 

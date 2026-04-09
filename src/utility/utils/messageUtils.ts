@@ -2,8 +2,8 @@ import _ from "lodash";
 import { log, progress } from "@clack/prompts";
 import TelegramBot from "node-telegram-bot-api";
 
-import { IGroup } from "../../domains/interfaces/IGroup";
-import { modelGroup } from "../../domains/models/groupModel";
+import { IGroup } from "../../domains/interfaces/IGroup.ts";
+import { modelGroup } from "../../domains/models/groupModel.ts";
 
 async function sendNotice(bot: TelegramBot, message: ((group: IGroup) => string) | string){
     let list: IGroup[];

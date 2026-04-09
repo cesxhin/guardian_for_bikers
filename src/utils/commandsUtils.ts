@@ -1,8 +1,8 @@
 import _ from "lodash";
 import TelegramBot from "node-telegram-bot-api";
 
-import userCacheUtils from "./userCacheUtils";
-import { checkMyCommand, commands } from "./botUtils";
+import userCacheUtils from "./userCacheUtils.ts";
+import { checkMyCommand, commands } from "./botUtils.ts";
 
 const historyCommand = new Map<string, commands>();
 

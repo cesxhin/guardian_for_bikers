@@ -1,9 +1,9 @@
 import { DateTime } from "luxon";
 import { intro, isCancel, log, outro, select } from "@clack/prompts";
 
-import updateNotice from "./menu/updateNotice";
-import finishNotice from "./menu/finishNotice";
-import connectionsUtils from "./utils/connectionsUtils";
+import updateNotice from "./menu/updateNotice.ts";
+import finishNotice from "./menu/finishNotice.ts";
+import connectionsUtils from "./utils/connectionsUtils.ts";
 
 let terminate = false;
 

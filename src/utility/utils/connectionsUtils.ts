@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
+import { spinner, log } from "@clack/prompts";
 import TelegramBot from "node-telegram-bot-api";
 
-import { URL_MONGO, TOKEN_BOT } from "../../env";
-import { spinner, log } from "@clack/prompts";
+import { URL_MONGO, TOKEN_BOT } from "../../env.ts";
 
 const s = spinner();
 
