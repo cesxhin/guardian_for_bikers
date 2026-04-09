@@ -32,7 +32,7 @@ const emojiPlugin: Plugin = {
         ctx.textBaseline = "bottom";
         ctx.font = "30px";
 
-        if(_.isNil(xAxis)){
+        if (_.isNil(xAxis)){
             return;
         }
 

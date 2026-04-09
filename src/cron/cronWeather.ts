@@ -57,7 +57,7 @@ export default (bot: TelegramBot) => {
                                 rain = weather.hourly.rain[i];
                                 prec = weather.hourly.precipitation_probability[i];
 
-                                if(_.isNil(time) || _.isNil(rain) || _.isNil(prec)){
+                                if (_.isNil(time) || _.isNil(rain) || _.isNil(prec)){
                                     continue;
                                 }
 
