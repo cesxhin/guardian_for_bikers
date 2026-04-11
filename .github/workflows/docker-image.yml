@@ -12,6 +12,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Set workdir
+        run: cd src
       - name: Install npm
         run: npm i
       - name: Run test
