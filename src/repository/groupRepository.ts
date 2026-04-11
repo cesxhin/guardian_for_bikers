@@ -37,7 +37,7 @@ export class GroupRepository {
     async edit(id: number, data: Omit<Partial<IGroup>, "id">): Promise<IGroup>{
         let group: IGroup | null;
         try {
-            group = await modelGroup.findOneAndUpdate({ id }, data, { new: true }).lean();
+            group = await modelGroup.findOneAndUpdate({ id }, data, { returnDocument: "after" }).lean();
         } catch (err){
             logger.error("Error edit, details:", err);
             throw new GroupErrorGeneric(err);

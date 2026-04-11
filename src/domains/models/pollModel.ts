@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { IPoll } from "../interfaces/IPoll.ts";
 
 const schemaPoll = new mongoose.Schema<IPoll>({
-    id: String,
+    id: { type: String, unique: true},
     message_id: Number,
     group_id: Number,
     expire: Date,

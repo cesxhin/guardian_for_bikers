@@ -37,7 +37,7 @@ export class TrackRepository {
     async edit(user_id: number, group_id: number, poll_id: string, data: StrictOmit<Partial<ITrack>, "group_id" | "poll_id" | "created" | "user_id">): Promise<ITrack>{
         let track: ITrack | null;
         try {
-            track = await modelTrack.findOneAndUpdate({ user_id, group_id, poll_id }, data, { new: true }).lean();
+            track = await modelTrack.findOneAndUpdate({ user_id, group_id, poll_id, terminate: false }, data, { returnDocument: "after" }).lean();
         } catch (err){
             logger.error("Error edit, details:", err);
             throw new TrackErrorGeneric(err);
@@ -50,27 +50,9 @@ export class TrackRepository {
         return track;
     }
 
-    async removeAllPositionsByPollId(poll_id: string): Promise<void>{
+    async findByPollId(poll_id: string): Promise<ITrack[]>{
         try {
-            await modelTrack.updateMany({ poll_id }, { positions: [] });
-        } catch (err){
-            logger.error("Error edit, details:", err);
-            throw new TrackErrorGeneric(err);
-        }
-    }
-
-    async terminateAllFromPollId(poll_id: string): Promise<void>{
-        try {
-            await modelTrack.updateMany({ poll_id }, { $set: { terminate: true, updated: new Date() } });
-        } catch (err){
-            logger.error("Error terminateAllFromPollId, details:", err);
-            throw new TrackErrorGeneric(err);
-        }
-    }
-
-    async findAllTermintedFromPollId(poll_id: string): Promise<ITrack[]>{
-        try {
-            return await modelTrack.find({ poll_id, terminate: true }).lean();
+            return await modelTrack.find({ poll_id, terminate: false }).lean();
         } catch (err){
             logger.error("Error findAllTermintedFromPollId, details:", err);
             throw new TrackErrorGeneric(err);
@@ -82,7 +64,7 @@ export class TrackRepository {
 
         let track: ITrack | null;
         try {
-            track = await modelTrack.findOneAndUpdate({ user_id, group_id, poll_id, terminate: false }, { $push: { positions: { $each: data.positions } }, $set: { updated: new Date() } }, { new: true }).lean();
+            track = await modelTrack.findOneAndUpdate({ user_id, group_id, poll_id, terminate: false }, { $push: { positions: { $each: data.positions } }, $set: { updated: new Date() } }, { returnDocument: "after" }).lean();
         } catch (err){
             logger.error("Error addPositions, details:", err);
             throw new TrackErrorGeneric(err);
@@ -109,7 +91,7 @@ export class TrackRepository {
         }
     }
 
-    async deleteByChatId(group_id: number): Promise<void>{
+    async deleteByGroupId(group_id: number): Promise<void>{
         try {
             await modelTrack.deleteMany({ group_id });
         } catch (err){

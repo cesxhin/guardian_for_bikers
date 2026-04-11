@@ -79,7 +79,7 @@ export class UserService {
     }
 
     async getIdsByChatId(chatId: number): Promise<number[]>{
-        return await this.userRepository.getIdsByChatId(chatId);
+        return (await this.userRepository.findManyByGroupId(chatId)).map((user) => user.id);
     }
 
     async resetScoreMultiplerNotAnswered(chatId: number, users: number[]): Promise<void>{
@@ -92,7 +92,7 @@ export class UserService {
 
     async resetAll(chatId: number): Promise<void>{
         await this.userRepository.resetAll(chatId);
-        await this.pollRepository.deleteByChatId(chatId);
-        await this.trackRepository.deleteByChatId(chatId);
+        await this.pollRepository.deleteByGroupId(chatId);
+        await this.trackRepository.deleteByGroupId(chatId);
     }
 }

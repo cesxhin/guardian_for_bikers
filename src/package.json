@@ -9,7 +9,8 @@
     "build": "tsup",
     "build-panel-control": "tsup --config panel-control.tsup.config.ts",
     "eslint": "eslint",
-    "eslint-fix": "eslint --fix"
+    "eslint-fix": "eslint --fix",
+    "test": "vitest"
   },
   "keywords": [],
   "author": "cesxhin",
@@ -44,11 +45,13 @@
     "@typescript-eslint/parser": "8.58.1",
     "eslint": "10.2.0",
     "globals": "^17.4.0",
+    "mongodb-memory-server": "^11.0.1",
     "node-gyp": "12.2.0",
     "tsup": "8.5.1",
     "tsx": "4.21.0",
     "typescript": "6.0.2",
-    "typescript-eslint": "8.58.1"
+    "typescript-eslint": "8.58.1",
+    "vitest": "^4.1.4"
   },
   "overrides": {
     "node-telegram-bot-api": {

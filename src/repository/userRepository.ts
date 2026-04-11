@@ -49,20 +49,11 @@ export class UserRepository {
             throw new UserErrorGeneric(err);
         }
     }
-
-    async getIdsByChatId(chatId: number): Promise<number[]>{
-        try {
-            return await modelUser.distinct("id", {chat_id: chatId}).lean();
-        } catch (err){
-            logger.error("Error find, details:", err);
-            throw new UserErrorGeneric(err);
-        }
-    }
     
     async edit(chat_id: number, id: number, data: StrictOmit<Partial<IUser>, "id">): Promise<IUser>{
         let user: IUser | null;
         try {
-            user = await modelUser.findOneAndUpdate({ id, chat_id }, data, { new: true }).lean();
+            user = await modelUser.findOneAndUpdate({ id, chat_id }, data, { returnDocument: "after" }).lean();
         } catch (err){
             logger.error("Error edit, details:", err);
             throw new UserErrorGeneric(err);

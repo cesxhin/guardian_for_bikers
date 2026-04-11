@@ -17,4 +17,6 @@ const schemaUser = new mongoose.Schema<IUser>({
     totalImpostor: Number
 });
 
+schemaUser.index({id: 1, chat_id: 1, username: 1}, {unique: true});
+
 export const modelUser = mongoose.model("user", schemaUser, "users");

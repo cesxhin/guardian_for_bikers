@@ -239,8 +239,8 @@ export default async function (bot: TelegramBot) {
                     await groupSerivce.delete(message.chat.id);
                     const listIds = await userService.getIdsByChatId(message.chat.id);
                     await userService.deleteManyByChatId(message.chat.id);
-                    await pollService.deleteByChatId(message.chat.id);
-                    await trackService.deleteByChatId(message.chat.id);
+                    await pollService.deleteByGroupId(message.chat.id);
+                    await trackService.deleteByGroupId(message.chat.id);
 
                     userCacheUtils.userCache.del(userCacheUtils.getMultiplePrimaryKeyCompose(message.chat.id, listIds));
 

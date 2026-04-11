@@ -14,4 +14,6 @@ const schemaTrack = new mongoose.Schema<ITrack>({
     updated: { type: Date, default: null }
 });
 
+schemaTrack.index({user_id: 1, group_id: 1, poll_id: 1}, {unique: true});
+
 export const modelTrack = mongoose.model("track", schemaTrack, "tracks");

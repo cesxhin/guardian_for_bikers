@@ -71,23 +71,6 @@ export class PollRepository {
             throw new PollErrorGeneric(err);
         }
     }
-
-    async listValidWithTypeOutById(id: string): Promise<IPoll>{
-
-        let poll: IPoll | null;
-        try {
-            poll = await modelPoll.findOne({id, stop: false, type: { $ne: "question" }}).lean();
-        } catch (err){
-            logger.error("Error listValidWithTypeOut, details:", err);
-            throw new PollErrorGeneric(err);
-        }
-
-        if (_.isNil(poll)){
-            throw new PollNotFound("Not found poll id "+ id);
-        }
-
-        return poll;
-    }
         
     async deleteByIds(ids: string[]): Promise<void>{
         let count = 0;
@@ -106,7 +89,7 @@ export class PollRepository {
     async edit(id: string, data: Partial<IPoll>): Promise<IPoll>{
         let user: IPoll | null;
         try {
-            user = await modelPoll.findOneAndUpdate({ id }, data, { new: true }).lean();
+            user = await modelPoll.findOneAndUpdate({ id, stop: false }, data, { returnDocument: "after" }).lean();
         } catch (err){
             logger.error("Error edit, details:", err);
             throw new PollErrorGeneric(err);
@@ -123,7 +106,7 @@ export class PollRepository {
 
         let poll: IPoll | null;
         try {
-            poll = await modelPoll.findOneAndUpdate({ id, stop: false }, { $push: { answered: userId } }, {new: true}).lean();
+            poll = await modelPoll.findOneAndUpdate({ id, stop: false }, { $push: { answered: userId } }, { returnDocument: "after" }).lean();
         } catch (err){
             logger.error("Error answered, details:", err);
             throw new PollErrorGeneric(err);
@@ -136,11 +119,11 @@ export class PollRepository {
         return poll;
     }
 
-    async deleteByChatId(chatId: number): Promise<void>{
+    async deleteByGroupId(groupId: number): Promise<void>{
         try {
-            await modelPoll.deleteMany({ group_id: chatId });
+            await modelPoll.deleteMany({ group_id: groupId });
         } catch (err){
-            logger.error("Error deleteByChatId, details:", err);
+            logger.error("Error deleteByGroupId, details:", err);
             throw new PollErrorGeneric(err);
         }
     }

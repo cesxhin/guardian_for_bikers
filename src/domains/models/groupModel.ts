@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { IGroup } from "../interfaces/IGroup.ts";
 
 const schemaGroup = new mongoose.Schema<IGroup>({
-    id: Number,
+    id: { type: Number, unique: true},
     name: String,
     enabled: Boolean,
     location: String,

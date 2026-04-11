@@ -9,6 +9,13 @@ on:
       - 'Dockerfile'
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install npm
+        run: npm i
+      - name: Run test
+        run: npm run test
   build:
     runs-on: ubuntu-latest
     steps:

@@ -17,10 +17,6 @@ export class PollService {
         return await this.pollRepository.checkTargetImpostor(group_id, user_id);
     }
 
-    async listValidWithTypeOutById(id: string): Promise<IPoll>{
-        return await this.pollRepository.listValidWithTypeOutById(id);
-    }
-
     async findById(id: string): Promise<IPoll>{
         return await this.pollRepository.findById(id);
     }
@@ -60,8 +56,8 @@ export class PollService {
         return poll;
     }
 
-    async deleteByChatId(chatId: number): Promise<void> {
-        await this.pollRepository.deleteByChatId(chatId);
+    async deleteByGroupId(groupId: number): Promise<void> {
+        await this.pollRepository.deleteByGroupId(groupId);
     }
 
     async deleteByIds(ids: string[]): Promise<void>{

@@ -78,11 +78,8 @@ export default (bot: TelegramBot) => {
                             //get all list users from groups
                             const users = await userService.findManyByGroupId(poll.group_id);
 
-                            //close all tracks
-                            await trackService.terminateAllFromPollId(poll.id);
-
                             //get all tracks closed
-                            const listTracks = await trackService.findAllTermintedFromPollId(poll.id);
+                            const listTracks = await trackService.findByPollId(poll.id);
 
                             logger.debug("Found total tracks: ", listTracks.length);
 
@@ -119,7 +116,7 @@ export default (bot: TelegramBot) => {
 
                                     logger.debug(`This track "${track.user_id}, ${track.group_id}, ${track.poll_id}" covered these kilometers ${calculatedKm}`);
                                     
-                                    await trackService.edit(track.user_id, track.group_id, track.poll_id, { totalKm: calculatedKm, totalTime });
+                                    await trackService.edit(track.user_id, track.group_id, track.poll_id, { totalKm: calculatedKm, totalTime, positions: [], terminate: true });
 
                                     findUser = _.find(users, {id: track.user_id});
 
@@ -150,7 +147,6 @@ export default (bot: TelegramBot) => {
                             }
 
                             await bot.sendMessage(poll.group_id, message);
-                            await trackService.removeAllPositionsByPollId(poll.id);
                         } else if (poll.type === "impostor" && !_.isNil(poll.target_impostor)){
                             const users = await userService.findManyByGroupId(poll.group_id);
 
