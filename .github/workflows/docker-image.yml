@@ -14,12 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set workdir
-        run: cd src
       - name: Install npm
+        working-directory: src
         run: npm i
       - name: Run test
+        working-directory: src
         run: npm run test
   build:
     runs-on: ubuntu-latest
