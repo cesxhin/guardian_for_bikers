@@ -2,6 +2,9 @@
   "name": "src",
   "version": "1.2.1",
   "main": "index.js",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "start": "tsx index.ts",
     "panel-control": "tsx ./utility/index.ts",
@@ -10,7 +13,8 @@
     "build-panel-control": "tsup --config panel-control.tsup.config.ts",
     "eslint": "eslint",
     "eslint-fix": "eslint --fix",
-    "test": "vitest"
+    "test-dev": "vitest --reporter=tree",
+    "test": "vitest --reporter=github-actions"
   },
   "keywords": [],
   "author": "cesxhin",
