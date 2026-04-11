@@ -7,11 +7,14 @@ on:
     paths:
       - 'src/**'
       - 'Dockerfile'
+      - '.github/workflows/**'
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Set workdir
         run: cd src
       - name: Install npm
