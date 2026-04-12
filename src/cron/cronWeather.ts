@@ -6,9 +6,9 @@ import TelegramBot from "node-telegram-bot-api";
 import Logger from "../lib/logger.ts";
 import graphUtils from "../utils/graphUtils.ts";
 import { IGroup } from "../domains/interfaces/IGroup.ts";
-import { PollService } from "../services/pollService.ts";
-import { GroupService } from "../services/groupService.ts";
-import { WeatherService } from "../services/weatherService.ts";
+import { PollService } from "../applications/services/pollService.ts";
+import { GroupService } from "../applications/services/groupService.ts";
+import { WeatherService } from "../applications/services/weatherService.ts";
 import { CRON_WEATHER, POLLS_EXPIRE_QUESTION_SECONDS } from "../env.ts";
 import { exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils.ts";
 

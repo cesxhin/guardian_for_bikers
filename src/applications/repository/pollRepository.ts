@@ -1,10 +1,10 @@
 import _ from "lodash";
 
-import Logger from "../lib/logger.ts";
-import { StrictOmit } from "../lib/types.ts";
-import { IPoll } from "../domains/interfaces/IPoll.ts";
-import { modelPoll } from "../domains/models/pollModel.ts";
-import { PollErrorGeneric, PollNotFound } from "../utils/exceptionsUtils.ts";
+import Logger from "../../lib/logger.ts";
+import { StrictOmit } from "../../lib/types.ts";
+import { IPoll } from "../../domains/interfaces/IPoll.ts";
+import { modelPoll } from "../../domains/models/pollModel.ts";
+import { PollErrorGeneric, PollNotFound } from "../../utils/exceptionsUtils.ts";
 
 const logger = Logger("poll-repository");
 

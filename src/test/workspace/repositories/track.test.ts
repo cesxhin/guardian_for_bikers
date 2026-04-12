@@ -2,11 +2,11 @@ import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { modelTrack } from "../../../domains/models/trackModel.ts";
-import { TrackRepository } from "../../../repository/trackRepository.ts";
 import trackData from "../../data/trackData.ts";
 import { ITrack } from "../../../domains/interfaces/ITrack.ts";
 import { TrackNotFound } from "../../../utils/exceptionsUtils.ts";
+import { modelTrack } from "../../../domains/models/trackModel.ts";
+import { TrackRepository } from "../../../applications/repository/trackRepository.ts";
 
 describe("track-repository", () => {
     let instanceMongoServer: MongoMemoryServer | undefined;

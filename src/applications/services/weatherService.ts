@@ -1,4 +1,4 @@
-import { IForecast } from "../domains/interfaces/api/IForecast.ts";
+import { IForecast } from "../../domains/interfaces/api/IForecast.ts";
 import { WeatherRepository } from "../repository/weatherRepository.ts";
 
 export class WeatherService {

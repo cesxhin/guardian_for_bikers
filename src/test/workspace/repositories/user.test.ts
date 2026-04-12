@@ -2,11 +2,11 @@ import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { modelUser } from "../../../domains/models/userMode.ts";
-import { UserRepository } from "../../../repository/userRepository.ts";
 import userData from "../../data/userData.ts";
 import { IUser } from "../../../domains/interfaces/IUser.ts";
+import { modelUser } from "../../../domains/models/userMode.ts";
 import { UserNotFound } from "../../../utils/exceptionsUtils.ts";
+import { UserRepository } from "../../../applications/repository/userRepository.ts";
 
 describe("group-repository", () => {
     let instanceMongoServer: MongoMemoryServer | undefined;

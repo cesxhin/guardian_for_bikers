@@ -4,7 +4,7 @@ import NodeCache from "node-cache";
 import Logger from "../lib/logger.ts";
 import { POLLS_EXPIRE_SECONDS } from "../env.ts";
 import { IPoll } from "../domains/interfaces/IPoll.ts";
-import { PollService } from "../services/pollService.ts";
+import { PollService } from "../applications/services/pollService.ts";
 
 const logger = Logger("poll-cache");
 const pollService = new PollService();

@@ -1,10 +1,10 @@
 import _ from "lodash";
 
-import Logger from "../lib/logger.ts";
-import { StrictOmit } from "../lib/types.ts";
-import { ITrack } from "../domains/interfaces/ITrack.ts";
-import { modelTrack } from "../domains/models/trackModel.ts";
-import { TrackErrorGeneric, TrackNotFound } from "../utils/exceptionsUtils.ts";
+import Logger from "../../lib/logger.ts";
+import { StrictOmit } from "../../lib/types.ts";
+import { ITrack } from "../../domains/interfaces/ITrack.ts";
+import { modelTrack } from "../../domains/models/trackModel.ts";
+import { TrackErrorGeneric, TrackNotFound } from "../../utils/exceptionsUtils.ts";
 
 const logger = Logger("track-repository");
 

@@ -6,7 +6,7 @@ import pollData from "../../data/pollData.ts";
 import { IPoll } from "../../../domains/interfaces/IPoll.ts";
 import { modelPoll } from "../../../domains/models/pollModel.ts";
 import { PollNotFound } from "../../../utils/exceptionsUtils.ts";
-import { PollRepository } from "../../../repository/pollRepository.ts";
+import { PollRepository } from "../../../applications/repository/pollRepository.ts";
 
 describe("poll-repository", () => {
     let instanceMongoServer: MongoMemoryServer | undefined;

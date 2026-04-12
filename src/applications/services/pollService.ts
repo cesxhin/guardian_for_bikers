@@ -1,10 +1,10 @@
 import _ from "lodash";
 
-import { StrictOmit } from "../lib/types.ts";
-import { IPoll } from "../domains/interfaces/IPoll.ts";
-import pollCacheUtils from "../utils/pollCacheUtils.ts";
+import { StrictOmit } from "../../lib/types.ts";
+import { IPoll } from "../../domains/interfaces/IPoll.ts";
+import pollCacheUtils from "../../utils/pollCacheUtils.ts";
 import { PollRepository } from "../repository/pollRepository.ts";
-import { PollConflict, PollIsClosed, PollIsExpired, PollNotFound } from "../utils/exceptionsUtils.ts";
+import { PollConflict, PollIsClosed, PollIsExpired, PollNotFound } from "../../utils/exceptionsUtils.ts";
 
 export class PollService {
     private pollRepository = new PollRepository();

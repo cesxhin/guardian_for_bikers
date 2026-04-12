@@ -6,7 +6,7 @@ import Logger from "../lib/logger.ts";
 import { USERS_EXPIRE_SECONDS } from "../env.ts";
 import { UserNotFound } from "./exceptionsUtils.ts";
 import { IUser } from "../domains/interfaces/IUser.ts";
-import { UserService } from "../services/userService.ts";
+import { UserService } from "../applications/services/userService.ts";
 
 const logger = Logger("user-cache");
 const lockUserCache = new AsyncLock();

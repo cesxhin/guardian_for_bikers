@@ -1,10 +1,10 @@
 import _ from "lodash";
 
-import Logger from "../lib/logger.ts";
-import { StrictOmit } from "../lib/types.ts";
-import { IGroup } from "../domains/interfaces/IGroup.ts";
-import { modelGroup } from "../domains/models/groupModel.ts";
-import { GroupErrorGeneric, GroupNotFound } from "../utils/exceptionsUtils.ts";
+import Logger from "../../lib/logger.ts";
+import { StrictOmit } from "../../lib/types.ts";
+import { IGroup } from "../../domains/interfaces/IGroup.ts";
+import { modelGroup } from "../../domains/models/groupModel.ts";
+import { GroupErrorGeneric, GroupNotFound } from "../../utils/exceptionsUtils.ts";
 
 const logger = Logger("group-repository");
 

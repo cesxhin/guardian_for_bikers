@@ -1,10 +1,10 @@
 import _ from "lodash";
 
-import Logger from "../lib/logger.ts";
-import { StrictOmit } from "../lib/types.ts";
-import { IUser } from "../domains/interfaces/IUser.ts";
-import { modelUser } from "../domains/models/userMode.ts";
-import { UserErrorGeneric, UserNotFound } from "../utils/exceptionsUtils.ts";
+import Logger from "../../lib/logger.ts";
+import { StrictOmit } from "../../lib/types.ts";
+import { IUser } from "../../domains/interfaces/IUser.ts";
+import { modelUser } from "../../domains/models/userMode.ts";
+import { UserErrorGeneric, UserNotFound } from "../../utils/exceptionsUtils.ts";
 
 const logger = Logger("user-repository");
 

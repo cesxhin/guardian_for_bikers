@@ -3,8 +3,8 @@ import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "../lib/logger.ts";
-import { UserService } from "../services/userService.ts";
-import { GroupService } from "../services/groupService.ts";
+import { UserService } from "../applications/services/userService.ts";
+import { GroupService } from "../applications/services/groupService.ts";
 
 const logger = Logger("cron-end-of-year");
 

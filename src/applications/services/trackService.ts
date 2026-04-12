@@ -1,6 +1,6 @@
-import { StrictOmit } from "../lib/types.ts";
-import { ITrack } from "../domains/interfaces/ITrack.ts";
-import { TrackNotFound } from "../utils/exceptionsUtils.ts";
+import { StrictOmit } from "../../lib/types.ts";
+import { ITrack } from "../../domains/interfaces/ITrack.ts";
+import { TrackNotFound } from "../../utils/exceptionsUtils.ts";
 import { TrackRepository } from "../repository/trackRepository.ts";
 
 export class TrackService {

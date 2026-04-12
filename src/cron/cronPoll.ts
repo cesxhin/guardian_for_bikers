@@ -6,9 +6,9 @@ import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "../lib/logger.ts";
 import { IUser } from "../domains/interfaces/IUser.ts";
-import { PollService } from "../services/pollService.ts";
-import { UserService } from "../services/userService.ts";
-import { TrackService } from "../services/trackService.ts";
+import { PollService } from "../applications/services/pollService.ts";
+import { UserService } from "../applications/services/userService.ts";
+import { TrackService } from "../applications/services/trackService.ts";
 import { CRON_POLL, POLLS_EXPIRE_ACTION_SECONDS } from "../env.ts";
 import { exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils.ts";
 

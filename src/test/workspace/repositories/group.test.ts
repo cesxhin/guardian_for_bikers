@@ -6,7 +6,7 @@ import groupsData from "../../data/groupsData.ts";
 import { IGroup } from "../../../domains/interfaces/IGroup.ts";
 import { GroupNotFound } from "../../../utils/exceptionsUtils.ts";
 import { modelGroup } from "../../../domains/models/groupModel.ts";
-import {GroupRepository} from "../../../repository/groupRepository.ts";
+import {GroupRepository} from "../../../applications/repository/groupRepository.ts";
 
 describe("group-repository", () => {
     let instanceMongoServer: MongoMemoryServer | undefined;
