@@ -89,7 +89,17 @@ export class PollRepository {
     async edit(id: string, data: Partial<IPoll>): Promise<IPoll>{
         let user: IPoll | null;
         try {
-            user = await modelPoll.findOneAndUpdate({ id, stop: false }, data, { returnDocument: "after" }).lean();
+            user = await modelPoll.findOneAndUpdate({
+                id,
+                stop: false
+            }, {
+                $set: {
+                    ...data,
+                    updated: new Date()
+                }
+            }, {
+                returnDocument: "after"
+            }).lean();
         } catch (err){
             logger.error("Error edit, details:", err);
             throw new PollErrorGeneric(err);
@@ -106,7 +116,15 @@ export class PollRepository {
 
         let poll: IPoll | null;
         try {
-            poll = await modelPoll.findOneAndUpdate({ id, stop: false }, { $push: { answered: userId } }, { returnDocument: "after" }).lean();
+            poll = await modelPoll.findOneAndUpdate({
+                id,
+                stop: false
+            }, {
+                $push: { answered: userId },
+                $set: { updated: new Date() }
+            }, {
+                returnDocument: "after"
+            }).lean();
         } catch (err){
             logger.error("Error answered, details:", err);
             throw new PollErrorGeneric(err);

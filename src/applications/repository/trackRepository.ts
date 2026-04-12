@@ -25,19 +25,22 @@ export class TrackRepository {
         return track;
     }
 
-    async create(data: StrictOmit<ITrack, "created" | "updated" | "terminate" | "totalKm" | "totalTime">): Promise<ITrack> {
-        try {
-            return (await modelTrack.create(data)).toObject();
-        } catch (err){
-            logger.error("Error create, details:", err);
-            throw new TrackErrorGeneric(err);
-        }
-    }
-
     async edit(user_id: number, group_id: number, poll_id: string, data: StrictOmit<Partial<ITrack>, "group_id" | "poll_id" | "created" | "user_id">): Promise<ITrack>{
         let track: ITrack | null;
         try {
-            track = await modelTrack.findOneAndUpdate({ user_id, group_id, poll_id, terminate: false }, data, { returnDocument: "after" }).lean();
+            track = await modelTrack.findOneAndUpdate({
+                user_id,
+                group_id,
+                poll_id,
+                terminate: false
+            }, {
+                $set: {
+                    ...data,
+                    updated: new Date()
+                }
+            }, {
+                returnDocument: "after"
+            }).lean();
         } catch (err){
             logger.error("Error edit, details:", err);
             throw new TrackErrorGeneric(err);
@@ -60,18 +63,38 @@ export class TrackRepository {
 
     }
 
-    async addPositions(user_id: number, group_id: number, poll_id: string, data: Pick<ITrack, "positions">): Promise<ITrack>{
+    async addPositions(data: Pick<ITrack, "positions" | "user_id" | "group_id" | "poll_id">): Promise<ITrack>{
 
         let track: ITrack | null;
         try {
-            track = await modelTrack.findOneAndUpdate({ user_id, group_id, poll_id, terminate: false }, { $push: { positions: { $each: data.positions } }, $set: { updated: new Date() } }, { returnDocument: "after" }).lean();
+            track = await modelTrack.findOneAndUpdate(
+                {
+                    user_id: data.user_id,
+                    group_id: data.group_id,
+                    poll_id: data.poll_id,
+                    terminate: false
+                }, {
+                    $push: {
+                        positions: { $each: data.positions }
+                    },
+                    $set: { updated: new Date() },
+                    $setOnInsert: {
+                        user_id: data.user_id,
+                        group_id: data.group_id,
+                        poll_id: data.poll_id
+                    }
+                },
+                {
+                    returnDocument: "after",
+                    upsert: true
+                }).lean();
         } catch (err){
             logger.error("Error addPositions, details:", err);
             throw new TrackErrorGeneric(err);
         }
 
         if (_.isNil(track)){
-            throw new TrackNotFound(`Not found track from ids "${user_id}" "${group_id}" "${poll_id}" for update positions`);
+            throw new TrackNotFound(`Not found track from ids "${data.user_id}" "${data.group_id}" "${data.poll_id}" for update positions`);
         }
 
         return track;

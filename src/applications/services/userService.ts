@@ -29,7 +29,7 @@ export class UserService {
             throw new UserConflict(`User id "${id}" already exist`);
         }
 
-        return await this.userRepository.create({
+        const user = await this.userRepository.create({
             id,
             chat_id,
             currentYear: DateTime.now().year,
@@ -40,13 +40,15 @@ export class UserService {
             totalImpostor: 0,
             totalKm: 0
         });
+        
+        const primaryKeyCache = userCacheUtils.getPrimaryKeyCompose(user.chat_id, user.id);
+        userCacheUtils.userCache.set(primaryKeyCache, user);
+
+        return user;
     }
     
     async edit(chatId: number, id: number, data: StrictOmit<Partial<IUser>, "id" | "created" | "updated" | "chat_id">): Promise<IUser>{
-        const user = await this.userRepository.edit(chatId, id, {
-            ...data,
-            updated: new Date()
-        });
+        const user = await this.userRepository.edit(chatId, id, data);
 
         const primaryKeyCache = userCacheUtils.getPrimaryKeyCompose(user.chat_id, user.id);
         if (userCacheUtils.userCache.has(primaryKeyCache)){

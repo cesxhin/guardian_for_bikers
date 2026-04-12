@@ -26,15 +26,7 @@ export class GroupService {
 
         return await this.groupRepository.create({
             id,
-            name,
-            enabled: true,
-            latitude: 41.8919,
-            longitude: 12.5113,
-            location: "rome",
-            timezone: "Europe/Rome",
-            days_trigger: [true, true, true, true, true, true, true],
-            start_time_guardian: "00:00",
-            end_time_guardian: "23:00"
+            name
         });
     }
 

@@ -8,7 +8,7 @@ import { modelUser } from "../../../domains/models/userMode.ts";
 import { UserNotFound } from "../../../utils/exceptionsUtils.ts";
 import { UserRepository } from "../../../applications/repository/userRepository.ts";
 
-describe("group-repository", () => {
+describe("user-repository", () => {
     let instanceMongoServer: MongoMemoryServer | undefined;
     const userRepository = new UserRepository();
 

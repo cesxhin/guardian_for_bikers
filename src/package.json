@@ -14,6 +14,7 @@
     "eslint": "eslint",
     "eslint-fix": "eslint --fix",
     "test-dev": "vitest --reporter=tree",
+    "test-converage": "vitest --reporter=tree --coverage",
     "test": "vitest --reporter=github-actions"
   },
   "keywords": [],
@@ -35,7 +36,8 @@
     "mongoose": "9.4.1",
     "node-cache": "5.1.2",
     "node-telegram-bot-api": "0.67.0",
-    "winston": "3.19.0"
+    "winston": "3.19.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "5.10.0",
@@ -47,6 +49,7 @@
     "@types/node-telegram-bot-api": "0.64.14",
     "@types/winston": "2.4.4",
     "@typescript-eslint/parser": "8.58.1",
+    "@vitest/coverage-v8": "^4.1.4",
     "eslint": "10.2.0",
     "globals": "^17.4.0",
     "mongodb-memory-server": "^11.0.1",

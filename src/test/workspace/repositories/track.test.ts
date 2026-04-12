@@ -46,49 +46,15 @@ describe("track-repository", () => {
         });
     });
 
-    describe("method: create", () => {
-        it("create track", async () => {
-            await expect(
-                trackRepository.create({
-                    group_id: 2,
-                    poll_id: "poll-create-1",
-                    user_id: 2,
-                    positions: []
-                })
-            ).resolves.toMatchObject({
-                group_id: 2,
-                poll_id: "poll-create-1",
-                user_id: 2
-            } satisfies Partial<ITrack>);
-        });
-
-        it("duplicate track", async () => {
-            await trackRepository.create({
-                group_id: 2,
-                poll_id: "poll-create-2",
-                user_id: 2,
-                positions: []
-            });
-
-            await expect(
-                trackRepository.create({
-                    group_id: 2,
-                    poll_id: "poll-create-2",
-                    user_id: 2,
-                    positions: []
-                })
-            ).rejects.toThrow();
-        });
-    });
-
     describe("method: edit", () => {
         it("edit track", async () => {
-            await trackRepository.create({
+            await trackRepository.addPositions({
                 group_id: 2,
                 poll_id: "poll-edit-1",
                 user_id: 2,
                 positions: []
             });
+
             await expect(
                 trackRepository.edit(2, 2, "poll-edit-1", {totalKm: 10})
             ).resolves.toMatchObject({
@@ -100,7 +66,7 @@ describe("track-repository", () => {
         });
 
         it("cannot edit track already terminate", async () => {
-            await trackRepository.create({
+            await trackRepository.addPositions({
                 group_id: 2,
                 poll_id: "poll-edit-2",
                 user_id: 2,
@@ -134,7 +100,7 @@ describe("track-repository", () => {
 
     describe("method: addPositions", () => {
         it("find track", async () => {
-            await trackRepository.create({
+            await trackRepository.addPositions({
                 group_id: 2,
                 poll_id: "poll-add-pos-1",
                 user_id: 2,
@@ -143,7 +109,14 @@ describe("track-repository", () => {
 
             const data: Pick<ITrack, "positions"> = {positions: [{date: new Date(), lat: 0, long: 0}, {date: new Date(), lat: 5, long: 1}]};
             
-            await expect(trackRepository.addPositions(2, 2, "poll-add-pos-1", data)).resolves.toMatchObject({
+            await expect(
+                trackRepository.addPositions({
+                    group_id: 2,
+                    user_id: 2,
+                    poll_id: "poll-add-pos-1",
+                    ...data
+                })
+            ).resolves.toMatchObject({
                 group_id: 2,
                 user_id: 2,
                 poll_id: "poll-add-pos-1",
@@ -156,7 +129,7 @@ describe("track-repository", () => {
         });
 
         it("not found track already terminate", async () => {
-            await trackRepository.create({
+            await trackRepository.addPositions({
                 group_id: 2,
                 poll_id: "poll-add-pos-2",
                 user_id: 2,
@@ -171,7 +144,7 @@ describe("track-repository", () => {
 
     describe("method: deleteByIds", () => {
         it("find track", async () => {
-            await trackRepository.create({
+            await trackRepository.addPositions({
                 group_id: 2,
                 poll_id: "poll-delete-1",
                 user_id: 2,
@@ -191,19 +164,19 @@ describe("track-repository", () => {
     describe("method: deleteByGroupId", () => {
         it("find tracks", async () => {
             await Promise.all([
-                trackRepository.create({
+                trackRepository.addPositions({
                     group_id: 3,
                     poll_id: "poll-delete-many-1",
                     user_id: 1,
                     positions: []
                 }),
-                trackRepository.create({
+                trackRepository.addPositions({
                     group_id: 3,
                     poll_id: "poll-delete-many-2",
                     user_id: 2,
                     positions: []
                 }),
-                trackRepository.create({
+                trackRepository.addPositions({
                     group_id: 3,
                     poll_id: "poll-delete-many-3",
                     user_id: 3,

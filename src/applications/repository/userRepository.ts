@@ -53,14 +53,26 @@ export class UserRepository {
     async edit(chat_id: number, id: number, data: StrictOmit<Partial<IUser>, "id">): Promise<IUser>{
         let user: IUser | null;
         try {
-            user = await modelUser.findOneAndUpdate({ id, chat_id }, data, { returnDocument: "after" }).lean();
+            user = await modelUser.findOneAndUpdate({
+                id,
+                chat_id
+            }, {
+                $set: {
+                    ...data,
+                    updated: new Date()
+                }
+            }, {
+                returnDocument: "after"
+            }).lean();
         } catch (err){
             logger.error("Error edit, details:", err);
             throw new UserErrorGeneric(err);
         }
+
         if (_.isNil(user)){
             throw new UserNotFound(`Not found user id "${id}" for edit`);
         }
+        
         return user;
     }
 

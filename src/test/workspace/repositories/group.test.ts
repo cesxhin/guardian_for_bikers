@@ -46,15 +46,7 @@ describe("group-repository", () => {
         it("find group", async () => {
             await groupRepository.create({
                 id: -111,
-                name: "test-edit-1",
-                latitude: 0,
-                longitude: 0,
-                location: "italy",
-                timezone: "rome",
-                days_trigger: [true, true, true, true, true, true, true],
-                enabled: true,
-                start_time_guardian: "10:00",
-                end_time_guardian: "12:00"
+                name: "test-edit-1"
             });
 
             
@@ -79,15 +71,7 @@ describe("group-repository", () => {
             await expect(
                 groupRepository.create({
                     id: -99999,
-                    name: "test--99999",
-                    latitude: 0,
-                    longitude: 0,
-                    location: "italy",
-                    timezone: "rome",
-                    days_trigger: [true, true, true, true, true, true, true],
-                    enabled: true,
-                    start_time_guardian: "10:00",
-                    end_time_guardian: "12:00"
+                    name: "test--99999"
                 })
             ).resolves.toMatchObject({
                 id: -99999
@@ -98,15 +82,7 @@ describe("group-repository", () => {
             await expect(
                 groupRepository.create({
                     id: 1,
-                    name: "test-1",
-                    latitude: 0,
-                    longitude: 0,
-                    location: "italy",
-                    timezone: "rome",
-                    days_trigger: [true, true, true, true, true, true, true],
-                    enabled: true,
-                    start_time_guardian: "10:00",
-                    end_time_guardian: "12:00"
+                    name: "test-1"
                 })
             ).rejects.toThrow();
         });
@@ -116,15 +92,7 @@ describe("group-repository", () => {
         it("find group", async () => {
             await groupRepository.create({
                 id: -111111,
-                name: "test--111111",
-                latitude: 0,
-                longitude: 0,
-                location: "italy",
-                timezone: "rome",
-                days_trigger: [true, true, true, true, true, true, true],
-                enabled: true,
-                start_time_guardian: "10:00",
-                end_time_guardian: "12:00"
+                name: "test--111111"
             });
 
             await expect(groupRepository.find(-111111)).resolves.toBeDefined();

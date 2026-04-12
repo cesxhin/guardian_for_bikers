@@ -1,7 +1,6 @@
 import _ from "lodash";
 
 import Logger from "../../lib/logger.ts";
-import { StrictOmit } from "../../lib/types.ts";
 import { IGroup } from "../../domains/interfaces/IGroup.ts";
 import { modelGroup } from "../../domains/models/groupModel.ts";
 import { GroupErrorGeneric, GroupNotFound } from "../../utils/exceptionsUtils.ts";
@@ -50,7 +49,7 @@ export class GroupRepository {
         return group;
     }
 
-    async create(data: StrictOmit<IGroup, "created" | "updated">): Promise<IGroup> {
+    async create(data: Pick<IGroup, "id" | "name">): Promise<IGroup> {
         try {
             return (await modelGroup.create(data)).toObject();
         } catch (err){

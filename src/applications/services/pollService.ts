@@ -58,6 +58,12 @@ export class PollService {
 
     async deleteByGroupId(groupId: number): Promise<void> {
         await this.pollRepository.deleteByGroupId(groupId);
+
+        for (const key of pollCacheUtils.pollCache.keys()) {
+            if (pollCacheUtils.pollCache.get<IPoll>(key)?.group_id === groupId){
+                pollCacheUtils.pollCache.del(key);
+            }
+        }
     }
 
     async deleteByIds(ids: string[]): Promise<void>{
@@ -73,10 +79,7 @@ export class PollService {
     }
 
     async edit(id: string, data: Partial<StrictOmit<IPoll, "id" | "group_id" | "message_id" | "type" | "updated" | "created">>): Promise<IPoll> {
-        const poll = await this.pollRepository.edit(id, {
-            ...data,
-            updated: new Date()
-        });
+        const poll = await this.pollRepository.edit(id, data);
 
         pollCacheUtils.pollCache.set(id, poll);
 

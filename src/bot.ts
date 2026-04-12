@@ -565,7 +565,12 @@ Your current settings:
 
             await exceptionsHandler(bot, message.chat.id, async () => {
                 if (poll.stop === false && new Date() < poll.expire && !_.isNil(message.location) && poll.type !== "question") {
-                    await trackService.addPositions(message.from?.id || -1, message.chat.id, poll.id, { positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date((message?.edit_date || 0) * 1000) }] });
+                    await trackService.addPositions({
+                        group_id: message.chat.id,
+                        user_id: message.from?.id || -1,
+                        poll_id: poll.id,
+                        positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date((message?.edit_date || 0) * 1000) }]
+                    });
                 }
             });
         });
