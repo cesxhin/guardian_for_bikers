@@ -162,6 +162,9 @@ describe("poll-service", () => {
                 type: "impostor",
                 expire: new Date()
             });
+
+            await new Promise(resolve => setTimeout(resolve, 25));
+            
             const pollEdited = await pollService.edit(poll.id, {stop: true});
 
             await expect(z.parseAsync(schemaPoll, pollEdited)).resolves.toBeDefined();
@@ -170,7 +173,7 @@ describe("poll-service", () => {
             //check field update
             expect(pollEdited.updated).not.toBeNull();
             expect(pollEdited.updated?.getTime()).not.eq(poll.updated?.getTime());
-            expect(pollEdited.updated?.getTime()).not.eq(poll.created?.getTime());
+            expect(pollEdited.updated?.getTime()).not.eq(pollEdited.created?.getTime());
         });
     });
 });
