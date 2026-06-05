@@ -141,6 +141,9 @@ describe("poll-service", () => {
                 type: "impostor",
                 expire: new Date()
             });
+
+            await new Promise(resolve => setTimeout(resolve, 25));
+
             const pollAnswred = await pollService.answered(poll.id, 1);
 
             await expect(z.parseAsync(schemaPoll, pollAnswred)).resolves.toBeDefined();
@@ -164,7 +167,7 @@ describe("poll-service", () => {
             });
 
             await new Promise(resolve => setTimeout(resolve, 25));
-            
+
             const pollEdited = await pollService.edit(poll.id, {stop: true});
 
             await expect(z.parseAsync(schemaPoll, pollEdited)).resolves.toBeDefined();

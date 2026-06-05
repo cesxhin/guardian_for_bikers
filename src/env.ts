@@ -42,7 +42,8 @@ export const CRON_POLL = process.env.CRON_POLL || "*/5 * * * *"; //Every 5 minut
 export const USERS_EXPIRE_SECONDS = parseInt(process.env.USERS_EXPIRE_SECONDS || "") || 10800; //3 hours;
 
 // -- CACHE POLLS --
-export const POLLS_EXPIRE_SECONDS = parseInt(process.env.POLLS_EXPIRE_SECONDS || "") || 3900; //1 hour and 5minutes;
+export const POLLS_CACHE_EXPIRE = parseInt(process.env.POLLS_CACHE_EXPIRE || "") || 3900; //1 hour and 5 minutes;
+export const POLLS_CACHE_CHECK_PERIOD = parseInt(process.env.POLLS_CACHE_CHECK_PERIOD || "") || 300; //5 minutes;
 
 // -- SETTINGS POLLS --
 export const POLLS_EXPIRE_QUESTION_SECONDS = parseInt(process.env.POLLS_EXPIRE_QUESTION_SECONDS || "") || 3600 * 2; //2 hour

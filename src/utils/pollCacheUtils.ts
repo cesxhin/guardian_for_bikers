@@ -2,16 +2,16 @@ import _ from "lodash";
 import NodeCache from "node-cache";
 
 import Logger from "../lib/logger.ts";
-import { POLLS_EXPIRE_SECONDS } from "../env.ts";
+import cacheUtils from "./cacheUtils.ts";
 import { IPoll } from "../domains/interfaces/IPoll.ts";
 import { PollService } from "../applications/services/pollService.ts";
-import cacheUtils from "./cacheUtils.ts";
+import { POLLS_CACHE_CHECK_PERIOD, POLLS_CACHE_EXPIRE } from "../env.ts";
 
 const logger = Logger("poll-cache");
 const pollService = new PollService();
 const pollCache = new NodeCache({
-    stdTTL: POLLS_EXPIRE_SECONDS,
-    checkperiod: 300 //5 minutes
+    stdTTL: POLLS_CACHE_EXPIRE,
+    checkperiod: POLLS_CACHE_CHECK_PERIOD
 });
 
 pollCache.on("set", (key) => {
