@@ -5,6 +5,7 @@ import Logger from "../lib/logger.ts";
 import { POLLS_EXPIRE_SECONDS } from "../env.ts";
 import { IPoll } from "../domains/interfaces/IPoll.ts";
 import { PollService } from "../applications/services/pollService.ts";
+import cacheUtils from "./cacheUtils.ts";
 
 const logger = Logger("poll-cache");
 const pollService = new PollService();
@@ -24,14 +25,7 @@ pollCache.on("expired", (key) => {
 });
 
 async function getPollCache(id: string): Promise<IPoll>{
-    if (pollCache.has(id)){
-        return pollCache.get(id) as IPoll;
-    } else {
-        const poll = await pollService.findById(id);
-        pollCache.set(poll.id, poll);
-
-        return poll;
-    }
+    return await cacheUtils.getCache<IPoll>(pollCache, id, async () => await pollService.findById(id));
 }
 
 async function getPollCacheByGroupId(group_id: number): Promise<IPoll>{

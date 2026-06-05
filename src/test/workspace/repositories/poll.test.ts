@@ -57,7 +57,7 @@ describe("poll-repository", () => {
     describe("method: findByGroupId", () => {
         it("find poll", async () => {
             await expect(pollRepository.findByGroupId(1)).resolves.toMatchObject({
-                id: "poll-1"
+                id: "poll-6"
             } satisfies Partial<IPoll>);
         });
 

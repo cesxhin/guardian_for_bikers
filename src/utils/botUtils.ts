@@ -21,7 +21,7 @@ export enum commands {
     ABOUT = "about"
 }
 
-export function onlyPermissionGroup(message: TelegramBot.Message){
+export function onlyPermissionGroup(message: Pick<TelegramBot.Message, "chat">): boolean {
     return message.chat.type === "group" || message.chat.type === "supergroup";
 }
 
@@ -33,7 +33,7 @@ export function checkMyCommand(text: string | undefined | null, command: command
             buildCommand += `@${USERNAME_BOT}`;
         }
 
-        return text.indexOf(buildCommand) !== -1;
+        return text.startsWith(buildCommand);
     }
 
     return false;
@@ -116,7 +116,7 @@ export function timeCommand(time: string): { text: string }[][]{
     ];
 }
 
-export function createMention(message: { first_name: string, user_id: number }, text: string){
+export function createMention(message: { first_name: string, user_id: number }, text: string): string {
     return `[${message.first_name}](tg://user?id=${message.user_id}) ${text.replace(/([_*\[\]()~`>#+=|{}.!-])/g, "\\$1")}`;
 }
 

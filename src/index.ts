@@ -1,3 +1,4 @@
+import axios from "axios";
 import mongoose from "mongoose";
 import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
@@ -11,7 +12,21 @@ import versionUtils from "./utils/versionUtils.ts";
 import cronEndOfYear from "./cron/cronEndOfYear.ts";
 
 const logger = Logger("main");
+const loggerAxios = Logger("axios");
 
+//axios
+axios.interceptors.request.use((config) => {
+    loggerAxios.info(`Request: ${config.url}, params: ${JSON.stringify(config.params || {})}`);
+
+    return config;
+});
+axios.interceptors.response.use((response) => {
+    loggerAxios.info(`Response: ${response.config.url}, params: ${JSON.stringify(response.config.params || {})} ${response.status}`);
+    
+    return response;
+});
+
+//main
 async function main(){
 
     logger.info("Current timezone:", DateTime.local().zoneName);

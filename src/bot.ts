@@ -301,67 +301,64 @@ export default async function (bot: TelegramBot) {
 
     //answer
     bot.on("poll_answer", async (pollAnswer) => {
-        await lockPollCache.acquire(pollAnswer.poll_id, async () => {
+        let poll: IPoll;
+        try {
+            poll = await pollCacheUtils.getPollCache(pollAnswer.poll_id);
+        } catch (err) {
+            logger.error("Failed get data poll from cache, details:", err);
+            return;
+        }
 
-            let poll: IPoll;
-            try {
-                poll = await pollCacheUtils.getPollCache(pollAnswer.poll_id);
-            } catch (err) {
-                logger.error("Failed get data poll from cache, details:", err);
-                return;
-            }
+        if (poll.type === "out" || poll.type === "out_x2") {
+            await exceptionsHandler(bot, poll.group_id, async () => {
+                const user = await userCacheUtils.getUserCache(poll.group_id, pollAnswer.user.id, pollAnswer.user.username as string); //todo da pensare bene ma non e' urgente
 
-            if (poll.type === "out" || poll.type === "out_x2") {
-                await exceptionsHandler(bot, poll.group_id, async () => {
-                    const user = await userCacheUtils.getUserCache(poll.group_id, pollAnswer.user.id, pollAnswer.user.username as string); //todo da pensare bene ma non e' urgente
+                let points = 0;
+                let skipOut = false;
 
-                    let points = 0;
-                    let skipOut = false;
-
-                    switch (poll.type) {
-                    case "out":
-                        if (pollAnswer.option_ids[0] === 0) {
-                            points = 1;
-                        } else {
-                            skipOut = true;
-                        }
-                        break;
-                    case "out_x2":
-                        if (pollAnswer.option_ids[0] === 0) {
-                            points = 2;
-                        } else if (pollAnswer.option_ids[0] === 1) {
-                            points = -2;
-                        } else {
-                            skipOut = true;
-                        }
-                        break;
+                switch (poll.type) {
+                case "out":
+                    if (pollAnswer.option_ids[0] === 0) {
+                        points = 1;
+                    } else {
+                        skipOut = true;
                     }
-
-                    if (points > 0) {
-                        points *= user.scoreMultiplier + 1;
-                    } else if (points < 0) {
-                        points *= (user.scoreMultiplier || 1);
+                    break;
+                case "out_x2":
+                    if (pollAnswer.option_ids[0] === 0) {
+                        points = 2;
+                    } else if (pollAnswer.option_ids[0] === 1) {
+                        points = -2;
+                    } else {
+                        skipOut = true;
                     }
-
-                    await userService.edit(user.chat_id, user.id, {
-                        points: skipOut ? user.points : user.points + points,
-                        scoreMultiplier: points > 0 ? user.scoreMultiplier + 1 : 0,
-                        outWithBike: user.outWithBike + (skipOut ? 0 : 1),
-                        skipOutWithBike: user.skipOutWithBike + (skipOut ? 1 : 0)
-                    });
-
-                    await pollService.answered(pollAnswer.poll_id, user.id);
-                });
-            } else if (poll.type === "impostor"){
-                if (poll.target_impostor === pollAnswer.user.id){
-                    await bot.sendMessage(poll.group_id, `Don't be cheeky "${pollAnswer.user.username}", your vote will not be counted.`);
-                } else {
-                    await pollService.answered(pollAnswer.poll_id, pollAnswer.user.id);
+                    break;
                 }
+
+                if (points > 0) {
+                    points *= user.scoreMultiplier + 1;
+                } else if (points < 0) {
+                    points *= (user.scoreMultiplier || 1);
+                }
+
+                await userService.edit(user.chat_id, user.id, {
+                    points: skipOut ? user.points : user.points + points,
+                    scoreMultiplier: points > 0 ? user.scoreMultiplier + 1 : 0,
+                    outWithBike: user.outWithBike + (skipOut ? 0 : 1),
+                    skipOutWithBike: user.skipOutWithBike + (skipOut ? 1 : 0)
+                });
+
+                await pollService.answered(pollAnswer.poll_id, user.id);
+            });
+        } else if (poll.type === "impostor"){
+            if (poll.target_impostor === pollAnswer.user.id){
+                await bot.sendMessage(poll.group_id, `Don't be cheeky "${pollAnswer.user.username}", your vote will not be counted.`);
             } else {
-                logger.debug(`This poll id "${pollAnswer.poll_id}" is not type out so skip evalutate points for user id ${pollAnswer.user.id}`);
+                await pollService.answered(pollAnswer.poll_id, pollAnswer.user.id);
             }
-        });
+        } else {
+            logger.debug(`This poll id "${pollAnswer.poll_id}" is not type out so skip evalutate points for user id ${pollAnswer.user.id}`);
+        }
     });
 
     //command show settings

@@ -61,5 +61,17 @@ export default [
         stop: true,
         target_impostor: 5,
         type: "impostor"
-    }
+    },
+    {
+        id: "poll-6",
+        answered: [],
+        created: new Date(),
+        updated: new Date(),
+        expire: DateTime.now().plus({minutes: 5}).toJSDate(),
+        group_id: 1,
+        message_id: 1,
+        stop: false,
+        target_impostor: 1,
+        type: "impostor"
+    },
 ] satisfies IPoll[];

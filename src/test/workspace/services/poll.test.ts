@@ -170,7 +170,7 @@ describe("poll-service", () => {
             //check field update
             expect(pollEdited.updated).not.toBeNull();
             expect(pollEdited.updated?.getTime()).not.eq(poll.updated?.getTime());
-            expect(pollEdited.updated?.getTime()).not.eq(pollEdited.created?.getTime());
+            expect(pollEdited.updated?.getTime()).not.eq(poll.created?.getTime());
         });
     });
 });
