@@ -76,7 +76,7 @@ export class UserRepository {
         return user;
     }
 
-    async create(data: StrictOmit<IUser, "created" | "updated" | "scoreMultiplier">): Promise<IUser> {
+    async create(data: StrictOmit<IUser, "created" | "updated" | "consecutive">): Promise<IUser> {
         try {
             return (await modelUser.create(data)).toObject();
         } catch (err){
@@ -129,7 +129,7 @@ export class UserRepository {
             }, {
                 outWithBike: 0,
                 points: 0,
-                scoreMultiplier: 0,
+                consecutive: 0,
                 skipOutWithBike: 0,
                 totalImpostor: 0,
                 totalKm: 0

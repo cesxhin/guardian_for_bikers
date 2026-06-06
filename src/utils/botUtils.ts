@@ -147,3 +147,17 @@ There will be three cases:
 
 Enough with the explanations now, have fun bikers!🏍️💨
 `;
+
+export function calculateScoreMultiplier(consecutive: number){
+    if (consecutive < 2){
+        return 1; //0-1 day
+    } else if (consecutive >= 2 && consecutive < 5){
+        return 2; //2-4 day
+    } else if (consecutive >= 5 && consecutive < 8){
+        return 3; //5-7 day
+    } else if (consecutive >= 8 && consecutive < 14){
+        return 4; //8-13 day
+    } else {
+        return 5; //14+ day
+    }
+}

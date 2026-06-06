@@ -142,7 +142,7 @@ describe("poll-service", () => {
                 expire: new Date()
             });
 
-            await new Promise(resolve => setTimeout(resolve, 25));
+            await new Promise((resolve) => setTimeout(resolve, 25));
 
             const pollAnswred = await pollService.answered(poll.id, 1);
 
@@ -166,7 +166,7 @@ describe("poll-service", () => {
                 expire: new Date()
             });
 
-            await new Promise(resolve => setTimeout(resolve, 25));
+            await new Promise((resolve) => setTimeout(resolve, 25));
 
             const pollEdited = await pollService.edit(poll.id, {stop: true});
 

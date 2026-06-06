@@ -31,7 +31,7 @@ export const USERNAME_BOT = process.env.USERNAME_BOT;
 export const URL_MONGO = process.env.URL_MONGO || "mongodb://127.0.0.1:27017/guards_for_bikers";
 
 // -- VERSION DB --
-export const VERSION_CURRENT_DB = 2;
+export const VERSION_CURRENT_DB = 3;
 
 // -- CRON --
 export const CRON_WEATHER = process.env.CRON_WEATHER || "0 * * * *"; //every hour;

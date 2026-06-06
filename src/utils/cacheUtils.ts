@@ -9,18 +9,18 @@ async function getCache<T>(cache: NodeCache, key: string, action: () => Promise<
     }
 
     return await lockPollCache.acquire<T>(key, async () => {
-       if (cache.has(key)){
-           return cache.get<T>(key);
-       }
+        if (cache.has(key)){
+            return cache.get<T>(key);
+        }
 
-       const item = await action();
+        const item = await action();
 
-       cache.set(key, item);
+        cache.set(key, item);
 
-       return item;
-    })
+        return item;
+    });
 }
 
 export default {
     getCache
-}
+};

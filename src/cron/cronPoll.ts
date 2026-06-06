@@ -10,7 +10,7 @@ import { PollService } from "../applications/services/pollService.ts";
 import { UserService } from "../applications/services/userService.ts";
 import { TrackService } from "../applications/services/trackService.ts";
 import { CRON_POLL, POLLS_EXPIRE_ACTION_SECONDS } from "../env.ts";
-import { exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils.ts";
+import { calculateScoreMultiplier, exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils.ts";
 
 const logger = Logger("cron-poll");
 
@@ -142,7 +142,7 @@ export default (bot: TelegramBot) => {
 
                             let rank = 1;
                             for (const user of users.sort((userA, userB) => userB.points - userA.points)) {
-                                message += `${rank === 1? "🥇" : rank === 2? "🥈" : rank === 3? "🥉" : rank.toString().padStart(3, " ") + "  "} ➜ ${user.username}: ${user.points} PT (${user.scoreMultiplier}x)\n`;
+                                message += `${rank === 1? "🥇" : rank === 2? "🥈" : rank === 3? "🥉" : rank.toString().padStart(3, " ") + "  "} ➜ ${user.username}: ${user.points} PT (${calculateScoreMultiplier(user.consecutive)}x)\n`;
                                 rank++;
                             }
 
@@ -157,7 +157,7 @@ export default (bot: TelegramBot) => {
                                 await bot.sendMessage(poll.group_id, `You found the imposter! It's "${usernameImpostor}", therefore their points and point multipliers have been reset!`);
 
                                 if (!_.isNil(userImpostor)){
-                                    await userService.edit(poll.group_id, poll.target_impostor, {points: 0, scoreMultiplier: 0, totalImpostor: userImpostor.totalImpostor + 1});
+                                    await userService.edit(poll.group_id, poll.target_impostor, {points: 0, consecutive: 0, totalImpostor: userImpostor.totalImpostor + 1});
                                 }
                             } else {
                                 await bot.sendMessage(poll.group_id, `The voting has been closed and did not meet the minimum requirements to report '${usernameImpostor}' as an impostor.`);
