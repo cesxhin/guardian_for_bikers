@@ -15,7 +15,7 @@
     "eslint-fix": "eslint --fix",
     "test-dev": "vitest --reporter=tree",
     "test-converage": "vitest --reporter=tree --coverage",
-    "test": "vitest --reporter=github-actions"
+    "test": "vitest"
   },
   "keywords": [],
   "author": "cesxhin",
@@ -33,7 +33,7 @@
     "geolib": "3.3.14",
     "lodash": "4.18.1",
     "luxon": "3.7.2",
-    "mongoose": "9.4.1",
+    "mongoose": "9.6.3",
     "node-cache": "5.1.2",
     "node-telegram-bot-api": "0.67.0",
     "winston": "3.19.0",

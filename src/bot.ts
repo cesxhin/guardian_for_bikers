@@ -16,7 +16,7 @@ import { TrackService } from "./applications/services/trackService.ts";
 import { LocationSerivce } from "./applications/services/locationService.ts";
 import { POLLS_EXPIRE_IMPOSTOR_SECONDS, USERNAME_BOT } from "./env.ts";
 import { PollIsClosed, PollIsExpired, UserNotFound } from "./utils/exceptionsUtils.ts";
-import { commands, createMention, exceptionsHandler, timeCommand, wrapBotMessage, MESSAGE_WELCOME } from "./utils/botUtils.ts";
+import { commands, createMention, exceptionsHandler, timeCommand, wrapBotMessage, MESSAGE_WELCOME, calculateScoreMultiplier } from "./utils/botUtils.ts";
 
 const logger = Logger("bot");
 
@@ -335,15 +335,15 @@ export default async function (bot: TelegramBot) {
                     break;
                 }
 
-                if (points > 0) {
-                    points *= user.scoreMultiplier + 1;
-                } else if (points < 0) {
-                    points *= (user.scoreMultiplier || 1);
-                }
+                //calculate score multiplier
+                const scoreMultiplier = calculateScoreMultiplier(user.consecutive + 1);
+
+                //calculate points
+                points *= scoreMultiplier;
 
                 await userService.edit(user.chat_id, user.id, {
                     points: skipOut ? user.points : user.points + points,
-                    scoreMultiplier: points > 0 ? user.scoreMultiplier + 1 : 0,
+                    consecutive: points > 0 ? user.consecutive + 1 : 0,
                     outWithBike: user.outWithBike + (skipOut ? 0 : 1),
                     skipOutWithBike: user.skipOutWithBike + (skipOut ? 1 : 0)
                 });

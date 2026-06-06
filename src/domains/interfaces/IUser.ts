@@ -10,7 +10,7 @@ export const schemaUser = z.object({
     created: z.date(),
     updated: z.date().nullable(),
     points: z.number().nonnegative(),
-    scoreMultiplier: z.number().nonnegative(),
+    consecutive: z.number().nonnegative(),
     totalKm: z.number().nonnegative(),
     totalImpostor: z.number().nonnegative()
 });

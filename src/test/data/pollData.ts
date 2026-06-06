@@ -73,5 +73,5 @@ export default [
         stop: false,
         target_impostor: 1,
         type: "impostor"
-    },
+    }
 ] satisfies IPoll[];

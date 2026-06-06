@@ -135,20 +135,20 @@ describe("user-service", () => {
             ]);
 
             [user, user2] = await Promise.all([
-                userService.edit(user.chat_id, user.id, {scoreMultiplier: 10}),
-                userService.edit(user2.chat_id, user2.id, {scoreMultiplier: 10})
+                userService.edit(user.chat_id, user.id, {consecutive: 10}),
+                userService.edit(user2.chat_id, user2.id, {consecutive: 10})
             ]);
 
-            expect(user.scoreMultiplier).toBe(10);
-            expect(user2.scoreMultiplier).toBe(10);
+            expect(user.consecutive).toBe(10);
+            expect(user2.consecutive).toBe(10);
 
             await expect(userService.resetScoreMultiplerNotAnswered(user.chat_id, [user2.id])).resolves.toBeUndefined();
 
             user = await userService.findById(user.chat_id, user.id);
             user2 = await userService.findById(user2.chat_id, user2.id);
 
-            expect(user.scoreMultiplier).toBe(0);
-            expect(user2.scoreMultiplier).toBe(10);
+            expect(user.consecutive).toBe(0);
+            expect(user2.consecutive).toBe(10);
         });
     });
 

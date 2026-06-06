@@ -88,7 +88,9 @@ export class UserService {
         const listUsers = await this.userRepository.findMissingFromList(chatId, users);
 
         for (const user of listUsers) {
-            await this.edit(user.chat_id, user.id, { scoreMultiplier: 0 });
+            await this.edit(user.chat_id, user.id, {
+                consecutive: 0
+            });
         };
     }
 

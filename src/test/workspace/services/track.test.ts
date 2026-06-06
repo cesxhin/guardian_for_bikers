@@ -85,7 +85,7 @@ describe("track-service", () => {
                 user_id: -2
             });
 
-            await new Promise(resolve => setTimeout(resolve, 25));
+            await new Promise((resolve) => setTimeout(resolve, 25));
 
             const trackEdited = await trackService.edit(-2, -2, "poll-position-2", {totalKm: 10});
             

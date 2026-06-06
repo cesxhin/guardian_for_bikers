@@ -11,7 +11,7 @@ vi.mock(import("../../../env.ts"), () => {
         USERNAME_BOT: "bot",
         POLLS_CACHE_EXPIRE: 1,
         POLLS_CACHE_CHECK_PERIOD: 1
-    }
+    };
 });
 
 describe("bot-utils", () => {
@@ -30,31 +30,31 @@ describe("bot-utils", () => {
     });
     
     describe("method: getPollCache", () => {
-        it('create cache and clear cache', async () => {
+        it("create cache and clear cache", async () => {
             const callback = vi.fn();
 
-            pollCacheUtils.pollCache.once('set', callback);
+            pollCacheUtils.pollCache.once("set", callback);
 
             await pollCacheUtils.getPollCache("poll-1");
 
             expect(callback).toHaveBeenCalled();
 
             const callbackDel = vi.fn();
-            pollCacheUtils.pollCache.once('del', callbackDel);
+            pollCacheUtils.pollCache.once("del", callbackDel);
 
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise((resolve) => setTimeout(resolve, 2000));
 
             expect(callbackDel).toHaveBeenCalled();
         });
         
-        it('get cache', async () => {
+        it("get cache", async () => {
             await pollCacheUtils.getPollCache("poll-6");
 
             const callback = vi.fn();
-            pollCacheUtils.pollCache.once('set', callback);
+            pollCacheUtils.pollCache.once("set", callback);
             await pollCacheUtils.getPollCache("poll-6");
 
             expect(callback).not.toHaveBeenCalled();
         });
-    })
-})
+    });
+});

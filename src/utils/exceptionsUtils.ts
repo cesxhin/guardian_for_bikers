@@ -89,3 +89,11 @@ export class TrackConflict extends Error {
         this.name = "TrackConflict";
     }
 }
+
+//update versione
+export class UpdateVersionNotFound extends Error {
+    constructor(message: any) {
+        super(message);
+        this.name = "UpdateVersionNotFound";
+    }
+}
