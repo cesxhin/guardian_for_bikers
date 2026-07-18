@@ -33,7 +33,7 @@ export default async () => {
     const exec = await container.exec({
         Cmd: [
             'mongodump',
-            `--archive=/data/db/test/backup-${mongoose.connection.db?.databaseName || "unknown"}-${DateTime.now().toFormat("yyyy-MM-dd HH-mm-ss")}.gz`,
+            `--archive=/data/db/backup-${mongoose.connection.db?.databaseName || "unknown"}-${DateTime.now().toFormat("yyyy-MM-dd HH-mm-ss")}.gz`,
             '--gzip'
         ],
         AttachStdout: true,
