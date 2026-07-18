@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 import {text, intro, outro} from "@clack/prompts";
 
-import messageUtils from "../utils/messageUtils";
+import messageUtils from "../utils/messageUtils.ts";
 
 const FORMAT_DATE = "dd/MM/yyyy HH:mm:ss";
 
@@ -26,6 +26,8 @@ export default async (bot: TelegramBot) => {
             if (checkDate.toJSDate() < new Date()){
                 return "Date must be present or future";
             }
+
+            return;
         }
     });
 

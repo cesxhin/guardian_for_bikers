@@ -1,14 +1,18 @@
-export interface IUser {
-    id: number,
-    chat_id: number,
-    username: string,
-    outWithBike: number,
-    skipOutWithBike: number,
-    currentYear: number,
-    created: Date,
-    updated: Date | null,
-    points: number
-    scoreMultiplier: number,
-    totalKm: number,
-    totalImpostor: number
-}
+import z from "zod";
+
+export const schemaUser = z.object({
+    id: z.number(),
+    chat_id: z.number(),
+    username: z.string().nonempty(),
+    outWithBike: z.number().nonnegative(),
+    skipOutWithBike: z.number().nonnegative(),
+    currentYear: z.number().nonnegative(),
+    created: z.date(),
+    updated: z.date().nullable(),
+    points: z.number().nonnegative(),
+    consecutive: z.number().nonnegative(),
+    totalKm: z.number().nonnegative(),
+    totalImpostor: z.number().nonnegative()
+});
+
+export type IUser = z.infer<typeof schemaUser>;

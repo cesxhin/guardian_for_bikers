@@ -1,10 +1,11 @@
 import _ from "lodash";
 import path from "path";
 import { readFileSync } from "fs";
+import "chartjs-adapter-luxon"; //after chartjs
 import { loadImage, createCanvas } from "canvas";
 import { Chart, Filler, LinearScale, LineController, LineElement, Plugin, PointElement, TimeScale } from "chart.js";
-import "chartjs-adapter-luxon"; //after chartjs
-import Logger from "../lib/logger";
+
+import Logger from "../lib/logger.ts";
 
 Chart.register(TimeScale, LinearScale, LineController, PointElement, LineElement, Filler);
       
@@ -30,6 +31,10 @@ const emojiPlugin: Plugin = {
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
         ctx.font = "30px";
+
+        if (_.isNil(xAxis)){
+            return;
+        }
 
         for (const index in xAxis.ticks) {
             const x = xAxis.getPixelForTick(Number(index));
@@ -164,7 +169,7 @@ async function render(width: number, height: number, headers: (number | string)[
                             font: {
                                 size: SIZE_FONT
                             },
-                            callback: (val: number) => val.toFixed(2).padStart(5, "0") + " °C"
+                            callback: (val) => (val as number).toFixed(2).padStart(5, "0") + " °C"
                         },
                         grid: {
                             display: false

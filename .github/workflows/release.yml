@@ -1,6 +1,10 @@
 name: Release
 
 on:
+  workflow_run:
+    workflows: ["Docker Image CI"]
+    types:
+      - completed
   push:
     branches:
       - main

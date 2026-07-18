@@ -1,12 +1,19 @@
 {
   "compilerOptions": {
-    "moduleResolution": "Bundler",
-    "module": "ESNext",
-    "target": "ESNext",
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
+    "target": "esnext",
+    "strict": true,
     "strictNullChecks": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "sourceMap": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   }
 }

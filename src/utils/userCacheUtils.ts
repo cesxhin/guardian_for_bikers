@@ -1,12 +1,12 @@
 import _ from "lodash";
 import NodeCache from "node-cache";
-
-import Logger from "../lib/logger";
-import { USERS_EXPIRE_SECONDS } from "../env";
-import { IUser } from "../domains/interfaces/IUser";
-import { UserService } from "../services/userService";
 import AsyncLock from "async-lock";
-import { UserNotFound } from "./exceptionsUtils";
+
+import Logger from "../lib/logger.ts";
+import { USERS_EXPIRE_SECONDS } from "../env.ts";
+import { UserNotFound } from "./exceptionsUtils.ts";
+import { IUser } from "../domains/interfaces/IUser.ts";
+import { UserService } from "../applications/services/userService.ts";
 
 const logger = Logger("user-cache");
 const lockUserCache = new AsyncLock();

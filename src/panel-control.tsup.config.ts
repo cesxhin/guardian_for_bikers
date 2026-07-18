@@ -1,4 +1,4 @@
-import pkg from "./package.json";
+import pkg from "./package.json" with {type: "json"};
 import { defineConfig } from "tsup";
 
 const PATH_OUT = "../setup/panel-control";

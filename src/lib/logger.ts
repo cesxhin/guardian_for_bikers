@@ -1,17 +1,15 @@
 import _ from "lodash";
 import winston from "winston";
 
-export const LOG_LEVEL = process.env.LOG_LEVEL || "info";
-
 export default (nameService: string) => winston.createLogger({
-    level: LOG_LEVEL,
+    level: process.env.LOG_LEVEL || "info",
     format: winston.format.combine(
         winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
         winston.format.printf(({ level, message, timestamp, service, ...args }) => {
             const meta: string[] = [];
             const symbols = Object.getOwnPropertySymbols(args);
             if (symbols.length == 2) {
-                if (_.isArray(args[symbols[1]])){
+                if (!_.isNil(symbols[1]) && _.isArray(args[symbols[1]])){
                     for (const arg of (args[symbols[1]] as any[])) {
                         if (_.isObject(arg)){
                             meta.push(JSON.stringify(arg));

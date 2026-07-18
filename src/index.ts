@@ -1,17 +1,35 @@
+import { URL_MONGO, TOKEN_BOT } from "./env.ts";
+
+import axios from "axios";
 import mongoose from "mongoose";
 import { DateTime } from "luxon";
 import TelegramBot from "node-telegram-bot-api";
 
-import Logger from "./lib/logger";
-import listenersBot from "./bot";
-import cronPoll from "./cron/cronPoll";
-import cronWeather from "./cron/cronWeather";
-import { URL_MONGO, TOKEN_BOT } from "./env";
-import versionUtils from "./utils/versionUtils";
-import cronEndOfYear from "./cron/cronEndOfYear";
+import Logger from "./lib/logger.ts";
+import listenersBot from "./bot.ts";
+import cronPoll from "./cron/cronEvent.ts";
+import cronWeather from "./cron/cronWeather.ts";
+import versionUtils from "./utils/versionUtils.ts";
+import cronEndOfYear from "./cron/cronEndOfYear.ts";
 
 const logger = Logger("main");
+const loggerAxios = Logger("axios");
 
+//axios
+axios.interceptors.request.use((config) => {
+    loggerAxios.info(`Request: ${config.url}, params: ${JSON.stringify(config.params || {})}`);
+
+    return config;
+});
+axios.interceptors.response.use((response) => {
+    loggerAxios.info(`Response: ${response.config.url}, params: ${JSON.stringify(response.config.params || {})} ${response.status}`);
+    
+    return response;
+});
+
+export let bot: TelegramBot;
+
+//main
 async function main(){
 
     logger.info("Current timezone:", DateTime.local().zoneName);
@@ -30,13 +48,12 @@ async function main(){
     await versionUtils.main();
     
     //telegram
-    let bot: TelegramBot;
     try {
         bot = new TelegramBot(TOKEN_BOT, {
             polling: {
                 autoStart: true,
                 params: {
-                    allowed_updates: ["message", "new_chat_title", "poll_answer"]
+                    allowed_updates: ["message", "new_chat_title", "poll_answer", "edited_message"]
                 }
             }
         });
@@ -46,30 +63,30 @@ async function main(){
     }
     logger.info("Bot connected!");
 
-    bot.on('polling_error', async (error) => {
+    bot.on("polling_error", async (error) => {
         logger.error("Failed polling, details:", error);
 
         await bot.stopPolling();
 
         logger.warn("Stop polling and wait for 5 seconds before retry reconntect");
 
-        await new Promise<void>(resolve => setTimeout(resolve, 5000));
+        await new Promise<void>((resolve) => setTimeout(resolve, 5000));
 
         await bot.startPolling();
 
-        try{
+        try {
             await bot.getMe();
 
             logger.info("Bot reconnected!");
-        }catch{
+        } catch {
             //ignore
         }
     });
 
-    listenersBot(bot);
-    cronWeather(bot);
-    cronPoll(bot);
-    cronEndOfYear(bot);
+    listenersBot();
+    cronWeather();
+    cronPoll();
+    cronEndOfYear();
 }
 
 try {

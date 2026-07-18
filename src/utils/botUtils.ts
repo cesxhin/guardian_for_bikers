@@ -1,10 +1,11 @@
 import _ from "lodash";
-import TelegramBot from "node-telegram-bot-api";
+import { Message } from "node-telegram-bot-api";
 
-import Logger from "../lib/logger";
-import { USERNAME_BOT } from "../env";
-import userCacheUtils from "./userCacheUtils";
-import { GroupErrorGeneric, GroupNotFound, PollErrorGeneric, PollNotFound, UserErrorGeneric, UserNotFound } from "./exceptionsUtils";
+import { bot } from "../index.ts";
+import Logger from "../lib/logger.ts";
+import { USERNAME_BOT } from "../env.ts";
+import userCacheUtils from "./userCacheUtils.ts";
+import { GroupErrorGeneric, GroupNotFound, PollErrorGeneric, PollNotFound, UserErrorGeneric, UserNotFound } from "./exceptionsUtils.ts";
 
 const logger = Logger("bot-utils");
 
@@ -21,7 +22,7 @@ export enum commands {
     ABOUT = "about"
 }
 
-export function onlyPermissionGroup(message: TelegramBot.Message){
+export function onlyPermissionGroup(message: Pick<Message, "chat">): boolean {
     return message.chat.type === "group" || message.chat.type === "supergroup";
 }
 
@@ -33,15 +34,15 @@ export function checkMyCommand(text: string | undefined | null, command: command
             buildCommand += `@${USERNAME_BOT}`;
         }
 
-        return text.indexOf(buildCommand) !== -1;
+        return text.startsWith(buildCommand);
     }
 
     return false;
 }
 
-export function wrapBotMessage(bot: TelegramBot, main: (message: TelegramBot.Message) => Promise<void>, functionNotPermission?: (message: TelegramBot.Message) => Promise<void>): void{
+export function wrapBotMessage(main: (message: Message) => Promise<void>, functionNotPermission?: (message: Message) => Promise<void>): void{
     bot.on("message", async (message) => {
-        await exceptionsHandler(bot, message.chat.id, async () => {
+        await exceptionsHandler(message.chat.id, async () => {
             //check cache user
             if (!_.isNil(message.from) && !message.from.is_bot){
                 await userCacheUtils.getUserCache(message.chat.id, message.from.id, message.from.username as string); //todo controllare username
@@ -56,7 +57,7 @@ export function wrapBotMessage(bot: TelegramBot, main: (message: TelegramBot.Mes
     });
 }
 
-export async function exceptionsHandler(bot: TelegramBot, chatId: number, genericFunction: () => Promise<any>){
+export async function exceptionsHandler(chatId: number, genericFunction: () => Promise<any>){
     try {
         await genericFunction();
     } catch (err){
@@ -116,7 +117,7 @@ export function timeCommand(time: string): { text: string }[][]{
     ];
 }
 
-export function createMention(message: { first_name: string, user_id: number }, text: string){
+export function createMention(message: { first_name: string, user_id: number }, text: string): string {
     return `[${message.first_name}](tg://user?id=${message.user_id}) ${text.replace(/([_*\[\]()~`>#+=|{}.!-])/g, "\\$1")}`;
 }
 
@@ -147,3 +148,17 @@ There will be three cases:
 
 Enough with the explanations now, have fun bikers!🏍️💨
 `;
+
+export function calculateScoreMultiplier(consecutive: number){
+    if (consecutive < 2){
+        return 1; //0-1 day
+    } else if (consecutive >= 2 && consecutive < 5){
+        return 2; //2-4 day
+    } else if (consecutive >= 5 && consecutive < 8){
+        return 3; //5-7 day
+    } else if (consecutive >= 8 && consecutive < 14){
+        return 4; //8-13 day
+    } else {
+        return 5; //14+ day
+    }
+}

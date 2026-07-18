@@ -1,9 +1,10 @@
 import { DateTime } from "luxon";
 import { intro, isCancel, log, outro, select } from "@clack/prompts";
 
-import updateNotice from "./menu/updateNotice";
-import finishNotice from "./menu/finishNotice";
-import connectionsUtils from "./utils/connectionsUtils";
+import backup from "./menu/backup.ts";
+import updateNotice from "./menu/updateNotice.ts";
+import finishNotice from "./menu/finishNotice.ts";
+import connectionsUtils from "./utils/connectionsUtils.ts";
 
 let terminate = false;
 
@@ -30,6 +31,7 @@ do {
         message: "Choose the procedure",
         options: [
             { value: "update-notice", label: "Send a pre-update notification" },
+            { value: "backup", label: "Create backup before of the update system" },
             { value: "finish-notice", label: "Send after update notification" },
             { value: "exit", label: "Exit" }
         ],
@@ -49,6 +51,9 @@ do {
             break;
         case "finish-notice":
             await finishNotice(bot);
+            break;
+        case "backup":
+            await backup();
             break;
 
         }

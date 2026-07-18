@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { LocationRepository } from "../repository/weatherLocationRepository";
-import { IWeatherLocation } from "../domains/interfaces/api/IWeatherLocation";
+import { LocationRepository } from "../repository/weatherLocationRepository.ts";
+import { IWeatherLocation } from "../../domains/interfaces/api/IWeatherLocation.ts";
 
 export class LocationSerivce {
     private locationRepository = new LocationRepository();

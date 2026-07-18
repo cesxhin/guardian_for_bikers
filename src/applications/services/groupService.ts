@@ -1,8 +1,9 @@
-import { IGroup } from "../domains/interfaces/IGroup";
-import { GroupConflict, GroupNotFound } from "../utils/exceptionsUtils";
-import { GroupRepository } from "../repository/groupRepository";
 import _ from "lodash";
-import { StrictOmit } from "../lib/types";
+
+import { StrictOmit } from "../../lib/types.ts";
+import { IGroup } from "../../domains/interfaces/IGroup.ts";
+import { GroupRepository } from "../repository/groupRepository.ts";
+import { GroupConflict, GroupNotFound } from "../../utils/exceptionsUtils.ts";
 
 
 export class GroupService {
@@ -25,15 +26,7 @@ export class GroupService {
 
         return await this.groupRepository.create({
             id,
-            name,
-            enabled: true,
-            latitude: 41.8919,
-            longitude: 12.5113,
-            location: "rome",
-            timezone: "Europe/Rome",
-            days_trigger: [true, true, true, true, true, true, true],
-            start_time_guardian: "00:00",
-            end_time_guardian: "23:00"
+            name
         });
     }
 

@@ -1,52 +1,66 @@
 {
   "name": "src",
-  "version": "1.2.1",
+  "version": "2.0.0",
   "main": "index.js",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "start": "tsx index.ts",
     "panel-control": "tsx ./utility/index.ts",
-    "typecheck": "npx tsc --noEmit",
+    "typecheck": "npx tsgo",
     "build": "tsup",
     "build-panel-control": "tsup --config panel-control.tsup.config.ts",
     "eslint": "eslint",
-    "eslint-fix": "eslint --fix"
+    "eslint-fix": "eslint --fix",
+    "test-dev": "vitest --reporter=tree",
+    "test-converage": "vitest --reporter=tree --coverage",
+    "test": "vitest"
   },
   "keywords": [],
   "author": "cesxhin",
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@clack/prompts": "^1.0.0-alpha.7",
+    "@clack/prompts": "1.7.0",
     "async-lock": "1.4.1",
-    "axios": "1.13.5",
-    "canvas": "3.2.1",
+    "axios": "1.18.1",
+    "canvas": "3.2.3",
     "chart.js": "4.5.1",
     "chartjs-adapter-luxon": "1.3.1",
     "cron": "4.4.0",
-    "geolib": "3.3.4",
-    "lodash": "4.17.23",
+    "dockerode": "^5.0.1",
+    "geolib": "3.3.14",
+    "lodash": "4.18.1",
     "luxon": "3.7.2",
-    "mongoose": "9.2.1",
+    "mongoose": "9.7.4",
     "node-cache": "5.1.2",
-    "node-telegram-bot-api": "0.67.0",
-    "winston": "3.19.0"
+    "node-telegram-bot-api": "1.2.0",
+    "winston": "3.19.0",
+    "zod": "4.4.3"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin": "5.8.0",
+    "@stylistic/eslint-plugin": "5.10.0",
     "@types/async-lock": "1.4.2",
     "@types/axios": "0.14.4",
-    "@types/lodash": "4.17.23",
-    "@types/luxon": "3.7.1",
+    "@types/dockerode": "^4.0.1",
+    "@types/lodash": "4.17.24",
+    "@types/luxon": "3.7.2",
     "@types/node-cache": "4.2.5",
-    "@types/node-telegram-bot-api": "0.64.13",
+    "@types/node-telegram-bot-api": "0.64.15",
     "@types/winston": "2.4.4",
-    "@typescript-eslint/parser": "8.56.0",
-    "eslint": "9.39.2",
+    "@typescript-eslint/parser": "8.64.0",
+    "@typescript/native-preview": "7.0.0-dev.20260707.2",
+    "@vitest/coverage-v8": "4.1.10",
+    "eslint": "10.7.0",
+    "globals": "17.7.0",
+    "mongodb-memory-server": "11.2.0",
     "node-gyp": "12.2.0",
     "tsup": "8.5.1",
-    "tsx": "4.21.0",
-    "typescript": "5.9.3",
-    "typescript-eslint": "8.56.0"
+    "tsx": "4.23.1",
+    "typescript": "6.0.2",
+    "typescript-eslint": "8.64.0",
+    "vitest": "4.1.10"
   },
   "overrides": {
     "node-telegram-bot-api": {
@@ -54,5 +68,10 @@
       "qs": "6.15.0",
       "tough-cookie": "4.1.4"
     }
+  },
+  "allowScripts": {
+    "canvas@3.2.3": true,
+    "esbuild@0.27.7": true,
+    "mongodb-memory-server@11.2.0": true
   }
 }

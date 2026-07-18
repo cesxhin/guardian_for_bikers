@@ -1,17 +1,17 @@
 import _ from "lodash";
 import { DateTime } from "luxon";
 
-import { StrictOmit } from "../lib/types";
-import { IUser } from "../domains/interfaces/IUser";
-import userCacheUtils from "../utils/userCacheUtils";
-import { UserRepository } from "../repository/userRepository";
-import { UserConflict, UserNotFound } from "../utils/exceptionsUtils";
-import { PollRepository } from "../repository/pollRepository";
-import { TrackRepository } from "../repository/trackRepository";
+import { StrictOmit } from "../../lib/types.ts";
+import { IUser } from "../../domains/interfaces/IUser.ts";
+import userCacheUtils from "../../utils/userCacheUtils.ts";
+import { EventRepository } from "../repository/eventRepository.ts";
+import { UserRepository } from "../repository/userRepository.ts";
+import { TrackRepository } from "../repository/trackRepository.ts";
+import { UserConflict, UserNotFound } from "../../utils/exceptionsUtils.ts";
 
 export class UserService {
     private userRepository = new UserRepository();
-    private pollRepository = new PollRepository();
+    private eventRepository = new EventRepository();
     private trackRepository = new TrackRepository();
 
 
@@ -29,7 +29,7 @@ export class UserService {
             throw new UserConflict(`User id "${id}" already exist`);
         }
 
-        return await this.userRepository.create({
+        const user = await this.userRepository.create({
             id,
             chat_id,
             currentYear: DateTime.now().year,
@@ -40,13 +40,15 @@ export class UserService {
             totalImpostor: 0,
             totalKm: 0
         });
+        
+        const primaryKeyCache = userCacheUtils.getPrimaryKeyCompose(user.chat_id, user.id);
+        userCacheUtils.userCache.set(primaryKeyCache, user);
+
+        return user;
     }
     
     async edit(chatId: number, id: number, data: StrictOmit<Partial<IUser>, "id" | "created" | "updated" | "chat_id">): Promise<IUser>{
-        const user = await this.userRepository.edit(chatId, id, {
-            ...data,
-            updated: new Date()
-        });
+        const user = await this.userRepository.edit(chatId, id, data);
 
         const primaryKeyCache = userCacheUtils.getPrimaryKeyCompose(user.chat_id, user.id);
         if (userCacheUtils.userCache.has(primaryKeyCache)){
@@ -79,20 +81,22 @@ export class UserService {
     }
 
     async getIdsByChatId(chatId: number): Promise<number[]>{
-        return await this.userRepository.getIdsByChatId(chatId);
+        return (await this.userRepository.findManyByGroupId(chatId)).map((user) => user.id);
     }
 
     async resetScoreMultiplerNotAnswered(chatId: number, users: number[]): Promise<void>{
         const listUsers = await this.userRepository.findMissingFromList(chatId, users);
 
         for (const user of listUsers) {
-            await this.edit(user.chat_id, user.id, { scoreMultiplier: 0 });
+            await this.edit(user.chat_id, user.id, {
+                consecutive: 0
+            });
         };
     }
 
     async resetAll(chatId: number): Promise<void>{
         await this.userRepository.resetAll(chatId);
-        await this.pollRepository.deleteByChatId(chatId);
-        await this.trackRepository.deleteByChatId(chatId);
+        await this.eventRepository.deleteByGroupId(chatId);
+        await this.trackRepository.deleteByGroupId(chatId);
     }
 }

@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import TelegramBot from "node-telegram-bot-api";
-
-import { URL_MONGO, TOKEN_BOT } from "../../env";
 import { spinner, log } from "@clack/prompts";
+import {TelegramBot, TelegramBotOptions} from "node-telegram-bot-api";
+
+import { URL_MONGO, TOKEN_BOT } from "../../env.ts";
 
 const s = spinner();
 
@@ -21,7 +21,7 @@ async function connectDatabase(): Promise<void>{
     
 }
 
-async function connectBot(options: TelegramBot.ConstructorOptions = {}): Promise<TelegramBot>{
+async function connectBot(options: TelegramBotOptions = {}): Promise<TelegramBot>{
     let bot: TelegramBot;
 
     s.start("Connecting bot");

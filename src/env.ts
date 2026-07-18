@@ -1,6 +1,6 @@
 import fs from "fs";
 import _ from "lodash";
-import Logger from "./lib/logger";
+import Logger from "./lib/logger.ts";
 
 const logger = Logger("env");
 
@@ -31,20 +31,21 @@ export const USERNAME_BOT = process.env.USERNAME_BOT;
 export const URL_MONGO = process.env.URL_MONGO || "mongodb://127.0.0.1:27017/guards_for_bikers";
 
 // -- VERSION DB --
-export const VERSION_CURRENT_DB = 2;
+export const VERSION_CURRENT_DB = 3;
 
 // -- CRON --
 export const CRON_WEATHER = process.env.CRON_WEATHER || "0 * * * *"; //every hour;
-export const CRON_POLL = process.env.CRON_POLL || "*/5 * * * *"; //Every 5 minutes
+export const CRON_EVENT = process.env.CRON_EVENT || "*/5 * * * *"; //Every 5 minutes
 
 
 // -- CACHE USERS --
 export const USERS_EXPIRE_SECONDS = parseInt(process.env.USERS_EXPIRE_SECONDS || "") || 10800; //3 hours;
 
 // -- CACHE POLLS --
-export const POLLS_EXPIRE_SECONDS = parseInt(process.env.POLLS_EXPIRE_SECONDS || "") || 3900; //1 hour and 5minutes;
+export const POLLS_CACHE_EXPIRE = parseInt(process.env.POLLS_CACHE_EXPIRE || "") || 3900; //1 hour and 5 minutes;
+export const POLLS_CACHE_CHECK_PERIOD = parseInt(process.env.POLLS_CACHE_CHECK_PERIOD || "") || 300; //5 minutes;
 
 // -- SETTINGS POLLS --
-export const POLLS_EXPIRE_QUESTION_SECONDS = parseInt(process.env.POLLS_EXPIRE_QUESTION_SECONDS || "") || 3600 * 2; //2 hour
-export const POLLS_EXPIRE_ACTION_SECONDS = parseInt(process.env.POLLS_EXPIRE_ACTION_SECONDS || "") || 3600 * 10; //10 hour
-export const POLLS_EXPIRE_IMPOSTOR_SECONDS = parseInt(process.env.POLLS_EXPIRE_ACTION_SECONDS || "") || 3600 * 10; //10 hour
+export const EVENT_EXPIRE_QUESTION_SECONDS = parseInt(process.env.EVENT_EXPIRE_QUESTION_SECONDS || "") || 3600 * 2; //2 hour
+export const POLL_EXPIRE_ACTION_SECONDS = parseInt(process.env.POLL_EXPIRE_ACTION_SECONDS || "") || 3600 * 2; //2 hour
+export const POLLS_EXPIRE_IMPOSTOR_SECONDS = parseInt(process.env.POLLS_EXPIRE_IMPOSTOR_SECONDS || "") || 3600 * 10; //10 hour

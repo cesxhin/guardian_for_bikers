@@ -1,10 +1,10 @@
 import _ from "lodash";
 
-import Logger from "../lib/logger";
-import { IUser } from "../domains/interfaces/IUser";
-import { modelUser } from "../domains/models/userMode";
-import { UserErrorGeneric, UserNotFound } from "../utils/exceptionsUtils";
-import { StrictOmit } from "../lib/types";
+import Logger from "../../lib/logger.ts";
+import { StrictOmit } from "../../lib/types.ts";
+import { IUser } from "../../domains/interfaces/IUser.ts";
+import { modelUser } from "../../domains/models/userMode.ts";
+import { UserErrorGeneric, UserNotFound } from "../../utils/exceptionsUtils.ts";
 
 const logger = Logger("user-repository");
 
@@ -49,31 +49,34 @@ export class UserRepository {
             throw new UserErrorGeneric(err);
         }
     }
-
-    async getIdsByChatId(chatId: number): Promise<number[]>{
-        try {
-            return await modelUser.distinct("id", {chat_id: chatId}).lean();
-        } catch (err){
-            logger.error("Error find, details:", err);
-            throw new UserErrorGeneric(err);
-        }
-    }
     
     async edit(chat_id: number, id: number, data: StrictOmit<Partial<IUser>, "id">): Promise<IUser>{
         let user: IUser | null;
         try {
-            user = await modelUser.findOneAndUpdate({ id, chat_id }, data, { new: true }).lean();
+            user = await modelUser.findOneAndUpdate({
+                id,
+                chat_id
+            }, {
+                $set: {
+                    ...data,
+                    updated: new Date()
+                }
+            }, {
+                returnDocument: "after"
+            }).lean();
         } catch (err){
             logger.error("Error edit, details:", err);
             throw new UserErrorGeneric(err);
         }
+
         if (_.isNil(user)){
             throw new UserNotFound(`Not found user id "${id}" for edit`);
         }
+        
         return user;
     }
 
-    async create(data: StrictOmit<IUser, "created" | "updated" | "scoreMultiplier">): Promise<IUser> {
+    async create(data: StrictOmit<IUser, "created" | "updated" | "consecutive">): Promise<IUser> {
         try {
             return (await modelUser.create(data)).toObject();
         } catch (err){
@@ -126,7 +129,7 @@ export class UserRepository {
             }, {
                 outWithBike: 0,
                 points: 0,
-                scoreMultiplier: 0,
+                consecutive: 0,
                 skipOutWithBike: 0,
                 totalImpostor: 0,
                 totalKm: 0

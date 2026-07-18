@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import pkg from "./package.json";
+import pkg from "./package.json" with {type: "json"};
 import { defineConfig } from "tsup";
 import path from "node:path";
 
