@@ -66,5 +66,10 @@
       "qs": "6.15.0",
       "tough-cookie": "4.1.4"
     }
+  },
+  "allowScripts": {
+    "canvas@3.2.3": true,
+    "esbuild@0.27.7": true,
+    "mongodb-memory-server@11.2.0": true
   }
 }

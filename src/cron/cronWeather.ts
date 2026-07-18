@@ -6,17 +6,17 @@ import TelegramBot from "node-telegram-bot-api";
 import Logger from "../lib/logger.ts";
 import graphUtils from "../utils/graphUtils.ts";
 import { IGroup } from "../domains/interfaces/IGroup.ts";
-import { PollService } from "../applications/services/pollService.ts";
+import { EventService } from "../applications/services/eventService.ts";
 import { GroupService } from "../applications/services/groupService.ts";
 import { WeatherService } from "../applications/services/weatherService.ts";
-import { CRON_WEATHER, POLLS_EXPIRE_QUESTION_SECONDS } from "../env.ts";
 import { exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils.ts";
+import { CRON_WEATHER, EVENT_EXPIRE_QUESTION_SECONDS, POLL_EXPIRE_ACTION_SECONDS } from "../env.ts";
 
 const logger = Logger("cron-weather");
 
 const groupService = new GroupService();
 const weatherService = new WeatherService();
-const pollService = new PollService();
+const eventService = new EventService();
 
 export default (bot: TelegramBot) => {
     new CronJob(
@@ -96,36 +96,42 @@ export default (bot: TelegramBot) => {
                             const findPercentageRain = _.find(weather.hourly.precipitation_probability, (val) => val > 25);
 
                             if (_.isNil(findRain)){
-                                let messagePoll: TelegramBot.Message;
-                                let typePoll: "question" | "out";
-                                
+                                let messagePoll: TelegramBot.Message | null = null;
+
+                                //set expire event for generate poll
+                                const endTime = Duration.fromISOTime(group.end_time_guardian);
+                                const expire = DateTime.now().set({hour: endTime.hours, minute: endTime.minutes, millisecond: 0, second: 0});
+
                                 if (!_.isNil(findPercentageRain)){
-                                    messagePoll = await bot.sendPoll(group.id, "There is a chance it might rain, do you still want to go out at your own risk?"+RESPONSIBILITY_POLICY, ["Yes!", "No"], { is_anonymous: false });
-                                    typePoll = "question";
+                                    messagePoll = await bot.sendPoll(
+                                        group.id,
+                                        "There is a chance it might rain, do you still want to go out at your own risk?"+RESPONSIBILITY_POLICY,
+                                        ["Yes!", "No"],
+                                        {
+                                            is_anonymous: false,
+                                            open_period: EVENT_EXPIRE_QUESTION_SECONDS
+                                        }
+                                    );
+
+                                    if(!_.isNil(messagePoll.poll?.id)){
+                                        await eventService.create({
+                                            type: "question",
+                                            group_id: group.id,
+                                            poll_id: messagePoll.poll.id,
+                                            expire_poll: DateTime.now().plus({ seconds: POLL_EXPIRE_ACTION_SECONDS }).toJSDate()
+                                        });
+                                    }else{
+                                        logger.error("Failed get poll id for event question");
+                                    }
                                 } else {
-                                    messagePoll = await bot.sendPoll(group.id, "Great news!\nThe weather is nice today, who's out?"+RESPONSIBILITY_POLICY, ["I went out", "No"], { is_anonymous: false });
-                                    typePoll = "out";
-                                }
-
-                                //get additional value for expire
-                                let additionalSeconds = POLLS_EXPIRE_QUESTION_SECONDS;
-                                if ( typePoll !== "question"){
-                                    const endTime = Duration.fromISOTime(group.end_time_guardian).toMillis() / 1000;
-                                    const startTime = Duration.fromISOTime(group.start_time_guardian).toMillis() / 1000;
-
-                                    additionalSeconds = endTime - startTime;
-                                }
-                                if (!_.isNil(messagePoll.poll)){
-                                    await pollService.create({
-                                        id: messagePoll.poll.id,
-                                        message_id: messagePoll.message_id,
+                                    await bot.sendMessage(group.id, "Great news!\nThe weather is nice today"+RESPONSIBILITY_POLICY);
+                                    await eventService.create({
+                                        type: "out",
                                         group_id: group.id,
-                                        type: typePoll,
-                                        expire: DateTime.now().plus({seconds: additionalSeconds }).set({millisecond: 0, second: 0}).toJSDate(),
-                                        target_impostor: null
+                                        poll_id: null,
+                                        expire_poll: null,
+                                        expire: expire.toJSDate(),
                                     });
-                                } else {
-                                    throw new Error("Cannot create poll because is null");
                                 }
                             } else {
                                 await bot.sendMessage(group.id, "Sorry bikers, but the weather doesn't look good, stay home!🏠");

@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-import polldata from "../../data/pollData.ts";
-import pollCacheUtils from "../../../utils/pollCacheUtils.ts";
-import { modelPoll } from "../../../domains/models/pollModel.ts";
+import polldata from "../../data/eventData.ts";
+import eventCacheUtils from "../../../utils/eventCacheUtils.ts";
+import { modelEvent } from "../../../domains/models/eventModel.ts";
 
 vi.mock(import("../../../env.ts"), () => {
     return {
@@ -23,7 +23,7 @@ describe("bot-utils", () => {
         await mongoose.connect(instanceMongoServer.getUri());
 
         //insert data
-        await modelPoll.insertMany(polldata);
+        await modelEvent.insertMany(polldata);
     });
     afterAll(async () => {
         await instanceMongoServer?.stop();
@@ -33,14 +33,14 @@ describe("bot-utils", () => {
         it("create cache and clear cache", async () => {
             const callback = vi.fn();
 
-            pollCacheUtils.pollCache.once("set", callback);
+            eventCacheUtils.pollCache.once("set", callback);
 
-            await pollCacheUtils.getPollCache("poll-1");
+            await eventCacheUtils.getPollCache("poll-1");
 
             expect(callback).toHaveBeenCalled();
 
             const callbackDel = vi.fn();
-            pollCacheUtils.pollCache.once("del", callbackDel);
+            eventCacheUtils.pollCache.once("del", callbackDel);
 
             await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -48,11 +48,11 @@ describe("bot-utils", () => {
         });
         
         it("get cache", async () => {
-            await pollCacheUtils.getPollCache("poll-6");
+            await eventCacheUtils.getPollCache("poll-1");
 
             const callback = vi.fn();
-            pollCacheUtils.pollCache.once("set", callback);
-            await pollCacheUtils.getPollCache("poll-6");
+            eventCacheUtils.pollCache.once("set", callback);
+            await eventCacheUtils.getPollCache("poll-1");
 
             expect(callback).not.toHaveBeenCalled();
         });

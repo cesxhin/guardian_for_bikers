@@ -4,14 +4,14 @@ import { DateTime } from "luxon";
 import { StrictOmit } from "../../lib/types.ts";
 import { IUser } from "../../domains/interfaces/IUser.ts";
 import userCacheUtils from "../../utils/userCacheUtils.ts";
-import { PollRepository } from "../repository/pollRepository.ts";
+import { EventRepository } from "../repository/eventRepository.ts";
 import { UserRepository } from "../repository/userRepository.ts";
 import { TrackRepository } from "../repository/trackRepository.ts";
 import { UserConflict, UserNotFound } from "../../utils/exceptionsUtils.ts";
 
 export class UserService {
     private userRepository = new UserRepository();
-    private pollRepository = new PollRepository();
+    private eventRepository = new EventRepository();
     private trackRepository = new TrackRepository();
 
 
@@ -96,7 +96,7 @@ export class UserService {
 
     async resetAll(chatId: number): Promise<void>{
         await this.userRepository.resetAll(chatId);
-        await this.pollRepository.deleteByGroupId(chatId);
+        await this.eventRepository.deleteByGroupId(chatId);
         await this.trackRepository.deleteByGroupId(chatId);
     }
 }

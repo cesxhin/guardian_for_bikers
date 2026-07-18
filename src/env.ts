@@ -35,7 +35,7 @@ export const VERSION_CURRENT_DB = 3;
 
 // -- CRON --
 export const CRON_WEATHER = process.env.CRON_WEATHER || "0 * * * *"; //every hour;
-export const CRON_POLL = process.env.CRON_POLL || "*/5 * * * *"; //Every 5 minutes
+export const CRON_EVENT = process.env.CRON_EVENT || "*/5 * * * *"; //Every 5 minutes
 
 
 // -- CACHE USERS --
@@ -46,6 +46,6 @@ export const POLLS_CACHE_EXPIRE = parseInt(process.env.POLLS_CACHE_EXPIRE || "")
 export const POLLS_CACHE_CHECK_PERIOD = parseInt(process.env.POLLS_CACHE_CHECK_PERIOD || "") || 300; //5 minutes;
 
 // -- SETTINGS POLLS --
-export const POLLS_EXPIRE_QUESTION_SECONDS = parseInt(process.env.POLLS_EXPIRE_QUESTION_SECONDS || "") || 3600 * 2; //2 hour
-export const POLLS_EXPIRE_ACTION_SECONDS = parseInt(process.env.POLLS_EXPIRE_ACTION_SECONDS || "") || 3600 * 10; //10 hour
-export const POLLS_EXPIRE_IMPOSTOR_SECONDS = parseInt(process.env.POLLS_EXPIRE_ACTION_SECONDS || "") || 3600 * 10; //10 hour
+export const EVENT_EXPIRE_QUESTION_SECONDS = parseInt(process.env.EVENT_EXPIRE_QUESTION_SECONDS || "") || 3600 * 2; //2 hour
+export const POLL_EXPIRE_ACTION_SECONDS = parseInt(process.env.POLL_EXPIRE_ACTION_SECONDS || "") || 3600 * 2; //2 hour
+export const POLLS_EXPIRE_IMPOSTOR_SECONDS = parseInt(process.env.POLLS_EXPIRE_IMPOSTOR_SECONDS || "") || 3600 * 10; //10 hour

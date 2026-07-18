@@ -5,7 +5,7 @@ import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "./lib/logger.ts";
 import listenersBot from "./bot.ts";
-import cronPoll from "./cron/cronPoll.ts";
+import cronPoll from "./cron/cronEvent.ts";
 import cronWeather from "./cron/cronWeather.ts";
 import { URL_MONGO, TOKEN_BOT } from "./env.ts";
 import versionUtils from "./utils/versionUtils.ts";

@@ -5,12 +5,12 @@ import TelegramBot from "node-telegram-bot-api";
 
 import Logger from "./lib/logger.ts";
 import commandsUtils from "./utils/commandsUtils.ts";
-import { IPoll } from "./domains/interfaces/IPoll.ts";
+import { IEvent } from "./domains/interfaces/IEvent.ts";
 import { IUser } from "./domains/interfaces/IUser.ts";
 import userCacheUtils from "./utils/userCacheUtils.ts";
-import pollCacheUtils from "./utils/pollCacheUtils.ts";
+import eventCacheUtils from "./utils/eventCacheUtils.ts";
 import { UserService } from "./applications/services/userService.ts";
-import { PollService } from "./applications/services/pollService.ts";
+import { EventService } from "./applications/services/eventService.ts";
 import { GroupService } from "./applications/services/groupService.ts";
 import { TrackService } from "./applications/services/trackService.ts";
 import { LocationSerivce } from "./applications/services/locationService.ts";
@@ -23,7 +23,7 @@ const logger = Logger("bot");
 const groupSerivce = new GroupService();
 const locationService = new LocationSerivce();
 const userService = new UserService();
-const pollService = new PollService();
+const eventService = new EventService();
 const trackService = new TrackService();
 
 const lockPollCache = new AsyncLock();
@@ -239,7 +239,7 @@ export default async function (bot: TelegramBot) {
                     await groupSerivce.delete(message.chat.id);
                     const listIds = await userService.getIdsByChatId(message.chat.id);
                     await userService.deleteManyByChatId(message.chat.id);
-                    await pollService.deleteByGroupId(message.chat.id);
+                    await eventService.deleteByGroupId(message.chat.id);
                     await trackService.deleteByGroupId(message.chat.id);
 
                     userCacheUtils.userCache.del(userCacheUtils.getMultiplePrimaryKeyCompose(message.chat.id, listIds));
@@ -301,22 +301,30 @@ export default async function (bot: TelegramBot) {
 
     //answer
     bot.on("poll_answer", async (pollAnswer) => {
-        let poll: IPoll;
+        let event: IEvent;
         try {
-            poll = await pollCacheUtils.getPollCache(pollAnswer.poll_id);
+            event = await eventCacheUtils.getPollCache(pollAnswer.poll_id);
         } catch (err) {
-            logger.error("Failed get data poll from cache, details:", err);
+            logger.error("Failed get data event from cache, details:", err);
             return;
         }
 
-        if (poll.type === "out" || poll.type === "out_x2") {
-            await exceptionsHandler(bot, poll.group_id, async () => {
-                const user = await userCacheUtils.getUserCache(poll.group_id, pollAnswer.user.id, pollAnswer.user.username as string); //todo da pensare bene ma non e' urgente
+        if(!_.isNil(event.expire_poll) && new Date() >= event.expire_poll){
+            logger.debug(`This poll id "${pollAnswer.poll_id}" is expired so skip evalutate points for user id ${pollAnswer.user.id}`);
+            await bot.sendMessage(event.group_id, `The event is already closed. Your vote "${pollAnswer.user.username}" will not be counted.`);
+            return;
+        }
+
+        if(event.type === "question"){
+            await eventService.answered(pollAnswer.poll_id, pollAnswer.user.id);
+        }else if (event.type === "out" || event.type === "out_x2") {
+            await exceptionsHandler(bot, event.group_id, async () => {
+                const user = await userCacheUtils.getUserCache(event.group_id, pollAnswer.user.id, pollAnswer.user.username as string); //todo da pensare bene ma non e' urgente
 
                 let points = 0;
                 let skipOut = false;
 
-                switch (poll.type) {
+                switch (event.type) {
                 case "out":
                     if (pollAnswer.option_ids[0] === 0) {
                         points = 1;
@@ -348,16 +356,14 @@ export default async function (bot: TelegramBot) {
                     skipOutWithBike: user.skipOutWithBike + (skipOut ? 1 : 0)
                 });
 
-                await pollService.answered(pollAnswer.poll_id, user.id);
+                await eventService.answered(pollAnswer.poll_id, user.id);
             });
-        } else if (poll.type === "impostor"){
-            if (poll.target_impostor === pollAnswer.user.id){
-                await bot.sendMessage(poll.group_id, `Don't be cheeky "${pollAnswer.user.username}", your vote will not be counted.`);
+        } else if (event.type === "impostor"){
+            if (event.target_impostor === pollAnswer.user.id){
+                await bot.sendMessage(event.group_id, `Don't be cheeky "${pollAnswer.user.username}", your vote will not be counted.`);
             } else {
-                await pollService.answered(pollAnswer.poll_id, pollAnswer.user.id);
+                await eventService.answered(pollAnswer.poll_id, pollAnswer.user.id);
             }
-        } else {
-            logger.debug(`This poll id "${pollAnswer.poll_id}" is not type out so skip evalutate points for user id ${pollAnswer.user.id}`);
         }
     });
 
@@ -494,22 +500,22 @@ Your current settings:
                         return;
                     }
 
-                    if (!await pollService.checkTargetImpostor(message.chat.id, find.id)){
+                    if (!await eventService.checkTargetImpostor(message.chat.id, find.id)){
                         const messagePoll = await bot.sendPoll(
                             message.chat.id,
                             `This user "${usernameImpostor}" tried to cheat, would you like to report them as an impostor and remove the duplicate points they earned?`,
                             ["Yes", "No"],
                             {
-                                is_anonymous: false
+                                is_anonymous: false,
+                                open_period: POLLS_EXPIRE_IMPOSTOR_SECONDS
                             }
                         );
 
                         if (!_.isNil(messagePoll.poll)){
-                            await pollService.create({
-                                expire: DateTime.now().plus({seconds: POLLS_EXPIRE_IMPOSTOR_SECONDS}).toJSDate(),
+                            await eventService.create({
+                                expire_poll: DateTime.now().plus({seconds: POLLS_EXPIRE_IMPOSTOR_SECONDS}).toJSDate(),
                                 group_id: message.chat.id,
-                                id: messagePoll.poll.id,
-                                message_id: messagePoll.message_id,
+                                poll_id: messagePoll.poll.id,
                                 type: "impostor",
                                 target_impostor: find.id
                             });
@@ -534,14 +540,14 @@ Your current settings:
 
         await lockPollCache.acquire(message.chat.id.toString(), async () => {
 
-            let poll: IPoll;
+            let event: IEvent;
             try {
-                poll = await pollCacheUtils.getPollCacheByGroupId(message.chat.id);
+                event = await eventCacheUtils.getPollCacheByGroupId(message.chat.id);
             } catch (err) {
                 if (!(err instanceof PollIsClosed || err instanceof PollIsExpired)) {
-                    logger.error("Failed get data poll from cache, details:", err);
+                    logger.error("Failed get data event from cache, details:", err);
                 } else {
-                    logger.warn(`The user id "${message.from?.id}" is trying to send the positions, but the poll is already closed`);
+                    logger.warn(`The user id "${message.from?.id}" is trying to send the positions, but the event is already closed`);
 
                     try {
                         await bot.deleteMessage(message.chat.id, message.message_id);
@@ -561,13 +567,17 @@ Your current settings:
             }
 
             await exceptionsHandler(bot, message.chat.id, async () => {
-                if (poll.stop === false && new Date() < poll.expire && !_.isNil(message.location) && poll.type !== "question") {
-                    await trackService.addPositions({
-                        group_id: message.chat.id,
-                        user_id: message.from?.id || -1,
-                        poll_id: poll.id,
-                        positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date((message?.edit_date || 0) * 1000) }]
-                    });
+                if (event.stop === false && (event.type === "out" || event.type === "out_x2") && new Date() < event.expire && !_.isNil(event.poll_id)) {
+                    if(!_.isNil(message.location)){
+                        await trackService.addPositions({
+                            group_id: message.chat.id,
+                            user_id: message.from?.id || -1,
+                            poll_id: event.poll_id,
+                            positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date((message?.edit_date || 0) * 1000) }]
+                        });
+                    }else{
+                        logger.error(`Failed get information location, group id: ${message.chat.id} user id: ${message.from?.id} poll id: ${event.poll_id}`)
+                    }
                 }
             });
         });
