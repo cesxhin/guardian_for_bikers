@@ -99,9 +99,9 @@ describe("event-repository", () => {
             expect(list.length).toBeGreaterThan(0);
             
             for (const event of list) {
-                if(event.type === "out" || event.type === "out_x2"){
+                if (event.type === "out" || event.type === "out_x2"){
                     expect(event.expire).lessThanOrEqual(new Date());
-                }else{
+                } else {
                     expect(event.expire_poll).lessThanOrEqual(new Date());
                 }
             }

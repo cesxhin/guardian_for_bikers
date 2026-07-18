@@ -74,10 +74,10 @@ export default (bot: TelegramBot) => {
                                 await bot.sendMessage(event.group_id, "Better this way bikers, go out by car or stay home and relax");
                             }
                         } else if (event.type === "out" || event.type === "out_x2") {
-                            if(_.isNil(event.expire_poll)){
+                            if (_.isNil(event.expire_poll)){
 
                                 let newPoll: TelegramBot.Message;
-                                if(event.type === "out"){
+                                if (event.type === "out"){
                                     newPoll = await bot.sendPoll(
                                         event.group_id,
                                         "Who's out?",
@@ -87,7 +87,7 @@ export default (bot: TelegramBot) => {
                                             open_period: POLL_EXPIRE_ACTION_SECONDS
                                         }
                                     );
-                                }else{
+                                } else {
                                     newPoll = await bot.sendPoll(
                                         event.group_id,
                                         "At your own risk, it might rain, how did it go in the end?"+RESPONSIBILITY_POLICY,
@@ -100,16 +100,16 @@ export default (bot: TelegramBot) => {
                                     );
                                 }
 
-                                if(!_.isNil(newPoll.poll?.id)){
+                                if (!_.isNil(newPoll.poll?.id)){
                                     await eventService.edit(event._id, {
                                         expire_poll: DateTime.fromJSDate(event.expire).plus({seconds: POLL_EXPIRE_ACTION_SECONDS}).set({ second: 0, millisecond: 0 }).toJSDate(),
                                         poll_id: newPoll.poll.id
-                                    })
-                                }else{
+                                    });
+                                } else {
                                     logger.error("Failed get poll id for event out");
                                 }
-                            }else{
-                                await answer(bot, event as  Pick<IEvent, "_id" | "group_id"> & RequireNonNullable<IEvent, "poll_id">, event.answered);
+                            } else {
+                                await answer(bot, event as Pick<IEvent, "_id" | "group_id"> & RequireNonNullable<IEvent, "poll_id">, event.answered);
                             }
                         } else if (event.type === "impostor"){
                             //todo magari farlo ritornare un numero totale senza dover sprecare le risorse

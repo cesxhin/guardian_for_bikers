@@ -309,15 +309,15 @@ export default async function (bot: TelegramBot) {
             return;
         }
 
-        if(!_.isNil(event.expire_poll) && new Date() >= event.expire_poll){
+        if (!_.isNil(event.expire_poll) && new Date() >= event.expire_poll){
             logger.debug(`This poll id "${pollAnswer.poll_id}" is expired so skip evalutate points for user id ${pollAnswer.user.id}`);
             await bot.sendMessage(event.group_id, `The event is already closed. Your vote "${pollAnswer.user.username}" will not be counted.`);
             return;
         }
 
-        if(event.type === "question"){
+        if (event.type === "question"){
             await eventService.answered(pollAnswer.poll_id, pollAnswer.user.id);
-        }else if (event.type === "out" || event.type === "out_x2") {
+        } else if (event.type === "out" || event.type === "out_x2") {
             await exceptionsHandler(bot, event.group_id, async () => {
                 const user = await userCacheUtils.getUserCache(event.group_id, pollAnswer.user.id, pollAnswer.user.username as string); //todo da pensare bene ma non e' urgente
 
@@ -568,15 +568,15 @@ Your current settings:
 
             await exceptionsHandler(bot, message.chat.id, async () => {
                 if (event.stop === false && (event.type === "out" || event.type === "out_x2") && new Date() < event.expire && !_.isNil(event.poll_id)) {
-                    if(!_.isNil(message.location)){
+                    if (!_.isNil(message.location)){
                         await trackService.addPositions({
                             group_id: message.chat.id,
                             user_id: message.from?.id || -1,
                             poll_id: event.poll_id,
                             positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date((message?.edit_date || 0) * 1000) }]
                         });
-                    }else{
-                        logger.error(`Failed get information location, group id: ${message.chat.id} user id: ${message.from?.id} poll id: ${event.poll_id}`)
+                    } else {
+                        logger.error(`Failed get information location, group id: ${message.chat.id} user id: ${message.from?.id} poll id: ${event.poll_id}`);
                     }
                 }
             });

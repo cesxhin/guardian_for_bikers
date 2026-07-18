@@ -14,18 +14,18 @@ const schemaEventOut = schemaBaseEvent.extend({
     type: z.literal("out"),
     poll_id: z.string().nullable(),
     expire: z.date(),
-    expire_poll: z.date().nullable(),
+    expire_poll: z.date().nullable()
 });
 const schemaEventOutX2 = schemaBaseEvent.extend({
     type: z.literal("out_x2"),
     poll_id: z.string().nullable(),
     expire: z.date(),
-    expire_poll: z.date().nullable(),
+    expire_poll: z.date().nullable()
 });
 const schemaEventQuestion = schemaBaseEvent.extend({
     type: z.literal("question"),
     poll_id: z.string(),
-    expire_poll: z.date(),
+    expire_poll: z.date()
 });
 const schemaEventImpostor = schemaBaseEvent.extend({
     type: z.literal("impostor"),

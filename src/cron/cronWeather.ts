@@ -113,14 +113,14 @@ export default (bot: TelegramBot) => {
                                         }
                                     );
 
-                                    if(!_.isNil(messagePoll.poll?.id)){
+                                    if (!_.isNil(messagePoll.poll?.id)){
                                         await eventService.create({
                                             type: "question",
                                             group_id: group.id,
                                             poll_id: messagePoll.poll.id,
                                             expire_poll: DateTime.now().plus({ seconds: POLL_EXPIRE_ACTION_SECONDS }).toJSDate()
                                         });
-                                    }else{
+                                    } else {
                                         logger.error("Failed get poll id for event question");
                                     }
                                 } else {
@@ -130,7 +130,7 @@ export default (bot: TelegramBot) => {
                                         group_id: group.id,
                                         poll_id: null,
                                         expire_poll: null,
-                                        expire: expire.toJSDate(),
+                                        expire: expire.toJSDate()
                                     });
                                 }
                             } else {

@@ -29,7 +29,7 @@ export class EventService {
     async findValidByGroupId(id: number): Promise<IEvent>{
         const event = await this.eventRepository.findByGroupId(id);
 
-        if(event.type === "out" || event.type === "out_x2"){
+        if (event.type === "out" || event.type === "out_x2"){
             if (new Date() > event.expire){
                 throw new PollIsExpired(`Event id "${event._id}" is expired`);
             }
@@ -56,7 +56,7 @@ export class EventService {
     ): Promise<IEvent>{
         const event = await this.eventRepository.create(data);
 
-        if(!_.isNil(event.poll_id)){
+        if (!_.isNil(event.poll_id)){
             eventCacheUtils.pollCache.set(event.poll_id, event);
         }
 
@@ -81,7 +81,7 @@ export class EventService {
         const events = Object.values<IEvent>(eventCacheUtils.pollCache.mget(eventCacheUtils.pollCache.keys())).filter((event) => ids.includes(event._id.toString()));
 
         for (const event of events) {
-            if(!_.isNil(event.poll_id)){
+            if (!_.isNil(event.poll_id)){
                 eventCacheUtils.pollCache.del(event.poll_id);
             }
         }
@@ -104,7 +104,7 @@ export class EventService {
     ): Promise<IEvent> {
         const event = await this.eventRepository.edit(id, data);
 
-        if(!_.isNil(event.poll_id)){
+        if (!_.isNil(event.poll_id)){
             eventCacheUtils.pollCache.set(event.poll_id, event);
         }
 

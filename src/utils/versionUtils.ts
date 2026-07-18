@@ -33,9 +33,9 @@ async function main(){
         for (let version = find.version; version < (updaters.length + 1); version++){
             logger.info(`Start migration v${version} to v${version + 1}...`);
 
-            try{
+            try {
                 await updaters[version - 1]?.();
-            }catch(err){
+            } catch(err){
                 logger.error(`Failed update v${version + 1}, details:`, err);
                 process.exit(1);
             }
@@ -79,9 +79,9 @@ async function v3(){
     )).modifiedCount;
     logger.info(`Updated total users (${countUsers})`);
 
-    if(await mongoose.connection.db?.dropCollection("polls")){
+    if (await mongoose.connection.db?.dropCollection("polls")){
         logger.info("Deleted old collection \"polls\"");
-    }else{
+    } else {
         logger.warn("Failed drop old collection \"polls\"");
     }
 }

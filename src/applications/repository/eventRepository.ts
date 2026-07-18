@@ -75,7 +75,7 @@ export class EventRepository {
         try {
             return (await modelEvent.insertOne(data as IEvent)).toObject(); //todo da verificare
         } catch (err){
-            if(_.has(err, "code") && err.code === 11000){
+            if (_.has(err, "code") && err.code === 11000){
                 throw new PollConflict("Duplicate poll id");
             }
 
