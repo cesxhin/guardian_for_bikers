@@ -2,18 +2,19 @@ import _ from "lodash";
 import geolib from "geolib";
 import { CronJob } from "cron";
 import { DateTime, Duration } from "luxon";
-import TelegramBot, { Message } from "node-telegram-bot-api";
+import { Message } from "node-telegram-bot-api";
 
+import { bot } from "../index.ts";
 import Logger from "../lib/logger.ts";
 import { IUser } from "../domains/interfaces/IUser.ts";
+import { IEvent } from "../domains/interfaces/IEvent.ts";
+import { RequireNonNullable } from "../utils/tsUtils.ts";
 import { CRON_EVENT, POLL_EXPIRE_ACTION_SECONDS } from "../env.ts";
 import { UserService } from "../applications/services/userService.ts";
 import { TrackService } from "../applications/services/trackService.ts";
 import { EventService } from "../applications/services/eventService.ts";
-import { calculateScoreMultiplier, exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils.ts";
-import { IEvent } from "../domains/interfaces/IEvent.ts";
-import { RequireNonNullable } from "../utils/tsUtils.ts";
 import { GroupService } from "../applications/services/groupService.ts";
+import { calculateScoreMultiplier, exceptionsHandler, RESPONSIBILITY_POLICY } from "../utils/botUtils.ts";
 
 const logger = Logger("cron-event");
 
@@ -22,7 +23,7 @@ const userService = new UserService();
 const trackService = new TrackService();
 const groupService = new GroupService();
 
-export default (bot: TelegramBot) => {
+export default () => {
     new CronJob(
         CRON_EVENT,
         async () => {
@@ -34,7 +35,6 @@ export default (bot: TelegramBot) => {
 
             for (const event of listEvents) {
                 await exceptionsHandler(
-                    bot,
                     event.group_id,
                     async () => {
                         logger.debug(`Current event id "${event._id}" of group id "${event.group_id}"`);
@@ -109,7 +109,7 @@ export default (bot: TelegramBot) => {
                                     logger.error("Failed get poll id for event out");
                                 }
                             } else {
-                                await answer(bot, event as Pick<IEvent, "_id" | "group_id"> & RequireNonNullable<IEvent, "poll_id">, event.answered);
+                                await answer(event as Pick<IEvent, "_id" | "group_id"> & RequireNonNullable<IEvent, "poll_id">, event.answered);
                             }
                         } else if (event.type === "impostor"){
                             //todo magari farlo ritornare un numero totale senza dover sprecare le risorse
@@ -144,7 +144,7 @@ export default (bot: TelegramBot) => {
     logger.info("Started!");
 };
 
-async function answer(bot: TelegramBot, event: Pick<IEvent, "_id" | "group_id"> & RequireNonNullable<IEvent, "poll_id">, answered: number[]){
+async function answer(event: Pick<IEvent, "_id" | "group_id"> & RequireNonNullable<IEvent, "poll_id">, answered: number[]){
     //close poll
     await eventService.edit(event._id, { stop: true });
 

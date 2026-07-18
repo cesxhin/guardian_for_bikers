@@ -1,6 +1,7 @@
 import _ from "lodash";
-import TelegramBot, { Message } from "node-telegram-bot-api";
+import { Message } from "node-telegram-bot-api";
 
+import { bot } from "../index.ts";
 import Logger from "../lib/logger.ts";
 import { USERNAME_BOT } from "../env.ts";
 import userCacheUtils from "./userCacheUtils.ts";
@@ -39,9 +40,9 @@ export function checkMyCommand(text: string | undefined | null, command: command
     return false;
 }
 
-export function wrapBotMessage(bot: TelegramBot, main: (message: Message) => Promise<void>, functionNotPermission?: (message: Message) => Promise<void>): void{
+export function wrapBotMessage(main: (message: Message) => Promise<void>, functionNotPermission?: (message: Message) => Promise<void>): void{
     bot.on("message", async (message) => {
-        await exceptionsHandler(bot, message.chat.id, async () => {
+        await exceptionsHandler(message.chat.id, async () => {
             //check cache user
             if (!_.isNil(message.from) && !message.from.is_bot){
                 await userCacheUtils.getUserCache(message.chat.id, message.from.id, message.from.username as string); //todo controllare username
@@ -56,7 +57,7 @@ export function wrapBotMessage(bot: TelegramBot, main: (message: Message) => Pro
     });
 }
 
-export async function exceptionsHandler(bot: TelegramBot, chatId: number, genericFunction: () => Promise<any>){
+export async function exceptionsHandler(chatId: number, genericFunction: () => Promise<any>){
     try {
         await genericFunction();
     } catch (err){

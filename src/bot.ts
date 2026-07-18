@@ -1,8 +1,9 @@
 import _ from "lodash";
 import { DateTime } from "luxon";
 import AsyncLock from "async-lock";
-import {TelegramBot, BotCommand} from "node-telegram-bot-api";
+import {BotCommand} from "node-telegram-bot-api";
 
+import { bot } from "./index.ts";
 import Logger from "./lib/logger.ts";
 import commandsUtils from "./utils/commandsUtils.ts";
 import { IEvent } from "./domains/interfaces/IEvent.ts";
@@ -28,7 +29,7 @@ const trackService = new TrackService();
 
 const lockPollCache = new AsyncLock();
 
-export default async function (bot: TelegramBot) {
+export default async function () {
     //const
     const arrayDays = [
         "monday",
@@ -68,28 +69,26 @@ export default async function (bot: TelegramBot) {
     });
 
     //debug
-    wrapBotMessage(bot, async (message) => {
+    wrapBotMessage(async (message) => {
         logger.debug(JSON.stringify(message));
     });
 
     //permission only groupTelegramBot
-    wrapBotMessage(bot, async () => undefined, async (message) => {
+    wrapBotMessage(async () => undefined, async (message) => {
         await bot.sendMessage(message.chat.id, "This bot can only be used in groups!");
     });
 
     //command about
-    wrapBotMessage(bot, async (message) => {
+    wrapBotMessage(async (message) => {
         commandsUtils.command({
             message,
             command: commands.ABOUT,
-            functionReadCommand: async () => {
-                await bot.sendMessage(message.chat.id, MESSAGE_WELCOME);
-            }
+            functionReadCommand: async () => await commandsUtils.replyMessageSend(message.chat.id, MESSAGE_WELCOME)
         });
     });
 
     //command location
-    wrapBotMessage(bot, async (message) => {
+    wrapBotMessage(async (message) => {
         commandsUtils.command({
             message,
             command: commands.SET_LOCATION,
@@ -102,19 +101,18 @@ export default async function (bot: TelegramBot) {
                         location,
                         timezone: findLocation.timezone
                     });
-                    await bot.sendMessage(message.chat.id, `Successfully updated the position "${location}" 📍`);
+                    
+                    return await commandsUtils.replyMessageSend(message.chat.id, `Successfully updated the position "${location}" 📍`);
                 } else {
-                    await bot.sendMessage(message.chat.id, `I couldn't find the position "${location}"`);
+                    return await commandsUtils.replyMessageSend(message.chat.id, `I couldn't find the position "${location}"`);
                 }
             },
-            functionReadCommand: async () => {
-                await bot.sendMessage(message.chat.id, "Enter the name of the city whose weather you want to monitor.\nExample: roma or Roma");
-            }
+            functionReadCommand: async () => await commandsUtils.replyMessageSend(message.chat.id, "Enter the name of the city whose weather you want to monitor.\nExample: roma or Roma")
         });
     });
 
     //command set days
-    wrapBotMessage(bot, async (message) => {
+    wrapBotMessage(async (message) => {
         commandsUtils.command({
             message,
             command: commands.SET_DAYS,
@@ -137,29 +135,17 @@ export default async function (bot: TelegramBot) {
                         days_trigger: currentDaysTrigger
                     });
 
-                    await bot.sendMessage(message.chat.id, `The ${day} is  ${group.days_trigger[currentIndex] ? "enabled" : "disabled"} for weather monitoring.`, {
-                        reply_markup: {
-                            remove_keyboard: true
-                        }
-                    });
+                    return await commandsUtils.replyMessageSend(message.chat.id, `The ${day} is  ${group.days_trigger[currentIndex] ? "enabled" : "disabled"} for weather monitoring.`);
                 } else if (day === "Cancel") {
-                    await bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
-                        reply_markup: {
-                            remove_keyboard: true
-                        }
-                    });
+                    return await commandsUtils.replyMessageSend(message.chat.id, "Ok, I'm not doing anything");
                 } else {
-                    await bot.sendMessage(message.chat.id, `The word ${day} is not recognized as one of the days of the week. Please use the commands or write one of these: ${arrayDays.join(", ")}.`, {
-                        reply_markup: {
-                            remove_keyboard: true
-                        }
-                    });
+                    return await commandsUtils.replyMessageSend(message.chat.id, `The word ${day} is not recognized as one of the days of the week. Please use the commands or write one of these: ${arrayDays.join(", ")}.`);
                 }
 
             },
             functionReadCommand: async () => {
                 const group = await groupSerivce.find(message.chat.id);
-                await bot.sendMessage(message.chat.id, "You can decide which days you want to receive weather updates.", {
+                return await commandsUtils.replyMessageSend(message.chat.id, "You can decide which days you want to receive weather updates.", {
                     reply_markup: {
                         one_time_keyboard: true,
                         keyboard: [
@@ -185,7 +171,7 @@ export default async function (bot: TelegramBot) {
     });
 
     //command active/disactive bot for group
-    wrapBotMessage(bot, async (message) => {
+    wrapBotMessage(async (message) => {
         commandsUtils.command({
             message,
             command: commands.SET_ENABLE,
@@ -195,30 +181,18 @@ export default async function (bot: TelegramBot) {
                 if (enable === "✅" || enable === "❌") {
                     await groupSerivce.edit(message.chat.id, { enabled: enable === "✅" });
 
-                    await bot.sendMessage(message.chat.id, `The bot has been ${enable === "✅" ? "actived" : "suspended"}.`, {
-                        reply_markup: {
-                            remove_keyboard: true
-                        }
-                    });
+                    return await commandsUtils.replyMessageSend(message.chat.id, `The bot has been ${enable === "✅" ? "actived" : "suspended"}.`);
                 } else if (enable === "Cancel") {
-                    await bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
-                        reply_markup: {
-                            remove_keyboard: true
-                        }
-                    });
+                    return await commandsUtils.replyMessageSend(message.chat.id, "Ok, I'm not doing anything");
                 } else {
-                    await bot.sendMessage(message.chat.id, `The word "${enable}" is not recognized to suspend or reactivate the bot. Please use the commands or write one of these: actived, suspended`, {
-                        reply_markup: {
-                            remove_keyboard: true
-                        }
-                    });
+                    return await commandsUtils.replyMessageSend(message.chat.id, `The word "${enable}" is not recognized to suspend or reactivate the bot. Please use the commands or write one of these: actived, suspended`);
                 }
 
             },
             functionReadCommand: async () => {
                 const group = await groupSerivce.find(message.chat.id);
 
-                await bot.sendMessage(message.chat.id, "You can decide whether to temporarily suspend the bot.", {
+                return await commandsUtils.replyMessageSend(message.chat.id, "You can decide whether to temporarily suspend the bot.", {
                     reply_markup: {
                         one_time_keyboard: true,
                         keyboard: [
@@ -232,7 +206,7 @@ export default async function (bot: TelegramBot) {
     });
 
     //leave someone
-    wrapBotMessage(bot, async (message) => {
+    wrapBotMessage(async (message) => {
         if (!_.isNil(message.left_chat_member)) {
             if (message.left_chat_member.is_bot) {
                 if (message.left_chat_member.username === USERNAME_BOT) {
@@ -264,7 +238,7 @@ export default async function (bot: TelegramBot) {
     });
 
     //entry someone
-    wrapBotMessage(bot, async (message) => {
+    wrapBotMessage(async (message) => {
         if (!_.isNil(message.new_chat_members)) {
             for (const new_chat_member of message.new_chat_members) {
                 if (new_chat_member.is_bot) {
@@ -288,7 +262,7 @@ export default async function (bot: TelegramBot) {
 
     //change name of group
     bot.on("new_chat_title", async (message) => {
-        await exceptionsHandler(bot, message.chat.id, async () => {
+        await exceptionsHandler(message.chat.id, async () => {
             if (!_.isNil(message.new_chat_title)) {
                 await groupSerivce.edit(message.chat.id, {
                     name: message.new_chat_title
@@ -335,7 +309,7 @@ export default async function (bot: TelegramBot) {
         if (event.type === "question"){
             await eventService.answered(pollAnswer.poll_id, pollUser.id);
         } else if (event.type === "out" || event.type === "out_x2") {
-            await exceptionsHandler(bot, event.group_id, async () => {
+            await exceptionsHandler(event.group_id, async () => {
                 const user = await userCacheUtils.getUserCache(event.group_id, pollUser.id, pollUser.username as string);
 
                 let points = 0;
@@ -385,13 +359,14 @@ export default async function (bot: TelegramBot) {
     });
 
     //command show settings
-    wrapBotMessage(bot, async (message) => {
+    wrapBotMessage(async (message) => {
         commandsUtils.command({
             message,
             command: commands.SHOW_SETTINGS,
             functionReadCommand: async () => {
                 const group = await groupSerivce.find(message.chat.id);
-                await bot.sendMessage(message.chat.id,
+                
+                return await commandsUtils.replyMessageSend(message.chat.id,
                     `
 Your current settings:
 🤖 Bot is ${group.enabled ? "activated" : "suspended"}
@@ -407,7 +382,7 @@ Your current settings:
     });
 
     //command set start time guardian
-    wrapBotMessage(bot, async (message) => {
+    wrapBotMessage(async (message) => {
         commandsUtils.command({
             message,
             command: commands.SET_START_TIME_GUARDIAN,
@@ -420,27 +395,24 @@ Your current settings:
 
                 if (checkFormatTime.test(time)) {
                     if (time > group.end_time_guardian) {
-                        await bot.sendMessage(message.chat.id, `The start time cannot be later than ${group.end_time_guardian}`, { reply_markup: { remove_keyboard: true } });
+                        return await commandsUtils.replyMessageSend(message.chat.id, `The start time cannot be later than ${group.end_time_guardian}`);
                     } else {
                         await groupSerivce.edit(message.chat.id, {
                             start_time_guardian: time
                         });
 
-                        await bot.sendMessage(message.chat.id, `Okay set to this time: "${time}"`, { reply_markup: { remove_keyboard: true } });
+                        return await commandsUtils.replyMessageSend(message.chat.id, `Okay set to this time: "${time}"`);
                     }
                 } else if (time === "Cancel") {
-                    await bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
-                        reply_markup: {
-                            remove_keyboard: true
-                        }
-                    });
+                    return await commandsUtils.replyMessageSend(message.chat.id, "Ok, I'm not doing anything");
                 } else {
-                    await bot.sendMessage(message.chat.id, `Invalid format time "${time}", I only accept hours from 00 to 23.\nExample: HH:00`, { reply_markup: { remove_keyboard: true } });
+                    return await commandsUtils.replyMessageSend(message.chat.id, `Invalid format time "${time}", I only accept hours from 00 to 23.\nExample: HH:00`);
                 }
             },
             functionReadCommand: async () => {
                 const group = await groupSerivce.find(message.chat.id);
-                await bot.sendMessage(message.chat.id, "Set the start time for weather checks", {
+                
+                return await commandsUtils.replyMessageSend(message.chat.id, "Set the start time for weather checks", {
                     reply_markup: {
                         one_time_keyboard: true,
                         keyboard: timeCommand(group.start_time_guardian)
@@ -451,7 +423,7 @@ Your current settings:
     });
 
     //command set end time guardian
-    wrapBotMessage(bot, async (message) => {
+    wrapBotMessage(async (message) => {
         commandsUtils.command({
             message,
             command: commands.SET_END_TIME_GUARDIAN,
@@ -464,27 +436,24 @@ Your current settings:
 
                 if (checkFormatTime.test(time)) {
                     if (time < group.start_time_guardian) {
-                        await bot.sendMessage(message.chat.id, `The end time cannot be earlier than ${group.start_time_guardian}`, { reply_markup: { remove_keyboard: true } });
+                        return await commandsUtils.replyMessageSend(message.chat.id, `The end time cannot be earlier than ${group.start_time_guardian}`);
                     } else {
                         await groupSerivce.edit(message.chat.id, {
                             end_time_guardian: time
                         });
 
-                        await bot.sendMessage(message.chat.id, `Okay set to this time: "${time}"`, { reply_markup: { remove_keyboard: true } });
+                        return await commandsUtils.replyMessageSend(message.chat.id, `Okay set to this time: "${time}"`);
                     }
                 } else if (time === "Cancel") {
-                    await bot.sendMessage(message.chat.id, "Ok, I'm not doing anything", {
-                        reply_markup: {
-                            remove_keyboard: true
-                        }
-                    });
+                    return await commandsUtils.replyMessageSend(message.chat.id, "Ok, I'm not doing anything");
                 } else {
-                    await bot.sendMessage(message.chat.id, `Invalid format time "${time}", I only accept hours from 00 to 23.\nExample: HH:00`, { reply_markup: { remove_keyboard: true } });
+                    return await commandsUtils.replyMessageSend(message.chat.id, `Invalid format time "${time}", I only accept hours from 00 to 23.\nExample: HH:00`);
                 }
             },
             functionReadCommand: async () => {
                 const group = await groupSerivce.find(message.chat.id);
-                await bot.sendMessage(message.chat.id, "Set the end time for weather checks", {
+                
+                return await commandsUtils.replyMessageSend(message.chat.id, "Set the end time for weather checks", {
                     reply_markup: {
                         one_time_keyboard: true,
                         keyboard: timeCommand(group.end_time_guardian)
@@ -495,7 +464,7 @@ Your current settings:
     });
 
     //command impostor
-    wrapBotMessage(bot, async (message) => {
+    wrapBotMessage(async (message) => {
         commandsUtils.command({
             message,
             command: commands.IMPOSTOR,
@@ -513,8 +482,7 @@ Your current settings:
                     }
 
                     if (_.isNil(find)){
-                        await bot.sendMessage(message.chat.id, `Not exist this user "${usernameImpostor}"`);
-                        return;
+                        return await commandsUtils.replyMessageSend(message.chat.id, `Not exist this user "${usernameImpostor}"`);
                     }
 
                     if (!await eventService.checkTargetImpostor(message.chat.id, find.id)){
@@ -539,16 +507,16 @@ Your current settings:
                         } else {
                             throw new Error("Cannot create poll because is null");
                         }
+
+                        return;
                     } else {
-                        await bot.sendMessage(message.chat.id, `You have already started a pool with this impostor "${usernameImpostor}"`);
+                        return await commandsUtils.replyMessageSend(message.chat.id, `You have already started a pool with this impostor "${usernameImpostor}"`);
                     }
                 } else {
-                    await bot.sendMessage(message.chat.id, "Invalid mention");
+                    return await commandsUtils.replyMessageSend(message.chat.id, "Invalid mention");
                 }
             },
-            functionReadCommand: async () => {
-                await bot.sendMessage(message.chat.id, "Who is the impostor? (You need to mention someone by starting with '@')");
-            }
+            functionReadCommand: async () => await commandsUtils.replyMessageSend(message.chat.id, "Who is the impostor? (You need to mention someone by starting with '@')")
         });
     });
 
@@ -585,7 +553,7 @@ Your current settings:
                 return;
             }
 
-            await exceptionsHandler(bot, message.chat.id, async () => {
+            await exceptionsHandler(message.chat.id, async () => {
                 if (event.stop === false && (event.type === "out" || event.type === "out_x2") && new Date() < event.expire) {
                     if (!_.isNil(message.location)){
                         await trackService.addPositions({

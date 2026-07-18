@@ -1,7 +1,7 @@
 import { CronJob } from "cron";
 import { DateTime } from "luxon";
-import TelegramBot from "node-telegram-bot-api";
 
+import { bot } from "../index.ts";
 import Logger from "../lib/logger.ts";
 import { UserService } from "../applications/services/userService.ts";
 import { GroupService } from "../applications/services/groupService.ts";
@@ -11,7 +11,7 @@ const logger = Logger("cron-end-of-year");
 const groupService = new GroupService();
 const userService = new UserService();
 
-export default (bot: TelegramBot) => {
+export default () => {
     new CronJob(
         "*/30 * * * *",
         async () => {

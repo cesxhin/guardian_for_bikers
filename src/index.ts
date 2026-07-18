@@ -27,6 +27,8 @@ axios.interceptors.response.use((response) => {
     return response;
 });
 
+export let bot: TelegramBot;
+
 //main
 async function main(){
 
@@ -46,7 +48,6 @@ async function main(){
     await versionUtils.main();
     
     //telegram
-    let bot: TelegramBot;
     try {
         bot = new TelegramBot(TOKEN_BOT, {
             polling: {
@@ -82,10 +83,10 @@ async function main(){
         }
     });
 
-    listenersBot(bot);
-    cronWeather(bot);
-    cronPoll(bot);
-    cronEndOfYear(bot);
+    listenersBot();
+    cronWeather();
+    cronPoll();
+    cronEndOfYear();
 }
 
 try {

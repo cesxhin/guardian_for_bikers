@@ -1,8 +1,9 @@
 import _ from "lodash";
 import { CronJob } from "cron";
 import { DateTime, Duration } from "luxon";
-import TelegramBot, { Message } from "node-telegram-bot-api";
+import { Message } from "node-telegram-bot-api";
 
+import { bot } from "../index.ts";
 import Logger from "../lib/logger.ts";
 import graphUtils from "../utils/graphUtils.ts";
 import { IGroup } from "../domains/interfaces/IGroup.ts";
@@ -18,7 +19,7 @@ const groupService = new GroupService();
 const weatherService = new WeatherService();
 const eventService = new EventService();
 
-export default (bot: TelegramBot) => {
+export default () => {
     new CronJob(
         CRON_WEATHER,
         async () => {
@@ -39,7 +40,6 @@ export default (bot: TelegramBot) => {
 
                 if (DateTime.now().setZone(group.timezone).toFormat("HH:mm") === timeTrigger && group.days_trigger[DateTime.now().weekday - 1] === true){
                     await exceptionsHandler(
-                        bot,
                         group.id,
                         async () => {
                             //get data weather from api
