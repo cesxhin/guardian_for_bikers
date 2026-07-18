@@ -4,6 +4,8 @@ import { calculateScoreMultiplier, checkMyCommand, commands, createMention, only
 
 vi.mock(import("../../../env.ts"), () => {
     return {
+        POLLS_CACHE_EXPIRE: 3900,
+        POLLS_CACHE_CHECK_PERIOD: 300,
         USERNAME_BOT: "bot",
         USERS_EXPIRE_SECONDS: 10800
     };

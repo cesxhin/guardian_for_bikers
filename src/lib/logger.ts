@@ -1,10 +1,8 @@
 import _ from "lodash";
 import winston from "winston";
 
-export const LOG_LEVEL = process.env.LOG_LEVEL || "info";
-
 export default (nameService: string) => winston.createLogger({
-    level: LOG_LEVEL,
+    level: process.env.LOG_LEVEL || "info",
     format: winston.format.combine(
         winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
         winston.format.printf(({ level, message, timestamp, service, ...args }) => {

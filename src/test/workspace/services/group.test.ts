@@ -42,6 +42,8 @@ describe("group-service", () => {
         it("edit group", async () => {
             const group = await groupService.create(-2, "service-create-group-2");
 
+            await new Promise((resolve) => setTimeout(resolve));
+
             const groupEdited = await groupService.edit(-2, {
                 name: "edited"
             });
