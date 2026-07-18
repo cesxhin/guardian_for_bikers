@@ -2,15 +2,16 @@ import _ from "lodash";
 import mongoose from "mongoose";
 
 import Logger from "../../lib/logger.ts";
-import { IEvent } from "../../domains/interfaces/IEvent.ts";
+import { EventOf, IEvent } from "../../domains/interfaces/IEvent.ts";
 import { modelEvent } from "../../domains/models/eventModel.ts";
 import { PollConflict, PollErrorGeneric, PollNotFound } from "../../utils/exceptionsUtils.ts";
+import { StrictOmit } from "../../lib/types.ts";
 
 const logger = Logger("event-repository");
 
 export class EventRepository {
     
-    async findById(id: string | mongoose.Types.ObjectId): Promise<IEvent>{
+    async findById(id: mongoose.Types.ObjectId): Promise<IEvent>{
         let event: IEvent | null;
         try {
             event = await modelEvent.findOne({ _id: id }).lean();
@@ -26,26 +27,34 @@ export class EventRepository {
         return event;
     }
     
-    async findByPollId(id: string): Promise<IEvent>{
+    async findByPollId(pollId: string): Promise<IEvent>{
         let event: IEvent | null;
         try {
-            event = await modelEvent.findOne({ poll_id: id, stop: false }).lean();
+            event = await modelEvent.findOne({
+                poll_id: pollId,
+                stop: false
+            }).lean();
         } catch (err){
             logger.error("Error findByPollId, details:", err);
             throw new PollErrorGeneric(err);
         }
             
         if (_.isNil(event)){
-            throw new PollNotFound(`Not found poll id "${id}"`);
+            throw new PollNotFound(`Not found poll id "${pollId}"`);
         }
         
         return event;
     }
     
-    async checkTargetImpostor(group_id: number, user_id: number): Promise<boolean>{
+    async checkTargetImpostor(groupId: number, userId: number): Promise<boolean>{
         let event: IEvent | null;
         try {
-            event = await modelEvent.findOne({ group_id, target_impostor: user_id, type: "impostor", stop: false }).lean();
+            event = await modelEvent.findOne({
+                group_id: groupId,
+                target_impostor: userId,
+                type: "impostor",
+                stop: false
+            }).lean();
         } catch (err){
             logger.error("Error findById, details:", err);
             throw new PollErrorGeneric(err);
@@ -54,26 +63,30 @@ export class EventRepository {
         return !_.isNil(event);
     }
 
-    async findByGroupId(group_id: number): Promise<IEvent>{
+    async findByGroupId(groupId: number): Promise<IEvent>{
         let event: IEvent | null;
         try {
-            event = await modelEvent.findOne({ group_id }).sort({ created: -1 }).lean();
+            event = await modelEvent.findOne({ group_id: groupId }).sort({ created: -1 }).lean();
         } catch (err){
             logger.error("Error findByGroupId, details:", err);
             throw new PollErrorGeneric(err);
         }
 
         if (_.isNil(event)){
-            throw new PollNotFound(`Not found event valid with group id "${group_id}"`);
+            throw new PollNotFound(`Not found event valid with group id "${groupId}"`);
         }
         
         return event;
     }
 
-    //todo da sistemare interfaccia
-    async create(data: Partial<IEvent>): Promise<IEvent>{
+    async create(data:
+        StrictOmit<EventOf<"question">, "_id" | "updated" | "created" | "answered" | "stop"> |
+        StrictOmit<EventOf<"impostor">, "_id" | "updated" | "created" | "answered" | "stop"> |
+        StrictOmit<EventOf<"out">, "_id" | "updated" | "created" | "answered" | "stop"> |
+        StrictOmit<EventOf<"out_x2">, "_id" | "updated" | "created" | "answered" | "stop">
+    ): Promise<IEvent>{
         try {
-            return (await modelEvent.insertOne(data as IEvent)).toObject(); //todo da verificare
+            return (await modelEvent.insertOne(data as IEvent)).toObject();
         } catch (err){
             if (_.has(err, "code") && err.code === 11000){
                 throw new PollConflict("Duplicate poll id");
@@ -129,7 +142,7 @@ export class EventRepository {
         }
     }
         
-    async deleteByIds(ids: (string | mongoose.Types.ObjectId)[]): Promise<void>{
+    async deleteByIds(ids: mongoose.Types.ObjectId[]): Promise<void>{
         let count = 0;
         try {
             count = (await modelEvent.deleteMany({ _id: ids })).deletedCount;
@@ -143,7 +156,15 @@ export class EventRepository {
         }
     }
     
-    async edit(id: mongoose.Types.ObjectId, data: Partial<IEvent>): Promise<IEvent>{
+    async edit(
+        id: mongoose.Types.ObjectId,
+        data: Partial<
+            StrictOmit<EventOf<"question">, "_id" | "updated" | "created" | "group_id" | "poll_id" | "expire_poll" | "type"> |
+            StrictOmit<EventOf<"impostor">, "_id" | "updated" | "created" | "group_id" | "poll_id" | "expire_poll" | "target_impostor" | "type"> |
+            StrictOmit<EventOf<"out">, "_id" | "updated" | "created" | "group_id" | "poll_id" | "expire" | "type"> |
+            StrictOmit<EventOf<"out_x2">, "_id" | "updated" | "created" | "group_id" | "poll_id" | "expire" | "type">
+        >
+    ): Promise<IEvent>{
         let event: IEvent | null;
         try {
             event = await modelEvent.findOneAndUpdate({

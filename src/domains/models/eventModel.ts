@@ -17,5 +17,8 @@ const schemaEvent = new mongoose.Schema<IEvent>({
 
 //todo creare indici
 schemaEvent.index({ ["poll_id" satisfies keyof IEvent]: 1, ["group_id" satisfies keyof IEvent]: 1 }, {unique: true});
+schemaEvent.index({ ["poll_id" satisfies keyof IEvent]: 1, ["stop" satisfies keyof IEvent]: 1 });
+schemaEvent.index({ ["group_id" satisfies keyof IEvent]: 1 });
+schemaEvent.index({ ["expire_poll" satisfies keyof IEvent]: 1, ["stop" satisfies keyof IEvent]: 1 });
 
 export const modelEvent = mongoose.model<IEvent>("event", schemaEvent, "events");

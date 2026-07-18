@@ -73,7 +73,8 @@ describe("event-repository", () => {
                     poll_id: "poll-test",
                     group_id: 1,
                     target_impostor: 1,
-                    type: "impostor"
+                    type: "impostor",
+                    expire_poll: new Date()
                 })
             ).resolves.toMatchObject({
                 poll_id: "poll-test"
@@ -86,7 +87,8 @@ describe("event-repository", () => {
                     poll_id: "poll-1",
                     group_id: 1,
                     target_impostor: 1,
-                    type: "impostor"
+                    type: "impostor",
+                    expire_poll: new Date()
                 })
             ).rejects.toThrow();
         });
@@ -115,13 +117,15 @@ describe("event-repository", () => {
                     poll_id: "poll-delete-1",
                     group_id: 1,
                     target_impostor: 1,
-                    type: "impostor"
+                    type: "impostor",
+                    expire_poll: new Date()
                 }),
                 eventRepository.create({
                     poll_id: "poll-delete-2",
                     group_id: 1,
                     target_impostor: 1,
-                    type: "impostor"
+                    type: "impostor",
+                    expire_poll: new Date()
                 })
             ]);
             
@@ -141,7 +145,8 @@ describe("event-repository", () => {
                 poll_id: "poll-delete-3",
                 group_id: 1,
                 target_impostor: 1,
-                type: "impostor"
+                type: "impostor",
+                expire_poll: new Date()
             });
             
             await expect(eventRepository.findById(event._id)).resolves.toBeDefined();
@@ -156,19 +161,20 @@ describe("event-repository", () => {
                 poll_id: "poll-edit-1",
                 group_id: 1,
                 target_impostor: 1,
-                type: "impostor"
+                type: "impostor",
+                expire_poll: new Date()
             });
 
-            await expect(eventRepository.findById(event._id.toString())).resolves.toMatchObject({
+            await expect(eventRepository.findById(event._id)).resolves.toMatchObject({
                 _id: event._id,
                 poll_id: "poll-edit-1",
                 type: "impostor"
             } satisfies Partial<IEvent>);
 
-            await expect(eventRepository.edit(event._id, {type: "out"})).resolves.toMatchObject({
+            await expect(eventRepository.edit(event._id, {answered: [1]})).resolves.toMatchObject({
                 _id: event._id,
                 poll_id: "poll-edit-1",
-                type: "out"
+                answered: [1]
             } satisfies Partial<IEvent>);
         });
 
@@ -177,7 +183,8 @@ describe("event-repository", () => {
                 poll_id: "poll-edit-2",
                 group_id: 1,
                 target_impostor: 1,
-                type: "impostor"
+                type: "impostor",
+                expire_poll: new Date()
             });
             await eventRepository.edit(event._id, {stop: true});
 
@@ -195,7 +202,8 @@ describe("event-repository", () => {
                 poll_id: "poll-answer-1",
                 group_id: 1,
                 target_impostor: 1,
-                type: "impostor"
+                type: "impostor",
+                expire_poll: new Date()
             });
 
             await expect(eventRepository.answered(event.poll_id as string, 1)).resolves.toMatchObject({
@@ -214,7 +222,8 @@ describe("event-repository", () => {
                 poll_id: "poll-answer-2",
                 group_id: 1,
                 target_impostor: 1,
-                type: "impostor"
+                type: "impostor",
+                expire_poll: new Date()
             });
             await eventRepository.edit(event._id, {stop: true});
 
@@ -232,13 +241,15 @@ describe("event-repository", () => {
                 poll_id: "poll-delete-1",
                 group_id: 1234,
                 target_impostor: 1,
-                type: "impostor"
+                type: "impostor",
+                expire_poll: new Date()
             });
             await eventRepository.create({
                 poll_id: "poll-delete-2",
                 group_id: 1234,
                 target_impostor: 1,
-                type: "impostor"
+                type: "impostor",
+                expire_poll: new Date()
             });
 
             await expect(eventRepository.deleteByGroupId(1234)).resolves.toBeUndefined();

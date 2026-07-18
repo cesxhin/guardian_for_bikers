@@ -18,7 +18,7 @@ export class EventService {
         return await this.eventRepository.checkTargetImpostor(group_id, user_id);
     }
 
-    async findById(id: string | mongoose.Types.ObjectId): Promise<IEvent>{
+    async findById(id: mongoose.Types.ObjectId): Promise<IEvent>{
         return await this.eventRepository.findById(id);
     }
 
@@ -73,12 +73,12 @@ export class EventService {
         }
     }
 
-    async deleteByIds(ids: (string | mongoose.Types.ObjectId)[]): Promise<void>{
+    async deleteByIds(ids: mongoose.Types.ObjectId[]): Promise<void>{
         await this.eventRepository.deleteByIds(ids);
 
-        ids = ids.map((id) => _.isString(id)? id : id.toString());
+        const idsString = ids.map((id) => id.toString());
         
-        const events = Object.values<IEvent>(eventCacheUtils.pollCache.mget(eventCacheUtils.pollCache.keys())).filter((event) => ids.includes(event._id.toString()));
+        const events = Object.values<IEvent>(eventCacheUtils.pollCache.mget(eventCacheUtils.pollCache.keys())).filter((event) => idsString.includes(event._id.toString()));
 
         for (const event of events) {
             if (!_.isNil(event.poll_id)){
