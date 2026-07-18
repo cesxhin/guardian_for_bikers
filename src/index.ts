@@ -1,3 +1,5 @@
+import { URL_MONGO, TOKEN_BOT } from "./env.ts";
+
 import axios from "axios";
 import mongoose from "mongoose";
 import { DateTime } from "luxon";
@@ -7,7 +9,6 @@ import Logger from "./lib/logger.ts";
 import listenersBot from "./bot.ts";
 import cronPoll from "./cron/cronEvent.ts";
 import cronWeather from "./cron/cronWeather.ts";
-import { URL_MONGO, TOKEN_BOT } from "./env.ts";
 import versionUtils from "./utils/versionUtils.ts";
 import cronEndOfYear from "./cron/cronEndOfYear.ts";
 
@@ -51,7 +52,7 @@ async function main(){
             polling: {
                 autoStart: true,
                 params: {
-                    allowed_updates: ["message", "new_chat_title", "poll_answer"]
+                    allowed_updates: ["message", "new_chat_title", "poll_answer", "edited_message"]
                 }
             }
         });

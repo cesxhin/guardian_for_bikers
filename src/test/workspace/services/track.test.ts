@@ -28,7 +28,7 @@ describe("track-service", () => {
         it("add track", async () => {
             const track = await trackService.addPositions({
                 group_id: -1,
-                poll_id: "poll-position",
+                event_id: "poll-position",
                 positions: [],
                 user_id: -1
             });
@@ -38,9 +38,9 @@ describe("track-service", () => {
         });
     });
 
-    describe("method: findByPollId", () => {
+    describe("method: findByEventId", () => {
         it("find tracks", async () => {
-            const tracks = await trackService.findByPollId("poll-1");
+            const tracks = await trackService.findByEventId("poll-1");
             
             expect(tracks.length).toBeGreaterThan(0);
 
@@ -54,7 +54,7 @@ describe("track-service", () => {
         it("delete track", async () => {
             await trackService.addPositions({
                 group_id: -1,
-                poll_id: "poll-delete",
+                event_id: "poll-delete",
                 positions: [],
                 user_id: -1
             });
@@ -67,7 +67,7 @@ describe("track-service", () => {
         it("delete track", async () => {
             await trackService.addPositions({
                 group_id: -3,
-                poll_id: "poll-delete",
+                event_id: "poll-delete",
                 positions: [],
                 user_id: -1
             });
@@ -80,7 +80,7 @@ describe("track-service", () => {
         it("edit track", async () => {
             const track = await trackService.addPositions({
                 group_id: -2,
-                poll_id: "poll-position-2",
+                event_id: "poll-position-2",
                 positions: [],
                 user_id: -2
             });

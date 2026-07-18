@@ -1,5 +1,5 @@
 import _ from "lodash";
-import TelegramBot from "node-telegram-bot-api";
+import TelegramBot, { Message } from "node-telegram-bot-api";
 
 import Logger from "../lib/logger.ts";
 import { USERNAME_BOT } from "../env.ts";
@@ -21,7 +21,7 @@ export enum commands {
     ABOUT = "about"
 }
 
-export function onlyPermissionGroup(message: Pick<TelegramBot.Message, "chat">): boolean {
+export function onlyPermissionGroup(message: Pick<Message, "chat">): boolean {
     return message.chat.type === "group" || message.chat.type === "supergroup";
 }
 
@@ -39,7 +39,7 @@ export function checkMyCommand(text: string | undefined | null, command: command
     return false;
 }
 
-export function wrapBotMessage(bot: TelegramBot, main: (message: TelegramBot.Message) => Promise<void>, functionNotPermission?: (message: TelegramBot.Message) => Promise<void>): void{
+export function wrapBotMessage(bot: TelegramBot, main: (message: Message) => Promise<void>, functionNotPermission?: (message: Message) => Promise<void>): void{
     bot.on("message", async (message) => {
         await exceptionsHandler(bot, message.chat.id, async () => {
             //check cache user

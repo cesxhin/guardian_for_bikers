@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { CronJob } from "cron";
 import { DateTime, Duration } from "luxon";
-import TelegramBot from "node-telegram-bot-api";
+import TelegramBot, { Message } from "node-telegram-bot-api";
 
 import Logger from "../lib/logger.ts";
 import graphUtils from "../utils/graphUtils.ts";
@@ -96,7 +96,7 @@ export default (bot: TelegramBot) => {
                             const findPercentageRain = _.find(weather.hourly.precipitation_probability, (val) => val > 25);
 
                             if (_.isNil(findRain)){
-                                let messagePoll: TelegramBot.Message | null = null;
+                                let messagePoll: Message | null = null;
 
                                 //set expire event for generate poll
                                 const endTime = Duration.fromISOTime(group.end_time_guardian);
@@ -106,7 +106,7 @@ export default (bot: TelegramBot) => {
                                     messagePoll = await bot.sendPoll(
                                         group.id,
                                         "There is a chance it might rain, do you still want to go out at your own risk?"+RESPONSIBILITY_POLICY,
-                                        ["Yes!", "No"],
+                                        [{text: "Yes!"}, {text: "No"}],
                                         {
                                             is_anonymous: false,
                                             open_period: EVENT_EXPIRE_QUESTION_SECONDS

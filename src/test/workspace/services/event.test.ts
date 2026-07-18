@@ -8,7 +8,7 @@ import { IEvent, schemaEvent } from "../../../domains/interfaces/IEvent.ts";
 import { modelEvent } from "../../../domains/models/eventModel.ts";
 import eventCacheUtils from "../../../utils/eventCacheUtils.ts"; //fix
 import { EventService } from "../../../applications/services/eventService.ts";
-import { PollConflict, PollIsClosed, PollIsExpired } from "../../../utils/exceptionsUtils.ts";
+import { PollConflict, EventIsClosed, PollIsExpired } from "../../../utils/exceptionsUtils.ts";
 import eventData from "../../data/eventData.ts";
 
 describe("event-service", () => {
@@ -73,7 +73,7 @@ describe("event-service", () => {
         });
         
         it("event already stop", async () => {
-            await expect(eventService.findValidByGroupId(5)).rejects.toThrow(PollIsClosed);
+            await expect(eventService.findValidByGroupId(5)).rejects.toThrow(EventIsClosed);
         });
     });
 

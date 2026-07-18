@@ -32,7 +32,16 @@ async function getPollCacheByGroupId(gropuId: number): Promise<IEvent>{
     const find: IEvent | null = _.find(Object.values(pollCache.mget(pollCache.keys())), { group_id: gropuId, stop: false} satisfies Pick<IEvent, "group_id" | "stop">) as any;
 
     //todo da verificare questo punto
-    if (!_.isNil(find)/* &&  new Date() < find.expire*/){
+    if (!_.isNil(find) && (
+        (
+            (find.type === "out" || find.type === "out_x2") && find.expire < new Date()
+        )
+            ||
+        (
+            find.type === "question" && find.expire_poll < new Date()
+        )
+    )
+    ){
         return find;
     } else {
         const poll = await eventService.findValidByGroupId(gropuId);

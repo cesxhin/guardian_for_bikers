@@ -28,7 +28,7 @@ describe("track-repository", () => {
         it("find track", async () => {
             await expect(trackRepository.findByIds(1, 1, "poll-1")).resolves.toMatchObject({
                 group_id: 1,
-                poll_id: "poll-1",
+                event_id: "poll-1",
                 user_id: 1
             } satisfies Partial<ITrack>);
         });
@@ -50,7 +50,7 @@ describe("track-repository", () => {
         it("edit track", async () => {
             await trackRepository.addPositions({
                 group_id: 2,
-                poll_id: "poll-edit-1",
+                event_id: "poll-edit-1",
                 user_id: 2,
                 positions: []
             });
@@ -59,7 +59,7 @@ describe("track-repository", () => {
                 trackRepository.edit(2, 2, "poll-edit-1", {totalKm: 10})
             ).resolves.toMatchObject({
                 group_id: 2,
-                poll_id: "poll-edit-1",
+                event_id: "poll-edit-1",
                 user_id: 2,
                 totalKm: 10
             } satisfies Partial<ITrack>);
@@ -68,7 +68,7 @@ describe("track-repository", () => {
         it("cannot edit track already terminate", async () => {
             await trackRepository.addPositions({
                 group_id: 2,
-                poll_id: "poll-edit-2",
+                event_id: "poll-edit-2",
                 user_id: 2,
                 positions: []
             });
@@ -82,9 +82,9 @@ describe("track-repository", () => {
         });
     });
 
-    describe("method: findByPollId", () => {
+    describe("method: findByEventId", () => {
         it("find tracks", async () => {
-            const list = await trackRepository.findByPollId("poll-1");
+            const list = await trackRepository.findByEventId("poll-1");
 
             expect(list.length).toBeGreaterThan(0);
 
@@ -94,7 +94,7 @@ describe("track-repository", () => {
         });
 
         it("not found tracks", async () => {
-            await expect(trackRepository.findByPollId("poll-remove-pos-1")).resolves.toHaveLength(0);
+            await expect(trackRepository.findByEventId("poll-remove-pos-1")).resolves.toHaveLength(0);
         });
     });
 
@@ -102,7 +102,7 @@ describe("track-repository", () => {
         it("find track", async () => {
             await trackRepository.addPositions({
                 group_id: 2,
-                poll_id: "poll-add-pos-1",
+                event_id: "poll-add-pos-1",
                 user_id: 2,
                 positions: []
             });
@@ -113,32 +113,32 @@ describe("track-repository", () => {
                 trackRepository.addPositions({
                     group_id: 2,
                     user_id: 2,
-                    poll_id: "poll-add-pos-1",
+                    event_id: "poll-add-pos-1",
                     ...data
                 })
             ).resolves.toMatchObject({
                 group_id: 2,
                 user_id: 2,
-                poll_id: "poll-add-pos-1",
+                event_id: "poll-add-pos-1",
                 positions: data.positions
             } satisfies Partial<ITrack>);
         });
 
         it("not found track", async () => {
-            await expect(trackRepository.findByPollId("poll-remove-pos-1")).resolves.toHaveLength(0);
+            await expect(trackRepository.findByEventId("poll-remove-pos-1")).resolves.toHaveLength(0);
         });
 
         it("not found track already terminate", async () => {
             await trackRepository.addPositions({
                 group_id: 2,
-                poll_id: "poll-add-pos-2",
+                event_id: "poll-add-pos-2",
                 user_id: 2,
                 positions: []
             });
 
             await expect(trackRepository.findByIds(2, 2, "poll-add-pos-2")).resolves.toBeDefined();
             await trackRepository.edit(2, 2, "poll-add-pos-2", {terminate: true});
-            await expect(trackRepository.findByPollId("poll-add-pos-2")).resolves.toHaveLength(0);
+            await expect(trackRepository.findByEventId("poll-add-pos-2")).resolves.toHaveLength(0);
         });
     });
 
@@ -146,7 +146,7 @@ describe("track-repository", () => {
         it("find track", async () => {
             await trackRepository.addPositions({
                 group_id: 2,
-                poll_id: "poll-delete-1",
+                event_id: "poll-delete-1",
                 user_id: 2,
                 positions: []
             });
@@ -166,19 +166,19 @@ describe("track-repository", () => {
             await Promise.all([
                 trackRepository.addPositions({
                     group_id: 3,
-                    poll_id: "poll-delete-many-1",
+                    event_id: "poll-delete-many-1",
                     user_id: 1,
                     positions: []
                 }),
                 trackRepository.addPositions({
                     group_id: 3,
-                    poll_id: "poll-delete-many-2",
+                    event_id: "poll-delete-many-2",
                     user_id: 2,
                     positions: []
                 }),
                 trackRepository.addPositions({
                     group_id: 3,
-                    poll_id: "poll-delete-many-3",
+                    event_id: "poll-delete-many-3",
                     user_id: 3,
                     positions: []
                 })

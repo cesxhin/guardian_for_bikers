@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { DateTime } from "luxon";
 import AsyncLock from "async-lock";
-import TelegramBot from "node-telegram-bot-api";
+import {TelegramBot, BotCommand} from "node-telegram-bot-api";
 
 import Logger from "./lib/logger.ts";
 import commandsUtils from "./utils/commandsUtils.ts";
@@ -15,7 +15,7 @@ import { GroupService } from "./applications/services/groupService.ts";
 import { TrackService } from "./applications/services/trackService.ts";
 import { LocationSerivce } from "./applications/services/locationService.ts";
 import { POLLS_EXPIRE_IMPOSTOR_SECONDS, USERNAME_BOT } from "./env.ts";
-import { PollIsClosed, PollIsExpired, UserNotFound } from "./utils/exceptionsUtils.ts";
+import { EventIsExpired, EventIsClosed, UserNotFound } from "./utils/exceptionsUtils.ts";
 import { commands, createMention, exceptionsHandler, timeCommand, wrapBotMessage, MESSAGE_WELCOME, calculateScoreMultiplier } from "./utils/botUtils.ts";
 
 const logger = Logger("bot");
@@ -40,7 +40,7 @@ export default async function (bot: TelegramBot) {
         "sunday"
     ];
 
-    const listCommandsBasic: TelegramBot.BotCommand[] = [
+    const listCommandsBasic: BotCommand[] = [
         { command: commands.IMPOSTOR, description: "If someone has cheated to earn points even though they didn't go out on their biker or didn't get caught in the rain, you can report it." },
         { command: commands.ABOUT, description: "The bot information" }
     ];
@@ -72,7 +72,7 @@ export default async function (bot: TelegramBot) {
         logger.debug(JSON.stringify(message));
     });
 
-    //permission only group
+    //permission only groupTelegramBot
     wrapBotMessage(bot, async () => undefined, async (message) => {
         await bot.sendMessage(message.chat.id, "This bot can only be used in groups!");
     });
@@ -301,6 +301,23 @@ export default async function (bot: TelegramBot) {
 
     //answer
     bot.on("poll_answer", async (pollAnswer) => {
+        if (_.isNil(pollAnswer.user)){
+            logger.debug(`This poll id "${pollAnswer.poll_id}" cannot get information user`);
+            return;
+        }
+
+        if (_.isNil(pollAnswer.user.id)){
+            logger.debug(`This poll id "${pollAnswer.poll_id}" cannot get information user id`);
+            return;
+        }
+
+        if (_.isNil(pollAnswer.user.username)){
+            logger.debug(`This poll id "${pollAnswer.poll_id}" cannot get information username`);
+            return;
+        }
+
+        const pollUser = pollAnswer.user;
+
         let event: IEvent;
         try {
             event = await eventCacheUtils.getPollCache(pollAnswer.poll_id);
@@ -316,10 +333,10 @@ export default async function (bot: TelegramBot) {
         }
 
         if (event.type === "question"){
-            await eventService.answered(pollAnswer.poll_id, pollAnswer.user.id);
+            await eventService.answered(pollAnswer.poll_id, pollUser.id);
         } else if (event.type === "out" || event.type === "out_x2") {
             await exceptionsHandler(bot, event.group_id, async () => {
-                const user = await userCacheUtils.getUserCache(event.group_id, pollAnswer.user.id, pollAnswer.user.username as string); //todo da pensare bene ma non e' urgente
+                const user = await userCacheUtils.getUserCache(event.group_id, pollUser.id, pollUser.username as string);
 
                 let points = 0;
                 let skipOut = false;
@@ -504,7 +521,7 @@ Your current settings:
                         const messagePoll = await bot.sendPoll(
                             message.chat.id,
                             `This user "${usernameImpostor}" tried to cheat, would you like to report them as an impostor and remove the duplicate points they earned?`,
-                            ["Yes", "No"],
+                            [{text: "Yes"}, {text: "No"}],
                             {
                                 is_anonymous: false,
                                 open_period: POLLS_EXPIRE_IMPOSTOR_SECONDS
@@ -536,7 +553,9 @@ Your current settings:
     });
 
     bot.on("edited_message", async (message) => {
-        logger.debug(JSON.stringify(message));
+        if (_.isNil(message.location?.live_period)){
+            return;
+        }
 
         await lockPollCache.acquire(message.chat.id.toString(), async () => {
 
@@ -544,7 +563,7 @@ Your current settings:
             try {
                 event = await eventCacheUtils.getPollCacheByGroupId(message.chat.id);
             } catch (err) {
-                if (!(err instanceof PollIsClosed || err instanceof PollIsExpired)) {
+                if (!(err instanceof EventIsClosed || err instanceof EventIsExpired)) {
                     logger.error("Failed get data event from cache, details:", err);
                 } else {
                     logger.warn(`The user id "${message.from?.id}" is trying to send the positions, but the event is already closed`);
@@ -557,7 +576,7 @@ Your current settings:
                     }
 
                     try {
-                        await bot.sendMessage(message.chat.id, createMention({ first_name: message.from?.first_name || "unknown", user_id: message.from?.id || -1 }, "At the moment, you can't share your location. There is no active poll right now."), { parse_mode: "MarkdownV2" });
+                        await bot.sendMessage(message.chat.id, createMention({ first_name: message.from?.first_name || "unknown", user_id: message.from?.id || -1 }, "At the moment, you can't share your location. There is no active event right now."), { parse_mode: "MarkdownV2" });
                     } catch (err) {
                         logger.error(`Failed send message  from group id "${message.chat.id}", details:`, err);
                     }
@@ -567,12 +586,12 @@ Your current settings:
             }
 
             await exceptionsHandler(bot, message.chat.id, async () => {
-                if (event.stop === false && (event.type === "out" || event.type === "out_x2") && new Date() < event.expire && !_.isNil(event.poll_id)) {
+                if (event.stop === false && (event.type === "out" || event.type === "out_x2") && new Date() < event.expire) {
                     if (!_.isNil(message.location)){
                         await trackService.addPositions({
                             group_id: message.chat.id,
                             user_id: message.from?.id || -1,
-                            poll_id: event.poll_id,
+                            event_id: event._id.toString(),
                             positions: [{ lat: message.location.latitude, long: message.location.longitude, date: new Date((message?.edit_date || 0) * 1000) }]
                         });
                     } else {

@@ -57,16 +57,22 @@ export class PollConflict extends Error {
         this.name = "PollConflict";
     }
 }
-export class PollIsClosed extends Error {
+export class EventIsClosed extends Error {
     constructor(message: any) {
         super(message);
-        this.name = "PollIsClosed";
+        this.name = "EventIsClosed";
     }
 }
 export class PollIsExpired extends Error {
     constructor(message: any) {
         super(message);
         this.name = "PollIsExpired";
+    }
+}
+export class EventIsExpired extends Error {
+    constructor(message: any) {
+        super(message);
+        this.name = "EventIsExpired";
     }
 }
 

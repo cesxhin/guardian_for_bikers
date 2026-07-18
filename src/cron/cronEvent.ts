@@ -2,7 +2,7 @@ import _ from "lodash";
 import geolib from "geolib";
 import { CronJob } from "cron";
 import { DateTime, Duration } from "luxon";
-import TelegramBot from "node-telegram-bot-api";
+import TelegramBot, { Message } from "node-telegram-bot-api";
 
 import Logger from "../lib/logger.ts";
 import { IUser } from "../domains/interfaces/IUser.ts";
@@ -76,12 +76,12 @@ export default (bot: TelegramBot) => {
                         } else if (event.type === "out" || event.type === "out_x2") {
                             if (_.isNil(event.expire_poll)){
 
-                                let newPoll: TelegramBot.Message;
+                                let newPoll: Message;
                                 if (event.type === "out"){
                                     newPoll = await bot.sendPoll(
                                         event.group_id,
                                         "Who's out?",
-                                        ["I went out", "No"],
+                                        [{text: "I went out"}, {text: "No"}],
                                         {
                                             is_anonymous: false,
                                             open_period: POLL_EXPIRE_ACTION_SECONDS
@@ -92,9 +92,9 @@ export default (bot: TelegramBot) => {
                                         event.group_id,
                                         "At your own risk, it might rain, how did it go in the end?"+RESPONSIBILITY_POLICY,
                                         [
-                                            "I went out without getting wet",
-                                            "I went out but got wet",
-                                            "I didn't go out"
+                                            {text: "I went out without getting wet"},
+                                            {text: "I went out but got wet"},
+                                            {text: "I didn't go out"}
                                         ],
                                         { is_anonymous: false, open_period: POLL_EXPIRE_ACTION_SECONDS }
                                     );
@@ -155,7 +155,7 @@ async function answer(bot: TelegramBot, event: Pick<IEvent, "_id" | "group_id"> 
     const users = await userService.findManyByGroupId(event.group_id);
 
     //get all tracks closed
-    const listTracks = await trackService.findByPollId(event.poll_id);
+    const listTracks = await trackService.findByEventId(event._id.toString());
 
     logger.debug("Found total tracks: ", listTracks.length);
 
@@ -190,9 +190,9 @@ async function answer(bot: TelegramBot, event: Pick<IEvent, "_id" | "group_id"> 
         if (distanceTotal > 0){
             calculatedKm = parseFloat((distanceTotal / 1000).toFixed(2));
 
-            logger.debug(`This track "${track.user_id}, ${track.group_id}, ${track.poll_id}" covered these kilometers ${calculatedKm}`);
+            logger.debug(`This track "${track.user_id}, ${track.group_id}, ${track.event_id}" covered these kilometers ${calculatedKm}`);
             
-            await trackService.edit(track.user_id, track.group_id, track.poll_id, { totalKm: calculatedKm, totalTime, positions: [], terminate: true });
+            await trackService.edit(track.user_id, track.group_id, track.event_id, { totalKm: calculatedKm, totalTime, positions: [], terminate: true });
 
             findUser = _.find(users, {id: track.user_id});
 
@@ -205,7 +205,7 @@ async function answer(bot: TelegramBot, event: Pick<IEvent, "_id" | "group_id"> 
             }
         } else {
             logger.warn(`This user "${track.user_id}" not have more 1 position or the distance is equal zero. Therefore, the track will be cancelled.`);
-            await trackService.deleteByIds(track.user_id, track.group_id, track.poll_id);
+            await trackService.deleteByIds(track.user_id, track.group_id, track.event_id);
         }
     }
 

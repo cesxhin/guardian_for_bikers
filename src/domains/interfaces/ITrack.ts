@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const schemaTrack = z.object({
-    poll_id: z.string().nonempty(),
+    event_id: z.string().nonempty(),
     group_id: z.number(),
     user_id: z.number(),
     positions: z.array(

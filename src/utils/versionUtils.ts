@@ -1,4 +1,6 @@
 import _ from "lodash";
+import winston from "winston";
+import mongoose from "mongoose";
 
 import Logger from "../lib/logger.ts";
 import { VERSION_CURRENT_DB } from "../env.ts";
@@ -7,7 +9,7 @@ import { modelEvent } from "../domains/models/eventModel.ts";
 import { UpdateVersionNotFound } from "./exceptionsUtils.ts";
 import { IVersion } from "../domains/interfaces/IVersion.ts";
 import { modelVersion } from "../domains/models/versionModel.ts";
-import mongoose from "mongoose";
+import { modelTrack } from "../domains/models/trackModel.ts";
 
 const logger = Logger("version-utils");
 const NAME_VERSION = "gfb";
@@ -20,7 +22,7 @@ async function main(){
         modelVersion.insertOne({name: NAME_VERSION, version: VERSION_CURRENT_DB});
         logger.info(`Created version for ${NAME_VERSION}`);
     } else {
-        const updaters: (() => Promise<void>)[] = [
+        const updaters: ((loggerV: winston.Logger) => Promise<void>)[] = [
             v2,
             v3
         ];
@@ -34,7 +36,7 @@ async function main(){
             logger.info(`Start migration v${version} to v${version + 1}...`);
 
             try {
-                await updaters[version - 1]?.();
+                await updaters[version - 1]?.(Logger("version-"+version.toString()));
             } catch(err){
                 logger.error(`Failed update v${version + 1}, details:`, err);
                 process.exit(1);
@@ -46,7 +48,7 @@ async function main(){
     }
 }
 
-async function v2(){
+async function v2(loggerV: winston.Logger){
     const countUsers = (await modelUser.updateMany({},
         {
             scoreMultiplier: 0,
@@ -54,7 +56,7 @@ async function v2(){
             totalKm: 0
         }
     )).modifiedCount;
-    logger.info(`Updated total users (${countUsers})`);
+    loggerV.info(`Updated total users (${countUsers})`);
 
     const countPoll = (await modelEvent.updateMany({},
         {
@@ -63,10 +65,10 @@ async function v2(){
             target_impostor: null
         }
     )).modifiedCount;
-    logger.info(`Updated total polls (${countPoll})`);
+    loggerV.info(`Updated total polls (${countPoll})`);
 }
 
-async function v3(){
+async function v3(loggerV: winston.Logger){
     const countUsers = (await modelUser.collection.updateMany({},
         {
             $set: {
@@ -77,12 +79,15 @@ async function v3(){
             }
         }
     )).modifiedCount;
-    logger.info(`Updated total users (${countUsers})`);
+    loggerV.info(`Updated total users (${countUsers})`);
+
+    await modelTrack.deleteMany({});
+    loggerV.info("Delete all tracks");
 
     if (await mongoose.connection.db?.dropCollection("polls")){
-        logger.info("Deleted old collection \"polls\"");
+        loggerV.info("Deleted old collection \"polls\"");
     } else {
-        logger.warn("Failed drop old collection \"polls\"");
+        loggerV.warn("Failed drop old collection \"polls\"");
     }
 }
 

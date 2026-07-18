@@ -1,5 +1,5 @@
 import _ from "lodash";
-import TelegramBot from "node-telegram-bot-api";
+import { Message } from "node-telegram-bot-api";
 
 import userCacheUtils from "./userCacheUtils.ts";
 import { checkMyCommand, commands } from "./botUtils.ts";
@@ -12,9 +12,9 @@ async function command({
     functionExecuteCommand = null,
     functionReadCommand
 }: {
-    message: TelegramBot.Message,
+    message: Message,
     command: commands,
-    functionExecuteCommand?: ((text: string, message: TelegramBot.Message) => Promise<void>) | null,
+    functionExecuteCommand?: ((text: string, message: Message) => Promise<void>) | null,
     functionReadCommand: () => Promise<void>
 }){
     if (!_.isNil(message.from) && !message.from.is_bot){

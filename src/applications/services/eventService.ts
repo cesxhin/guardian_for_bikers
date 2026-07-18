@@ -5,7 +5,7 @@ import { StrictOmit } from "../../lib/types.ts";
 import eventCacheUtils from "../../utils/eventCacheUtils.ts";
 import { EventRepository } from "../repository/eventRepository.ts";
 import { EventOf, IEvent } from "../../domains/interfaces/IEvent.ts";
-import { PollIsClosed, PollIsExpired } from "../../utils/exceptionsUtils.ts";
+import { EventIsExpired, EventIsClosed, PollIsExpired } from "../../utils/exceptionsUtils.ts";
 
 export class EventService {
     private eventRepository = new EventRepository();
@@ -31,7 +31,7 @@ export class EventService {
 
         if (event.type === "out" || event.type === "out_x2"){
             if (new Date() > event.expire){
-                throw new PollIsExpired(`Event id "${event._id}" is expired`);
+                throw new EventIsExpired(`Event id "${event._id}" is expired`);
             }
         }
 
@@ -40,7 +40,7 @@ export class EventService {
         }
 
         if (event.stop){
-            throw new PollIsClosed(`Event id "${event._id}" is closed`);
+            throw new EventIsClosed(`Event id "${event._id}" is closed`);
         }
 
         return event;
