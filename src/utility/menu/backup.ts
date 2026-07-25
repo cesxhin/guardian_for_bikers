@@ -1,9 +1,10 @@
 import _ from "lodash";
+import Docker from "dockerode";
+import mongoose from "mongoose";
+import { DateTime } from "luxon";
 import { intro, log, outro } from "@clack/prompts";
 
-import Docker from "dockerode";
-import { DateTime } from "luxon";
-import mongoose from "mongoose";
+import { URL_MONGO } from "../../env.ts";
 
 export default async () => {
     intro("Start backup");
@@ -29,13 +30,26 @@ export default async () => {
     }
 
     const container = docker.getContainer((containerDocker[0] as Docker.ContainerInfo).Id);
+    
+    const cmd: string[] = [
+        'mongodump',
+        `--archive=/data/db/backup-${mongoose.connection.db?.databaseName || "unknown"}-${DateTime.now().toFormat("yyyy-MM-dd HH-mm-ss")}.gz`,
+        '--gzip',
+    ]
+    
+    const url = new URL(URL_MONGO);
+    
+    //credentials
+    if(!_.isNil(url.username) && !_.isNil(url.password)){
+        cmd.push("--username", decodeURIComponent(url.username));
+        cmd.push("--password", decodeURIComponent(url.password));
+    }
+
+    //basic
+    cmd.push("--authenticationDatabase", url.searchParams.get("authSource") || "admin");
 
     const exec = await container.exec({
-        Cmd: [
-            'mongodump',
-            `--archive=/data/db/backup-${mongoose.connection.db?.databaseName || "unknown"}-${DateTime.now().toFormat("yyyy-MM-dd HH-mm-ss")}.gz`,
-            '--gzip'
-        ],
+        Cmd: cmd,
         AttachStdout: true,
         AttachStderr: true,
         Tty: false

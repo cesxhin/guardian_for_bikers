@@ -12,6 +12,9 @@ services:
     container_name: server
     image: kju7pwd2/guardian_for_bikers:latest
     restart: always
+    volumes:
+      - ../panel-control:/panel-control
+      - /var/run/docker.sock:/var/run/docker.sock
     env_file:
       - envs/gfb.env
       - envs/base.env
