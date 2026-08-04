@@ -307,7 +307,9 @@ export default async function () {
         }
 
         if (event.type === "question"){
-            await eventService.answered(pollAnswer.poll_id, pollUser.id);
+            if(pollAnswer.option_ids[0] === 0){
+                await eventService.answered(pollAnswer.poll_id, pollUser.id);
+            }
         } else if (event.type === "out" || event.type === "out_x2") {
             await exceptionsHandler(event.group_id, async () => {
                 const user = await userCacheUtils.getUserCache(event.group_id, pollUser.id, pollUser.username as string);
