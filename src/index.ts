@@ -113,17 +113,19 @@ try {
                 process.exit(1);
             }
 
+            group.start_time_guardian = "00:00";
+            group.end_time_guardian = "23:59";
+
             const {image} = await weatherService.get(group);
 
-            fs.writeFileSync(`weather-${new Date().toISOString()}.png`, image);
+            fs.writeFileSync(`weather-test.png`, image);
 
             logger.info("Complete generation image weather");
-            break;
+
+            process.exit(0);
         default:
             await main();
     }
 } catch (err){
     logger.error("Generic error not handled, details:", err);
 }
-
-process.exit(0);

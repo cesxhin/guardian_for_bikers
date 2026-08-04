@@ -22,8 +22,8 @@ Chart.defaults.responsive = false;
 const logger = Logger("graph-utils");
 
 const emojiPlugin: Plugin = {
-    id: "emojiPlugin",
-    afterDraw(chart, args, options) {
+    id: "emoji",
+    afterDraw(chart, _args, options) {
         const ctx = chart.ctx;
         const xAxis = chart.scales["xEmoji"];
 
@@ -59,7 +59,7 @@ const emojiPlugin: Plugin = {
 };
 
 const backgroundPlugin: Plugin = {
-    id: "custom_canvas_background_color",
+    id: "background",
     beforeDraw: (chart) => {
         const ctx = chart.canvas.getContext("2d");
 
@@ -72,14 +72,98 @@ const backgroundPlugin: Plugin = {
     }
 };
 
-async function render(width: number, height: number, headers: (number | string)[], data: (number | string)[], dataWeather: (number | string)[]): Promise<Buffer> {
+const detectRainPlugin: Plugin = {
+    id:  "detectRain",
+    beforeDraw: (chart, _args, options) => {
+        const ctx = chart.ctx;
+        const xAxis = chart.scales["xEmoji"];
+        const { top, bottom } = chart.chartArea;
+
+        const width = 90;
+
+        if (_.isNil(xAxis)){
+            return;
+        }
+
+        for (const index in xAxis.ticks) {
+            const x = xAxis.getPixelForTick(Number(index));
+        
+            const actualWeather = options.dataWeather[index];
+
+            if(!_.isNil(actualWeather) && actualWeather.startsWith("1")){
+
+                ctx.save();
+                
+                ctx.strokeStyle ='rgba(0, 162, 255, 0.7)';
+                ctx.lineWidth = 4;
+                
+
+                ctx.beginPath();
+                ctx.rect(
+                    x - (width / 2),
+                    top,
+                    width,
+                    bottom - top
+                );
+                ctx.clip();
+
+                // linee diagonali
+                for (let y = top - width; y < bottom + width; y += 20) {
+                    ctx.beginPath();
+
+                    ctx.moveTo(
+                        x - width / 2,
+                        y
+                    );
+
+                    ctx.lineTo(
+                        x + width / 2,
+                        y + width
+                    );
+
+                    ctx.stroke();
+                }
+
+                ctx.restore();
+            }
+
+        }
+    }
+}
+
+async function render(width: number, height: number, headers: (number | string)[], data: number[], dataWeather: (number | string)[]): Promise<Buffer> {
     const canvas = createCanvas(width, height);
+    
     const ctx = canvas.getContext("2d");
+    
     ctx.fillStyle = "red";
     ctx.imageSmoothingEnabled = true;
     ctx.quality = "best";
     ctx.font = "60px";
+    
     ctx.fillRect(0, 0, 200, 200);
+
+    //set color from temperature
+    const gradient = ctx.createLinearGradient(0, height, 0, 0);
+
+    const ranges = [
+        { test: (v: number) => v <= 5,  color: 'rgba(0, 150, 255, 0.45)' },
+        { test: (v: number) => v <= 10, color: 'rgba(0, 210, 220, 0.45)' },
+        { test: (v: number) => v <= 20, color: 'rgba(255, 220, 80, 0.45)' },
+        { test: (v: number) => v <= 25, color: 'rgba(255, 140, 40, 0.45)' },
+        { test: () => true,    color: 'rgba(240, 50, 50, 0.45)' }
+    ];
+
+    let pos = 0;
+
+    for (const range of ranges) {
+        const count = data.filter(range.test).length;
+
+        if (count > 0) {
+            pos += count / data.length;
+            gradient.addColorStop(pos, range.color);
+        }
+    }
     
     const chart = new Chart(
         canvas as any,
@@ -89,8 +173,8 @@ async function render(width: number, height: number, headers: (number | string)[
                 datasets: [
                     {
                         data: data.map((_, index) => { return {x: headers[index], y: data[index]}; }),
-                        borderColor: "#FF6500",
-                        backgroundColor: "rgba(255, 101, 0, 0.25)",
+                        borderColor: gradient,
+                        backgroundColor: gradient,
                         borderWidth: 10,
                         fill: true
                     }, {
@@ -118,7 +202,10 @@ async function render(width: number, height: number, headers: (number | string)[
                 },
                 plugins: {
                     //@ts-ignore
-                    emojiPlugin: {
+                    emoji: {
+                        dataWeather
+                    },
+                    detectRain: {
                         dataWeather
                     },
                     legend: {
@@ -178,7 +265,7 @@ async function render(width: number, height: number, headers: (number | string)[
                     }
                 }
             },
-            plugins: [emojiPlugin, backgroundPlugin]
+            plugins: [emojiPlugin, backgroundPlugin, detectRainPlugin]
         }
     );
 
