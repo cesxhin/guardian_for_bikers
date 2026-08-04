@@ -43,48 +43,9 @@ export default () => {
                         group.id,
                         async () => {
                             //get data weather from api
-                            const weather = await weatherService.get(group.latitude, group.longitude);
+                            const {image, weather} = await weatherService.get(group);
 
-                            //create message
-                            let onlyTime: string;
-                            const dataTypeWeather: string[] = [];
-                            const listTimeBlacklist: number[] = [];
-
-                            let time: string | undefined, prec: number | undefined, rain: number | undefined;
-                            for (let i = 0; i < weather.hourly.time.length; i++){
-
-                                time = weather.hourly.time[i];
-                                rain = weather.hourly.rain[i];
-                                prec = weather.hourly.precipitation_probability[i];
-
-                                if (_.isNil(time) || _.isNil(rain) || _.isNil(prec)){
-                                    continue;
-                                }
-
-                                onlyTime = DateTime.fromISO(time).toFormat("HH:mm");
-
-                                if (onlyTime >= group.start_time_guardian && onlyTime <= group.end_time_guardian){
-                                    if (rain > 0){
-                                        dataTypeWeather.push("2");
-                                    } else if (prec > 0){
-                                        dataTypeWeather.push(`1 - ${weather.hourly.precipitation_probability[i]}`);
-                                    } else {
-                                        dataTypeWeather.push("0");
-                                    }
-                                } else {
-                                    listTimeBlacklist.push(i);
-                                }
-                            }
-
-                            //if user has set range custom for check weather
-                            _.remove(weather.hourly.time, (_, index) => listTimeBlacklist.includes(index));
-                            _.remove(weather.hourly.precipitation_probability, (_, index) => listTimeBlacklist.includes(index));
-                            _.remove(weather.hourly.rain, (_, index) => listTimeBlacklist.includes(index));
-                            _.remove(weather.hourly.temperature_2m, (_, index) => listTimeBlacklist.includes(index));
-
-                            const result = await graphUtils.render(600 * 4, 250 * 4, weather.hourly.time.map((time) => DateTime.fromFormat(time, "yyyy-MM-dd'T'HH:mm").setLocale(group.timezone).toISO()).filter((date) => !_.isNil(date)), weather.hourly.temperature_2m, dataTypeWeather);
-            
-                            await bot.sendPhoto(group.id, result, {
+                            await bot.sendPhoto(group.id, image, {
                                 caption: "Hello bikers! Let's see what the weather has to offer today!"
                             }, {
                                 filename: `${group.name}-${DateTime.now().toISO()}.png`,
