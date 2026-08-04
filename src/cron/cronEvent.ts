@@ -221,7 +221,7 @@ async function answer(event: Pick<IEvent, "_id" | "group_id"> & RequireNonNullab
         message += `${rank === 1? "🥇" : rank === 2? "🥈" : rank === 3? "🥉" : rank.toString().padStart(3, " ") + "  "} ➜ ${user.username}: ${user.points} PT (${calculateScoreMultiplier(user.consecutive)}x)`;
 
         if(user.consecutive > 0){
-            message += " ${user.consecutive} 🔥"
+            message += ` ${user.consecutive} 🔥`
         }
 
         message +="\n";

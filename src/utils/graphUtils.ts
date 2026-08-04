@@ -150,7 +150,7 @@ async function render(width: number, height: number, headers: (number | string)[
         { test: (v: number) => v <= 5,  color: 'rgba(0, 150, 255, 0.45)' },
         { test: (v: number) => v <= 10, color: 'rgba(0, 210, 220, 0.45)' },
         { test: (v: number) => v <= 20, color: 'rgba(255, 220, 80, 0.45)' },
-        { test: (v: number) => v <= 25, color: 'rgba(255, 140, 40, 0.45)' },
+        { test: (v: number) => v <= 30, color: 'rgba(255, 140, 40, 0.45)' },
         { test: () => true,    color: 'rgba(240, 50, 50, 0.45)' }
     ];
 
