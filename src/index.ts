@@ -1,5 +1,6 @@
 import { URL_MONGO, TOKEN_BOT } from "./env.ts";
 
+import _ from "lodash";
 import fs from "node:fs";
 import axios from "axios";
 import mongoose from "mongoose";
@@ -13,9 +14,7 @@ import cronWeather from "./cron/cronWeather.ts";
 import versionUtils from "./utils/versionUtils.ts";
 import cronEndOfYear from "./cron/cronEndOfYear.ts";
 import { WeatherService } from "./applications/services/weatherService.ts";
-import { GroupRepository } from "./applications/repository/groupRepository.ts";
 import { modelGroup } from "./domains/models/groupModel.ts";
-import _ from "lodash";
 
 const logger = Logger("main");
 const loggerAxios = Logger("axios");
@@ -100,31 +99,31 @@ async function main(){
 try {
     const [command] = process.argv.slice(2);
     
-    switch(command){
-        case "--generate-image":
-            await mongo();
+    switch (command){
+    case "--generate-image":
+        await mongo();
 
-            const weatherService = new WeatherService();
+        const weatherService = new WeatherService();
             
-            const group = await modelGroup.findOne().lean();
+        const group = await modelGroup.findOne().lean();
 
-            if(_.isNil(group)){
-                logger.error("Not found group for generate weather image");
-                process.exit(1);
-            }
+        if (_.isNil(group)){
+            logger.error("Not found group for generate weather image");
+            process.exit(1);
+        }
 
-            group.start_time_guardian = "00:00";
-            group.end_time_guardian = "23:59";
+        group.start_time_guardian = "00:00";
+        group.end_time_guardian = "23:59";
 
-            const {image} = await weatherService.get(group);
+        const {image} = await weatherService.get(group);
 
-            fs.writeFileSync(`weather-test.png`, image);
+        fs.writeFileSync("weather-test.png", image);
 
-            logger.info("Complete generation image weather");
+        logger.info("Complete generation image weather");
 
-            process.exit(0);
-        default:
-            await main();
+        process.exit(0);
+    default:
+        await main();
     }
 } catch (err){
     logger.error("Generic error not handled, details:", err);

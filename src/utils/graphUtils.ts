@@ -90,11 +90,11 @@ const detectRainPlugin: Plugin = {
         
             const actualWeather = options.dataWeather[index];
 
-            if(!_.isNil(actualWeather) && actualWeather.startsWith("1")){
+            if (!_.isNil(actualWeather) && actualWeather.startsWith("1")){
 
                 ctx.save();
                 
-                ctx.strokeStyle ='rgba(0, 162, 255, 0.7)';
+                ctx.strokeStyle ="rgba(0, 162, 255, 0.7)";
                 ctx.lineWidth = 4;
                 
 
@@ -112,12 +112,12 @@ const detectRainPlugin: Plugin = {
                     ctx.beginPath();
 
                     ctx.moveTo(
-                        x - width / 2,
+                        (x - width) / 2,
                         y
                     );
 
                     ctx.lineTo(
-                        x + width / 2,
+                        (x + width) / 2,
                         y + width
                     );
 
@@ -129,7 +129,7 @@ const detectRainPlugin: Plugin = {
 
         }
     }
-}
+};
 
 async function render(width: number, height: number, headers: (number | string)[], data: number[], dataWeather: (number | string)[]): Promise<Buffer> {
     const canvas = createCanvas(width, height);
@@ -147,11 +147,11 @@ async function render(width: number, height: number, headers: (number | string)[
     const gradient = ctx.createLinearGradient(0, height, 0, 0);
 
     const ranges = [
-        { test: (v: number) => v <= 5,  color: 'rgba(0, 150, 255, 0.45)' },
-        { test: (v: number) => v <= 10, color: 'rgba(0, 210, 220, 0.45)' },
-        { test: (v: number) => v <= 20, color: 'rgba(255, 220, 80, 0.45)' },
-        { test: (v: number) => v <= 30, color: 'rgba(255, 140, 40, 0.45)' },
-        { test: () => true,    color: 'rgba(240, 50, 50, 0.45)' }
+        { test: (v: number) => v <= 5, color: "rgba(0, 150, 255, 0.45)" },
+        { test: (v: number) => v <= 10, color: "rgba(0, 210, 220, 0.45)" },
+        { test: (v: number) => v <= 20, color: "rgba(255, 220, 80, 0.45)" },
+        { test: (v: number) => v <= 30, color: "rgba(255, 140, 40, 0.45)" },
+        { test: () => true, color: "rgba(240, 50, 50, 0.45)" }
     ];
 
     let pos = 0;

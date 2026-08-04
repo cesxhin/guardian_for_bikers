@@ -307,7 +307,7 @@ export default async function () {
         }
 
         if (event.type === "question"){
-            if(pollAnswer.option_ids[0] === 0){
+            if (pollAnswer.option_ids[0] === 0){
                 await eventService.answered(pollAnswer.poll_id, pollUser.id);
             }
         } else if (event.type === "out" || event.type === "out_x2") {

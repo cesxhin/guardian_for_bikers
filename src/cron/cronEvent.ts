@@ -220,8 +220,8 @@ async function answer(event: Pick<IEvent, "_id" | "group_id"> & RequireNonNullab
     for (const user of users.sort((userA, userB) => userB.points - userA.points)) {
         message += `${rank === 1? "🥇" : rank === 2? "🥈" : rank === 3? "🥉" : rank.toString().padStart(3, " ") + "  "} ➜ ${user.username}: ${user.points} PT (${calculateScoreMultiplier(user.consecutive)}x)`;
 
-        if(user.consecutive > 0){
-            message += ` ${user.consecutive} 🔥`
+        if (user.consecutive > 0){
+            message += ` ${user.consecutive} 🔥`;
         }
 
         message +="\n";

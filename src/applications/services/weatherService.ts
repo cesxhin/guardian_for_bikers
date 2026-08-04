@@ -54,6 +54,6 @@ export class WeatherService {
         return {
             weather,
             image
-        }
+        };
     }
 }

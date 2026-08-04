@@ -5,7 +5,6 @@ import { Message } from "node-telegram-bot-api";
 
 import { bot } from "../index.ts";
 import Logger from "../lib/logger.ts";
-import graphUtils from "../utils/graphUtils.ts";
 import { IGroup } from "../domains/interfaces/IGroup.ts";
 import { EventService } from "../applications/services/eventService.ts";
 import { GroupService } from "../applications/services/groupService.ts";
