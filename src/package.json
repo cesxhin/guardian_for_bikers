@@ -37,7 +37,7 @@
     "node-cache": "5.1.2",
     "node-telegram-bot-api": "1.2.0",
     "winston": "3.19.0",
-    "zod": "4.4.3"
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "5.10.0",
