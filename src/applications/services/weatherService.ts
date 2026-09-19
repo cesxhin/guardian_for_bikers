@@ -41,9 +41,6 @@ export class WeatherService {
             error = false;
         } while ( error );
 
-        console.log(weather);
-        
-
         if (_.isNil(weather)){
             throw new Error("Impossible get information weather, it's aborted operation for group id: " + group.id);
         }

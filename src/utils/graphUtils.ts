@@ -108,8 +108,6 @@ const detectRainPlugin: Plugin = {
                 ctx.clip();
 
                 for (let y = top - WIDTH_ICON; y < bottom; y += actualWeather.startsWith("1")? 40 : 20) {
-                    console.log(y, bottom);
-                    
                     ctx.beginPath();
                     
                     ctx.moveTo(
