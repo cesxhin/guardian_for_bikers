@@ -22,7 +22,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@clack/prompts": "1.7.0",
+    "@clack/prompts": "1.8.1",
     "async-lock": "1.4.1",
     "axios": "1.19.0",
     "canvas": "3.2.3",
